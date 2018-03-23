@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "FileKit",
+        "repositoryURL": "https://github.com/nvzqz/FileKit",
+        "state": {
+          "branch": null,
+          "revision": "93505a1ad04b4a2de01abd751ace4f05c6db16a5",
+          "version": "5.0.0"
+        }
+      },
+      {
+        "package": "ShellOut",
+        "repositoryURL": "https://github.com/JohnSundell/ShellOut",
+        "state": {
+          "branch": null,
+          "revision": "f1c253a34a40df4bfd268b09fdb101b059f6d52d",
+          "version": "2.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
