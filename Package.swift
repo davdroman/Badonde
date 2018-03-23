@@ -13,6 +13,10 @@ let package = Package(
 		.package(
 			url: "https://github.com/JohnSundell/ShellOut",
 			from: "2.1.0"
+		),
+		.package(
+			url: "https://github.com/Moya/Moya",
+			from: "10.0.1"
 		)
 	],
 	targets: [
@@ -22,7 +26,7 @@ let package = Package(
 		),
 		.target(
 			name: "BadondeCore",
-			dependencies: ["FileKit", "ShellOut"]
+			dependencies: ["FileKit", "ShellOut", "Moya"]
 		),
 		.testTarget(
 			name: "BadondeTests",

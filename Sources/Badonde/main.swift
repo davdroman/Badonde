@@ -1,9 +1,8 @@
 import BadondeCore
-
-let tool = Badonde()
+import Foundation
 
 do {
-	try tool.run()
+	try Badonde().run()
 } catch {
-	print("Whoops! An error occurred: \(error)")
+	print("Error: \(error)")
 }
