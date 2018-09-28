@@ -1,30 +1,47 @@
-import Foundation
 import XCTest
-import FileKit
-import BadondeCore
+import class Foundation.Bundle
 
-class BadondeTests: XCTestCase {
-	func testCreatingFile() throws {
-		// Setup a temp test folder that can be used as a sandbox
-//		let fileSystem = FileSystem()
-//		let tempFolder = fileSystem.temporaryFolder
-//		let testFolder = try tempFolder.createSubfolderIfNeeded(
-//			withName: "CommandLineToolTests"
-//		)
+final class BadondeTests: XCTestCase {
+    func testExample() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
 
-		// Empty the test folder to ensure a clean state
-//		try testFolder.empty()
+        // Some of the APIs that we use below are available in macOS 10.13 and above.
+        guard #available(macOS 10.13, *) else {
+            return
+        }
 
-		// Make the temp folder the current working folder
-//		let fileManager = FileManager.default
-//		fileManager.changeCurrentDirectoryPath(testFolder.path)
+        let fooBinary = productsDirectory.appendingPathComponent("Badonde")
 
-		// Create an instance of the command line tool
-//		let arguments = [testFolder.path, "Hello.swift"]
-//		let tool = CommandLineTool(arguments: arguments)
+        let process = Process()
+        process.executableURL = fooBinary
 
-		// Run the tool and assert that the file was created
-//		try tool.run()
-//		XCTAssertNotNil(try? testFolder.file(named: "Hello.swift"))
-	}
+        let pipe = Pipe()
+        process.standardOutput = pipe
+
+        try process.run()
+        process.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8)
+
+        XCTAssertEqual(output, "Hello, world!\n")
+    }
+
+    /// Returns path to the built products directory.
+    var productsDirectory: URL {
+      #if os(macOS)
+        for bundle in Bundle.allBundles where bundle.bundlePath.hasSuffix(".xctest") {
+            return bundle.bundleURL.deletingLastPathComponent()
+        }
+        fatalError("couldn't find the products directory")
+      #else
+        return Bundle.main.bundleURL
+      #endif
+    }
+
+    static var allTests = [
+        ("testExample", testExample),
+    ]
 }
