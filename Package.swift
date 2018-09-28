@@ -4,12 +4,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "Badonde",
-    targets: [
-        .target(
-            name: "Badonde",
-            dependencies: ["BadondeCore"]
-        ),
-        .target(name: "BadondeCore")
-    ]
+	name: "Badonde",
+	dependencies: [
+		.package(
+			url: "https://github.com/jakeheis/SwiftCLI",
+			from: "5.0.0"
+		)
+	],
+	targets: [
+		.target(
+			name: "Badonde",
+			dependencies: ["BadondeCore"]
+		),
+		.target(
+			name: "BadondeCore",
+			dependencies: ["SwiftCLI"]
+		)
+	]
 )
+
