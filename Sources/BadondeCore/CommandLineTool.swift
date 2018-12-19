@@ -1,4 +1,12 @@
 import Foundation
+import SwiftCLI
+
+class BadondeCommand: Command {
+	let name = "greet"
+	func execute() throws {
+		stdout <<< "Hey there!"
+	}
+}
 
 public final class CommandLineTool {
     private let arguments: [String]
@@ -8,6 +16,7 @@ public final class CommandLineTool {
     }
 
     public func run() throws {
-        print("Hello world")
+        let cli = CLI(singleCommand: BadondeCommand())
+		_ = cli.go()
     }
 }
