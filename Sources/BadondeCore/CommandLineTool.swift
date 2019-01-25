@@ -2,9 +2,16 @@ import Foundation
 import SwiftCLI
 
 class BadondeCommand: Command {
-	let name = "greet"
+	let name = ""
+	
 	func execute() throws {
-		stdout <<< "Hey there!"
+		guard let currentBranch = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
+			return
+		}
+
+		try run(bash: "open \"https://github.com/asosteam/asos-native-ios/compare/\(currentBranch)?expand=1\"")
+
+		stdout <<< currentBranch
 	}
 }
 
