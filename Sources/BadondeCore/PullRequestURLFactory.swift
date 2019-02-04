@@ -21,7 +21,7 @@ class PullRequestURLFactory: Codable {
 		urlComponents.queryItems = [
 			URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title),
 			URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ","))
-			].compactMap({ $0 }).nilIfEmpty
+		].compactMap({ $0 }).nilIfEmpty
 
 		return urlComponents.url
 	}

@@ -1,24 +1,6 @@
 import Foundation
 import SwiftCLI
 
-extension URLQueryItem {
-	init?(name: String, mandatoryValue: String?) {
-		guard let value = mandatoryValue else {
-			return nil
-		}
-		self.init(name: name, value: value)
-	}
-}
-
-extension Array {
-	var nilIfEmpty: [Element]? {
-		guard !isEmpty else {
-			return nil
-		}
-		return self
-	}
-}
-
 class BadondeCommand: Command {
 	let name = ""
 
