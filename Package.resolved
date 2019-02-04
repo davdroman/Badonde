@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "JIRAKit",
+        "repositoryURL": "https://github.com/DavdRoman/JIRAKit",
+        "state": {
+          "branch": "master",
+          "revision": "415efa8eb39024069a44d755c2e51b76910ed66d",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftCLI",
         "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
         "state": {

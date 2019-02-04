@@ -9,6 +9,10 @@ let package = Package(
 		.package(
 			url: "https://github.com/jakeheis/SwiftCLI",
 			from: "5.0.0"
+		),
+		.package(
+			url: "https://github.com/DavdRoman/JIRAKit",
+			.branch("master")
 		)
 	],
 	targets: [
@@ -18,7 +22,7 @@ let package = Package(
 		),
 		.target(
 			name: "BadondeCore",
-			dependencies: ["SwiftCLI"]
+			dependencies: ["SwiftCLI", "JIRAKit"]
 		)
 	]
 )
