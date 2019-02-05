@@ -7,6 +7,7 @@ class PullRequestURLFactory: Codable {
 	var targetBranch: String?
 	var title: String?
 	var labels: [String]?
+	var milestone: String?
 
 	init(repositoryShorthand: String) {
 		self.repositoryShorthand = repositoryShorthand
@@ -20,7 +21,8 @@ class PullRequestURLFactory: Codable {
 
 		urlComponents.queryItems = [
 			URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title),
-			URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ","))
+			URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ",")),
+			URLQueryItem(name: CodingKeys.milestone.stringValue, mandatoryValue: milestone)
 		].compactMap({ $0 }).nilIfEmpty
 
 		return urlComponents.url
