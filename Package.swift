@@ -11,12 +11,12 @@ let package = Package(
 			from: "5.0.0"
 		),
 		.package(
-			url: "https://github.com/DavdRoman/JIRAKit",
-			.branch("master")
-		),
-		.package(
 			url: "https://github.com/antitypical/Result",
 			from: "4.0.0"
+		),
+		.package(
+			url: "https://github.com/DavdRoman/SwiftyStringScore",
+			.branch("master")
 		)
 	],
 	targets: [
@@ -26,7 +26,7 @@ let package = Package(
 		),
 		.target(
 			name: "BadondeCore",
-			dependencies: ["SwiftCLI", "JIRAKit", "Result"]
+			dependencies: ["SwiftCLI", "Result", "SwiftyStringScore"]
 		)
 	]
 )

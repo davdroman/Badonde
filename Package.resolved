@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "JIRAKit",
-        "repositoryURL": "https://github.com/DavdRoman/JIRAKit",
-        "state": {
-          "branch": "master",
-          "revision": "415efa8eb39024069a44d755c2e51b76910ed66d",
-          "version": null
-        }
-      },
-      {
         "package": "Result",
         "repositoryURL": "https://github.com/antitypical/Result",
         "state": {
@@ -26,6 +17,15 @@
           "branch": null,
           "revision": "5318c37d3cacc8780f50b87a8840a6774320ebdf",
           "version": "5.2.2"
+        }
+      },
+      {
+        "package": "SwiftyStringScore",
+        "repositoryURL": "https://github.com/DavdRoman/SwiftyStringScore",
+        "state": {
+          "branch": "master",
+          "revision": "37ac30f46f34b638f9635a3112e0703484edbc6e",
+          "version": null
         }
       }
     ]
