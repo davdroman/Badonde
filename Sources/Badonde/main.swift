@@ -1,3 +1,4 @@
+import Foundation
 import BadondeCore
 
 let tool = CommandLineTool()
@@ -7,3 +8,5 @@ do {
 } catch {
 	print("Whoops! An error occurred: \(error)")
 }
+
+RunLoop.main.run()
