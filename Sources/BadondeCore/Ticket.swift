@@ -1,5 +1,46 @@
 import Foundation
 
+struct TicketId: Codable {
+	let prefix: String
+	let number: String
+	var rawValue: String {
+		return [prefix, number].joined(separator: "-")
+	}
+
+	init?(rawValue: String) {
+		let components = rawValue.split(separator: "-")
+		guard
+			let prefix = components[safe: 0],
+			let number = components[safe: 1]
+		else {
+			return nil
+		}
+		self.init(prefix: String(prefix), number: String(number))
+	}
+
+	init(prefix: String, number: String) {
+		self.prefix = prefix
+		self.number = number
+	}
+
+	init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let ticketId = try container.decode(String.self)
+		guard let _self = type(of: self).init(rawValue: ticketId) else {
+			throw DecodingError.dataCorruptedError(
+				in: container,
+				debugDescription: "Ticket ID could not be parsed"
+			)
+		}
+		self = _self
+	}
+
+	func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(rawValue)
+	}
+}
+
 struct Ticket: Codable {
 	let key: String
 	var fields: TicketFields
@@ -9,14 +50,14 @@ struct TicketFields: Codable {
 	let fixVersions: [FixVersion]
 	let issueType: IssueType
 	let summary: String
-	let epicKey: String?
+	let epicId: TicketId?
 	var epicSummary: String?
 
 	enum CodingKeys: String, CodingKey {
 		case fixVersions = "fixVersions"
 		case issueType = "issuetype"
 		case summary = "summary"
-		case epicKey = "customfield_10008"
+		case epicId = "customfield_10008"
 	}
 }
 

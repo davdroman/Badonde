@@ -9,34 +9,9 @@ import Foundation
 import JIRAKit
 import Result
 
-fileprivate struct TicketId {
-	let prefix: String
-	let number: String
-	var value: String {
-		return [prefix, number].joined(separator: "-")
-	}
-
-	init(prefix: String, number: String) {
-		self.prefix = prefix
-		self.number = number
-	}
-
-	init?(branchName: String) {
-		guard
-			let ticketComponents = branchName.split(separator: "_").first?.split(separator: "-").prefix(2),
-			let ticketPrefix = ticketComponents[safe: 0],
-			let ticketNumber = ticketComponents[safe: 1]
-		else {
-			return nil
-		}
-		self.init(prefix: String(ticketPrefix), number: String(ticketNumber))
-	}
-}
-
 final class TicketFetcher {
 
 	enum Error: Swift.Error {
-		case invalidBranchFormat
 		case noTicket
 		case urlFormattingError
 		case jiraConnection
@@ -61,33 +36,26 @@ final class TicketFetcher {
 	}
 
 	func fetchTicket(
-		fromBranchName branchName: String,
+		with ticketId: TicketId,
 		completion: @escaping (Result<Ticket, Error>) -> Void
 	) {
-		guard let ticketId = TicketId(branchName: branchName) else {
-			completion(.failure(Error.invalidBranchFormat))
-			return
-		}
-
-		guard ticketId.value != "NO-TICKET" else {
+		guard ticketId.rawValue != "NO-TICKET" else {
 			completion(.failure(Error.noTicket))
 			return
 		}
 
-		requestTicket(withTicketId: ticketId.value, expanded: true) { result in
-			completion(result)
-		}
+		requestTicket(with: ticketId, expanded: true, completion: completion)
 	}
 
 	private func requestTicket(
-		withTicketId ticketId: String,
+		with ticketId: TicketId,
 		expanded: Bool = false,
 		completion: @escaping (Result<Ticket, Error>) -> Void
 	) {
 		let jiraUrl = URL(
 			scheme: "https",
 			host: "asosmobile.atlassian.net",
-			path: "/rest/api/2/issue/\(ticketId)",
+			path: "/rest/api/2/issue/\(ticketId.rawValue)",
 			queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 		)
 
@@ -121,12 +89,12 @@ final class TicketFetcher {
 			do {
 				var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
 
-				guard let epicKey = ticket.fields.epicKey else {
+				guard let epicId = ticket.fields.epicId else {
 					completion(.success(ticket))
 					return
 				}
 
-				self.requestTicket(withTicketId: epicKey) { result in
+				self.requestTicket(with: epicId) { result in
 					switch result {
 					case .success(let epic):
 						ticket.fields.epicSummary = epic.fields.summary
