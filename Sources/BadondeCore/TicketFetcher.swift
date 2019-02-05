@@ -84,15 +84,14 @@ final class TicketFetcher {
 		expanded: Bool = false,
 		completion: @escaping (Result<Ticket, Error>) -> Void
 	) {
-		var urlComponents = URLComponents()
-		urlComponents.scheme = "https"
-		urlComponents.host = "asosmobile.atlassian.net"
-		urlComponents.path = "/rest/api/2/issue/\(ticketId)"
-		if expanded {
-			urlComponents.queryItems = [URLQueryItem.init(name: "expand", value: "names")]
-		}
+		let jiraUrl = URL(
+			scheme: "https",
+			host: "asosmobile.atlassian.net",
+			path: "/rest/api/2/issue/\(ticketId)",
+			queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
+		)
 
-		guard let jiraUrl = urlComponents.url else {
+		guard let url = jiraUrl else {
 			completion(.failure(Error.urlFormattingError))
 			return
 		}
@@ -102,7 +101,7 @@ final class TicketFetcher {
 			return
 		}
 
-		var request = URLRequest(url: jiraUrl)
+		var request = URLRequest(url: url)
 		request.httpMethod = "GET"
 		request.setValue("Basic \(authorizationValue)", forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")

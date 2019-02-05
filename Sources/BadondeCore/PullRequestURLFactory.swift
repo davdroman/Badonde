@@ -14,18 +14,16 @@ class PullRequestURLFactory: Codable {
 	}
 
 	var url: URL? {
-		var urlComponents = URLComponents()
-		urlComponents.scheme = "https"
-		urlComponents.host = "github.com"
-		urlComponents.path = urlPath
-
-		urlComponents.queryItems = [
-			URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title),
-			URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ",")),
-			URLQueryItem(name: CodingKeys.milestone.stringValue, mandatoryValue: milestone)
-		].compactMap({ $0 }).nilIfEmpty
-
-		return urlComponents.url
+		return URL(
+			scheme: "https",
+			host: "github.com",
+			path: urlPath,
+			queryItems: [
+				URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title),
+				URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ",")),
+				URLQueryItem(name: CodingKeys.milestone.stringValue, mandatoryValue: milestone)
+			]
+		)
 	}
 
 	private var urlPath: String {
