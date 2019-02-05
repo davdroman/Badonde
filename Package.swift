@@ -13,6 +13,10 @@ let package = Package(
 		.package(
 			url: "https://github.com/DavdRoman/JIRAKit",
 			.branch("master")
+		),
+		.package(
+			url: "https://github.com/antitypical/Result",
+			from: "4.0.0"
 		)
 	],
 	targets: [
@@ -22,7 +26,7 @@ let package = Package(
 		),
 		.target(
 			name: "BadondeCore",
-			dependencies: ["SwiftCLI", "JIRAKit"]
+			dependencies: ["SwiftCLI", "JIRAKit", "Result"]
 		)
 	]
 )
