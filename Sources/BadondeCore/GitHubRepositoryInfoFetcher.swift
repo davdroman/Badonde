@@ -9,27 +9,16 @@ import Foundation
 import Result
 
 struct GitHubRepositoryInfo {
-	var labels: [GitHubRepositoryLabel]
-}
-
-struct GitHubRepositoryLabel: Codable {
-	let id: Int
-	let nodeID: String
-	let url: String
-	let name: String
-	let description: String
-	let color: String
-	let labelDefault: Bool
-
-	enum CodingKeys: String, CodingKey {
-		case id = "id"
-		case nodeID = "node_id"
-		case url = "url"
-		case name = "name"
-		case description = "description"
-		case color = "color"
-		case labelDefault = "default"
+	struct Label: Codable {
+		let name: String
 	}
+
+	struct Milestone: Codable {
+		let title: String
+	}
+
+	var labels: [Label]
+	var milestones: [Milestone]
 }
 
 final class GitHubRepositoryInfoFetcher {
@@ -51,10 +40,47 @@ final class GitHubRepositoryInfoFetcher {
 		withRepositoryShorthand shorthand: String,
 		completion: @escaping (Result<GitHubRepositoryInfo, Error>) -> Void
 	) {
+		fetchRepositoryInfo(
+			withRepositoryShorthand: shorthand,
+			endpoint: "labels",
+			model: GitHubRepositoryInfo.Label.self,
+			completion: { result in
+				switch result {
+				case .success(let labels):
+					self.fetchRepositoryInfo(
+						withRepositoryShorthand: shorthand,
+						endpoint: "milestones",
+						model: GitHubRepositoryInfo.Milestone.self,
+						queryItems: [URLQueryItem(name: "state", value: "all")],
+						completion: { result in
+							switch result {
+							case .success(let milestones):
+								let repoInfo = GitHubRepositoryInfo(labels: labels, milestones: milestones)
+								completion(.success(repoInfo))
+							case .failure(let error):
+								completion(.failure(error))
+							}
+						}
+					)
+				case .failure(let error):
+					completion(.failure(error))
+				}
+			}
+		)
+	}
+
+	private func fetchRepositoryInfo<EndpointModel: Codable>(
+		withRepositoryShorthand shorthand: String,
+		endpoint: String,
+		model: EndpointModel.Type,
+		queryItems: [URLQueryItem]? = nil,
+		completion: @escaping (Result<[EndpointModel], Error>) -> Void
+	) {
 		let labelsUrl = URL(
 			scheme: "https",
 			host: "api.github.com",
-			path: "/repos/\(shorthand)/labels"
+			path: "/repos/\(shorthand)/\(endpoint)",
+			queryItems: queryItems
 		)
 
 		guard let url = labelsUrl else {
@@ -80,10 +106,8 @@ final class GitHubRepositoryInfoFetcher {
 			}
 
 			do {
-				let labels = try JSONDecoder().decode([GitHubRepositoryLabel].self, from: jsonData)
-				let repoInfo = GitHubRepositoryInfo(labels: labels)
-
-				completion(.success(repoInfo))
+				let endpointValues = try JSONDecoder().decode([EndpointModel].self, from: jsonData)
+				completion(.success(endpointValues))
 			} catch {
 				completion(.failure(Error.infoParsingError))
 			}
