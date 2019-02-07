@@ -20,6 +20,7 @@ class BurghCommand: Command {
 	enum Error: Swift.Error {
 		case invalidBranchFormat
 		case invalidPullRequestURL
+		case missingGitRemote
 	}
 
 	let name = "burgh"
@@ -69,16 +70,29 @@ class BurghCommand: Command {
 		return developBranch
 	}
 
+	func getRepositoryShorthand() -> String? {
+		guard let repositoryURL = try? capture(bash: "git config --get remote.origin.url").stdout else {
+			return nil
+		}
+		return repositoryURL
+			.drop(while: { $0 != ":" })
+			.prefix(while: { $0 != "." })
+			.replacingOccurrences(of: ":", with: "")
+			.replacingOccurrences(of: ".", with: "")
+	}
+
 	func execute() throws {
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
 			let ticketId = TicketId(branchName: currentBranchName)
 		else {
-			stdout <<< Error.invalidBranchFormat.localizedDescription
-			return
+			throw Error.invalidBranchFormat
 		}
 
-		let repoShorthand = "asosteam/asos-native-ios" // TODO: ask as input
+		guard let repoShorthand = getRepositoryShorthand() else {
+			throw Error.missingGitRemote
+		}
+
 		let accessTokenStore = AccessTokenStore()
 		let accessTokenConfig = getOrPromptAccessTokenConfig(for: accessTokenStore)
 
