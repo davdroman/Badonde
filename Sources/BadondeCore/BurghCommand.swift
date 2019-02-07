@@ -23,6 +23,7 @@ class BurghCommand: Command {
 	}
 
 	let name = "burgh"
+	let shortDescription = "Generates and opens PR page"
 
 	func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
 		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {
