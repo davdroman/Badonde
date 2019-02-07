@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
 	name: "Badonde",
+	products: [
+		.executable(name: "badonde", targets: ["Badonde"])
+	],
 	dependencies: [
 		.package(
 			url: "https://github.com/jakeheis/SwiftCLI",
