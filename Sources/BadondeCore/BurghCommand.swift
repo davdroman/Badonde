@@ -70,7 +70,6 @@ class BurghCommand: Command {
 	}
 
 	func execute() throws {
-//		let currentBranchName = "ISAV-12296"
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
 			let ticketId = TicketId(branchName: currentBranchName)
@@ -118,63 +117,48 @@ class BurghCommand: Command {
 		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
 		let ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
 
-		repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand) { result in
-			let repoInfo = result.value
+		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
+		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
 
-			ticketFetcher.fetchTicket(with: ticketId) { result in
-				switch result {
-				case .success(let ticket):
-					let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
-					// TODO: fetch possible dependency branch from related tickets
-					pullRequestURLFactory.baseBranch = self.baseBranch(forBranch: currentBranchName)
-					pullRequestURLFactory.targetBranch = currentBranchName
-					pullRequestURLFactory.title = "[\(ticket.key)] \(ticket.fields.summary)"
+		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
+		// TODO: fetch possible dependency branch from related tickets
+		pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
+		pullRequestURLFactory.targetBranch = currentBranchName
+		pullRequestURLFactory.title = "[\(ticket.key)] \(ticket.fields.summary)"
 
-					let repoLabels = repoInfo?.labels.map { $0.name } ?? []
-					var pullRequestLabels: [String] = []
+		let repoLabels = repoInfo.labels.map { $0.name }
+		var pullRequestLabels: [String] = []
 
-					// Append Bug label if ticket is a bug
-					if ticket.fields.issueType.isBug {
-						if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
-							pullRequestLabels.append(bugLabel)
-						}
-					}
-
-					// Append ticket's epic label if similar name is found in repo labels
-					if let epic = ticket.fields.epicSummary {
-						guard let epicLabel = repoLabels.fuzzyMatch(word: epic) else {
-							return
-						}
-						pullRequestLabels.append(epicLabel)
-					}
-
-					pullRequestURLFactory.labels = pullRequestLabels.nilIfEmpty
-
-					if
-						let rawMilestone = ticket.fields.fixVersions.first?.name,
-						!rawMilestone.isEmpty,
-						let repoMilestones = repoInfo?.milestones.map({ $0.title })
-					{
-						if let milestone = repoMilestones.fuzzyMatch(word: rawMilestone) {
-							pullRequestURLFactory.milestone = milestone
-						}
-					}
-
-					guard let pullRequestURL = pullRequestURLFactory.url else {
-						self.stdout <<< Error.invalidPullRequestURL.localizedDescription
-						return
-					}
-
-					do {
-						try run(bash: "open \"\(pullRequestURL)\"")
-						exit(EXIT_SUCCESS)
-					} catch {
-						self.stdout <<< error.localizedDescription
-					}
-				case .failure(let error):
-					self.stdout <<< error.localizedDescription
-				}
+		// Append Bug label if ticket is a bug
+		if ticket.fields.issueType.isBug {
+			if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
+				pullRequestLabels.append(bugLabel)
 			}
 		}
+
+		// Append ticket's epic label if similar name is found in repo labels
+		if let epic = ticket.fields.epicSummary {
+			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
+				pullRequestLabels.append(epicLabel)
+			}
+		}
+
+		pullRequestURLFactory.labels = pullRequestLabels.nilIfEmpty
+
+		if
+			let rawMilestone = ticket.fields.fixVersions.first?.name,
+			!rawMilestone.isEmpty
+		{
+			let repoMilestones = repoInfo.milestones.map({ $0.title })
+			if let milestone = repoMilestones.fuzzyMatch(word: rawMilestone) {
+				pullRequestURLFactory.milestone = milestone
+			}
+		}
+
+		guard let pullRequestURL = pullRequestURLFactory.url else {
+			throw Error.invalidPullRequestURL
+		}
+
+		try run(bash: "open \"\(pullRequestURL)\"")
 	}
 }

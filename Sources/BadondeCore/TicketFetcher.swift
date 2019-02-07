@@ -15,7 +15,6 @@ final class TicketFetcher {
 		case urlFormattingError
 		case jiraConnection
 		case noDataReceived
-		case ticketParsingError
 		case authorizationEncodingError
 	}
 
@@ -34,23 +33,15 @@ final class TicketFetcher {
 		self.apiToken = apiToken
 	}
 
-	func fetchTicket(
-		with ticketId: TicketId,
-		completion: @escaping (Result<Ticket, Error>) -> Void
-	) {
+	func fetchTicket(with ticketId: TicketId) throws -> Ticket {
 		guard ticketId.rawValue != "NO-TICKET" else {
-			completion(.failure(Error.noTicket))
-			return
+			throw Error.noTicket
 		}
 
-		requestTicket(with: ticketId, expanded: true, completion: completion)
+		return try requestTicket(with: ticketId, expanded: true)
 	}
 
-	private func requestTicket(
-		with ticketId: TicketId,
-		expanded: Bool = false,
-		completion: @escaping (Result<Ticket, Error>) -> Void
-	) {
+	private func requestTicket(with ticketId: TicketId, expanded: Bool = false) throws -> Ticket {
 		let jiraUrl = URL(
 			scheme: "https",
 			host: "asosmobile.atlassian.net",
@@ -59,55 +50,36 @@ final class TicketFetcher {
 		)
 
 		guard let url = jiraUrl else {
-			completion(.failure(Error.urlFormattingError))
-			return
+			throw Error.urlFormattingError
 		}
 
 		guard let authorizationValue = authorizationValue else {
-			completion(.failure(Error.authorizationEncodingError))
-			return
+			throw Error.authorizationEncodingError
 		}
 
+		let session = URLSession(configuration: .default)
 		var request = URLRequest(url: url)
 		request.httpMethod = "GET"
 		request.setValue("Basic \(authorizationValue)", forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-		let session = URLSession(configuration: .default)
-		let task = session.dataTask(with: request) { responseData, response, responseError in
-			guard responseError == nil else {
-				completion(.failure(Error.jiraConnection))
-				return
-			}
+		let response = session.synchronousDataTask(with: request)
 
-			guard let jsonData = responseData else {
-				completion(.failure(Error.noDataReceived))
-				return
-			}
-
-			do {
-				var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
-
-				guard let epicId = ticket.fields.epicId else {
-					completion(.success(ticket))
-					return
-				}
-
-				self.requestTicket(with: epicId) { result in
-					switch result {
-					case .success(let epic):
-						ticket.fields.epicSummary = epic.fields.summary
-					case .failure:
-						break
-					}
-
-					completion(.success(ticket))
-				}
-			} catch {
-				completion(.failure(Error.ticketParsingError))
-			}
+		guard response.error == nil else {
+			throw Error.jiraConnection
 		}
 
-		task.resume()
+		guard let jsonData = response.data else {
+			throw Error.noDataReceived
+		}
+
+		var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
+
+		if let epicId = ticket.fields.epicId {
+			let epic = try requestTicket(with: epicId)
+			ticket.fields.epicSummary = epic.fields.summary
+		}
+
+		return ticket
 	}
 }

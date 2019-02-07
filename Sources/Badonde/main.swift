@@ -8,5 +8,3 @@ do {
 } catch {
 	print(error)
 }
-
-RunLoop.main.run()

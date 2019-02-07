@@ -27,7 +27,6 @@ final class GitHubRepositoryInfoFetcher {
 		case urlFormattingError
 		case githubConnection
 		case noDataReceived
-		case infoParsingError
 	}
 
 	private let accessToken: String
@@ -36,46 +35,29 @@ final class GitHubRepositoryInfoFetcher {
 		self.accessToken = accessToken
 	}
 
-	func fetchRepositoryInfo(
-		withRepositoryShorthand shorthand: String,
-		completion: @escaping (Result<GitHubRepositoryInfo, Error>) -> Void
-	) {
-		fetchRepositoryInfo(
+	func fetchRepositoryInfo(withRepositoryShorthand shorthand: String) throws -> GitHubRepositoryInfo {
+		let labels = try fetchRepositoryInfo(
 			withRepositoryShorthand: shorthand,
 			endpoint: "labels",
-			model: GitHubRepositoryInfo.Label.self,
-			completion: { result in
-				switch result {
-				case .success(let labels):
-					self.fetchRepositoryInfo(
-						withRepositoryShorthand: shorthand,
-						endpoint: "milestones",
-						model: GitHubRepositoryInfo.Milestone.self,
-						queryItems: [URLQueryItem(name: "state", value: "all")],
-						completion: { result in
-							switch result {
-							case .success(let milestones):
-								let repoInfo = GitHubRepositoryInfo(labels: labels, milestones: milestones)
-								completion(.success(repoInfo))
-							case .failure(let error):
-								completion(.failure(error))
-							}
-						}
-					)
-				case .failure(let error):
-					completion(.failure(error))
-				}
-			}
+			model: GitHubRepositoryInfo.Label.self
 		)
+
+		let milestones = try fetchRepositoryInfo(
+			withRepositoryShorthand: shorthand,
+			endpoint: "milestones",
+			model: GitHubRepositoryInfo.Milestone.self,
+			queryItems: [URLQueryItem(name: "state", value: "all")]
+		)
+
+		return GitHubRepositoryInfo(labels: labels, milestones: milestones)
 	}
 
 	private func fetchRepositoryInfo<EndpointModel: Codable>(
 		withRepositoryShorthand shorthand: String,
 		endpoint: String,
 		model: EndpointModel.Type,
-		queryItems: [URLQueryItem]? = nil,
-		completion: @escaping (Result<[EndpointModel], Error>) -> Void
-	) {
+		queryItems: [URLQueryItem]? = nil
+	) throws -> [EndpointModel] {
 		let labelsUrl = URL(
 			scheme: "https",
 			host: "api.github.com",
@@ -84,36 +66,26 @@ final class GitHubRepositoryInfoFetcher {
 		)
 
 		guard let url = labelsUrl else {
-			completion(.failure(Error.urlFormattingError))
-			return
+			throw Error.urlFormattingError
 		}
 
+		let session = URLSession(configuration: .default)
 		var request = URLRequest(url: url)
 		request.httpMethod = "GET"
 		request.setValue("token \(accessToken)", forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-		let session = URLSession(configuration: .default)
-		let task = session.dataTask(with: request) { responseData, response, responseError in
-			guard responseError == nil else {
-				completion(.failure(Error.githubConnection))
-				return
-			}
+		let response = session.synchronousDataTask(with: request)
 
-			guard let jsonData = responseData else {
-				completion(.failure(Error.noDataReceived))
-				return
-			}
-
-			do {
-				let endpointValues = try JSONDecoder().decode([EndpointModel].self, from: jsonData)
-				completion(.success(endpointValues))
-			} catch {
-				completion(.failure(Error.infoParsingError))
-			}
+		guard response.error == nil else {
+			throw Error.githubConnection
 		}
 
-		task.resume()
+		guard let jsonData = response.data else {
+			throw Error.noDataReceived
+		}
+
+		return try JSONDecoder().decode([EndpointModel].self, from: jsonData)
 	}
 }
 

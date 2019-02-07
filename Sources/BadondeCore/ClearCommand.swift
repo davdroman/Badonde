@@ -13,10 +13,6 @@ class ClearCommand: Command {
 	let shortDescription = "Clears credentials"
 
 	func execute() throws {
-		defer {
-			exit(EXIT_SUCCESS)
-		}
-
 		let accessTokenStore = AccessTokenStore()
 		guard accessTokenStore.config != nil else {
 			return
