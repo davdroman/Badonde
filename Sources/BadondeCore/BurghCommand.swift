@@ -16,13 +16,13 @@ extension IssueType {
 	}
 }
 
-class BadondeCommand: Command {
+class BurghCommand: Command {
 	enum Error: Swift.Error {
 		case invalidBranchFormat
 		case invalidPullRequestURL
 	}
 
-	let name = ""
+	let name = "burgh"
 
 	func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
 		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {
@@ -80,15 +80,42 @@ class BadondeCommand: Command {
 
 		let repoShorthand = "asosteam/asos-native-ios"
 		let accessTokenStore = AccessTokenStore()
-		let repoInfoFetcher: GitHubRepositoryInfoFetcher
-		let ticketFetcher: TicketFetcher
-		if let accessTokenConfig = accessTokenStore.config {
-			repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
-			ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
+		let accessTokenConfig: AccessTokenConfig
+
+		if let config = accessTokenStore.config {
+			accessTokenConfig = config
 		} else {
-			// TODO: prompt for keys
-			exit(EXIT_FAILURE)
+			let jiraEmailInput = Input.readLine(
+				prompt: "Enter JIRA email address:",
+				secure: false,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
+				}
+			)
+			let jiraApiTokenInput = Input.readLine(
+				prompt: "Enter JIRA API token (generated at https://id.atlassian.com/manage/api-tokens):",
+				secure: true,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "Invalid token; \(invalidInputReason)"
+				}
+			)
+			let githubAccessTokenInput = Input.readLine(
+				prompt: "Enter GitHub API token (generated at https://github.com/settings/tokens):",
+				secure: true,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "Invalid token; \(invalidInputReason)"
+				}
+			)
+			accessTokenConfig = AccessTokenConfig(
+				jiraEmail: jiraEmailInput,
+				jiraApiToken: jiraApiTokenInput,
+				githubAccessToken: githubAccessTokenInput
+			)
+			accessTokenStore.config = accessTokenConfig
 		}
+
+		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
+		let ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
 
 		repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand) { result in
 			let repoInfo = result.value
