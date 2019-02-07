@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import JIRAKit
 import Result
 
 final class TicketFetcher {
