@@ -78,41 +78,9 @@ class BurghCommand: Command {
 			return
 		}
 
-		let repoShorthand = "asosteam/asos-native-ios"
+		let repoShorthand = "asosteam/asos-native-ios" // TODO: ask as input
 		let accessTokenStore = AccessTokenStore()
-		let accessTokenConfig: AccessTokenConfig
-
-		if let config = accessTokenStore.config {
-			accessTokenConfig = config
-		} else {
-			let jiraEmailInput = Input.readLine(
-				prompt: "Enter JIRA email address:",
-				secure: false,
-				errorResponse: { input, invalidInputReason in
-					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
-				}
-			)
-			let jiraApiTokenInput = Input.readLine(
-				prompt: "Enter JIRA API token (generated at https://id.atlassian.com/manage/api-tokens):",
-				secure: true,
-				errorResponse: { input, invalidInputReason in
-					self.stderr <<< "Invalid token; \(invalidInputReason)"
-				}
-			)
-			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token (generated at https://github.com/settings/tokens):",
-				secure: true,
-				errorResponse: { input, invalidInputReason in
-					self.stderr <<< "Invalid token; \(invalidInputReason)"
-				}
-			)
-			accessTokenConfig = AccessTokenConfig(
-				jiraEmail: jiraEmailInput,
-				jiraApiToken: jiraApiTokenInput,
-				githubAccessToken: githubAccessTokenInput
-			)
-			accessTokenStore.config = accessTokenConfig
-		}
+		let accessTokenConfig = getOrPromptAccessTokenConfig(for: accessTokenStore)
 
 		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
 		let ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
@@ -160,5 +128,43 @@ class BurghCommand: Command {
 		}
 
 		try run(bash: "open \"\(pullRequestURL)\"")
+	}
+
+	func getOrPromptAccessTokenConfig(for store: AccessTokenStore) -> AccessTokenConfig {
+		let accessTokenConfig: AccessTokenConfig
+
+		if let config = store.config {
+			accessTokenConfig = config
+		} else {
+			let jiraEmailInput = Input.readLine(
+				prompt: "Enter JIRA email address:",
+				secure: false,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
+				}
+			)
+			let jiraApiTokenInput = Input.readLine(
+				prompt: "Enter JIRA API token (generated at https://id.atlassian.com/manage/api-tokens):",
+				secure: true,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "Invalid token; \(invalidInputReason)"
+				}
+			)
+			let githubAccessTokenInput = Input.readLine(
+				prompt: "Enter GitHub API token (generated at https://github.com/settings/tokens):",
+				secure: true,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "Invalid token; \(invalidInputReason)"
+				}
+			)
+			accessTokenConfig = AccessTokenConfig(
+				jiraEmail: jiraEmailInput,
+				jiraApiToken: jiraApiTokenInput,
+				githubAccessToken: githubAccessTokenInput
+			)
+			store.config = accessTokenConfig
+		}
+
+		return accessTokenConfig
 	}
 }
