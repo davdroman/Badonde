@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "Result",
-        "repositoryURL": "https://github.com/antitypical/Result",
-        "state": {
-          "branch": null,
-          "revision": "2ca499ba456795616fbc471561ff1d963e6ae160",
-          "version": "4.1.0"
-        }
-      },
-      {
         "package": "SwiftCLI",
         "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
         "state": {
