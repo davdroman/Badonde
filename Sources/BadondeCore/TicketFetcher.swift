@@ -71,6 +71,9 @@ final class TicketFetcher {
 		if let epicId = ticket.fields.epicId {
 			let epic = try requestTicket(with: epicId)
 			ticket.fields.epicSummary = epic.fields.summary
+		} else if let parentTicketId = ticket.fields.parentTicket?.key {
+			let parentTicket = try requestTicket(with: parentTicketId, expanded: true)
+			ticket.fields.epicSummary = parentTicket.fields.epicSummary
 		}
 
 		return ticket

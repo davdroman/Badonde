@@ -46,18 +46,24 @@ struct Ticket: Codable {
 	var fields: TicketFields
 }
 
+struct ParentTicket: Codable {
+	let key: TicketId
+}
+
 struct TicketFields: Codable {
 	let fixVersions: [FixVersion]
 	let issueType: IssueType
 	let summary: String
 	let epicId: TicketId?
 	var epicSummary: String?
+	let parentTicket: ParentTicket?
 
 	enum CodingKeys: String, CodingKey {
 		case fixVersions = "fixVersions"
 		case issueType = "issuetype"
 		case summary = "summary"
 		case epicId = "customfield_10008"
+		case parentTicket = "parent"
 	}
 }
 
