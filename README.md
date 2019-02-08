@@ -6,4 +6,4 @@
 - [ ] Derive epic from subtasks' parent ticket
 - [ ] Derive need for UI/unit test labels from Git diff
 - [ ] Homebrew distribution
-- [ ] Fix bug where labels are sometimes not attached (by fetching all label pages)
+- [x] Fix bug where labels are sometimes not attached (by fetching all label pages)

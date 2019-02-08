@@ -36,12 +36,7 @@ final class GitHubRepositoryInfoFetcher {
 	}
 
 	func fetchRepositoryInfo(withRepositoryShorthand shorthand: String) throws -> GitHubRepositoryInfo {
-		let labels = try fetchRepositoryInfo(
-			withRepositoryShorthand: shorthand,
-			endpoint: "labels",
-			model: GitHubRepositoryInfo.Label.self
-		)
-
+		let labels = try fetchAllRepositoryLabels(withRepositoryShorthand: shorthand)
 		let milestones = try fetchRepositoryInfo(
 			withRepositoryShorthand: shorthand,
 			endpoint: "milestones",
@@ -50,6 +45,25 @@ final class GitHubRepositoryInfoFetcher {
 		)
 
 		return GitHubRepositoryInfo(labels: labels, milestones: milestones)
+	}
+
+	private func fetchAllRepositoryLabels(withRepositoryShorthand shorthand: String) throws -> [GitHubRepositoryInfo.Label] {
+		var labels: [GitHubRepositoryInfo.Label] = []
+		var currentPage = 1
+		while true {
+			let newLabels = try fetchRepositoryInfo(
+				withRepositoryShorthand: shorthand,
+				endpoint: "labels",
+				model: GitHubRepositoryInfo.Label.self,
+				queryItems: [URLQueryItem(name: "page", value: "\(currentPage)")]
+			)
+			guard !newLabels.isEmpty else {
+				break
+			}
+			labels += newLabels
+			currentPage += 1
+		}
+		return labels
 	}
 
 	private func fetchRepositoryInfo<EndpointModel: Codable>(
