@@ -1,10 +1,3 @@
-//
-//  GitHubRepositoryInfoFetcher.swift
-//  BadondeCore
-//
-//  Created by David Roman on 06/02/2019.
-//
-
 import Foundation
 import Result
 

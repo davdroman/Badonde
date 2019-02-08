@@ -1,10 +1,3 @@
-//
-//  SwiftyStringScore+Sugar.swift
-//  BadondeCore
-//
-//  Created by David Roman on 06/02/2019.
-//
-
 import SwiftyStringScore
 
 extension Array where Element == String {
