@@ -71,7 +71,7 @@ class BurghCommand: Command {
 	}
 
 	func getRepositoryShorthand() -> String? {
-		guard let repositoryURL = try? capture(bash: "git config --get remote.origin.url").stdout else {
+		guard let repositoryURL = try? capture(bash: "git ls-remote --get-url origin").stdout else {
 			return nil
 		}
 		return repositoryURL
