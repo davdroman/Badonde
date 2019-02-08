@@ -1,10 +1,3 @@
-//
-//  URL+Sugar.swift
-//  BadondeCore
-//
-//  Created by David Roman on 05/02/2019.
-//
-
 import Foundation
 
 extension URL {
