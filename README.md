@@ -13,6 +13,7 @@ Done!
 ## What's ahead
 
 - [ ] Test coverage
+- [ ] Set up CI
 - [x] Derive epic from subtasks' parent ticket
 - [ ] Derive need for UI/unit test labels from Git diff
 - [ ] Homebrew distribution
