@@ -112,7 +112,7 @@ class BurghCommand: Command {
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
 			guard let ticketBranch = branch(withTicketId: baseTicket) else {
-				throw Error.invalidBranchFormat
+				throw Error.invalidBaseTicketId
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
 		} else {
