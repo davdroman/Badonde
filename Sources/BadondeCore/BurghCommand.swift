@@ -18,6 +18,7 @@ extension IssueType {
 
 class BurghCommand: Command {
 	enum Error: Swift.Error {
+		case invalidBaseTicketId
 		case invalidBranchFormat
 		case invalidPullRequestURL
 		case missingGitRemote
@@ -25,6 +26,7 @@ class BurghCommand: Command {
 
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
+	let baseTicket = Key<String>("-t", "--base-ticket", description: "Ticket ID of the base branch")
 
 	func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
 		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {
@@ -70,6 +72,18 @@ class BurghCommand: Command {
 		return developBranch
 	}
 
+	func branch(withTicketId ticketId: String) -> String? {
+		guard let localBranchesRaw = try? capture(bash: "git branch -a | grep \"\(ticketId)\"").stdout else {
+			return nil
+		}
+
+		return localBranchesRaw
+			.replacingOccurrences(of: "  ", with: "")
+			.split(separator: "\n")
+			.map { $0.replacingOccurrences(of: "remotes/origin/", with: "") }
+			.first
+	}
+
 	func getRepositoryShorthand() -> String? {
 		guard let repositoryURL = try? capture(bash: "git ls-remote --get-url origin").stdout else {
 			return nil
@@ -93,21 +107,34 @@ class BurghCommand: Command {
 			throw Error.missingGitRemote
 		}
 
+		// Set PR base and target branches
+		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
+		// TODO: fetch possible dependency branch from related tickets?
+		if let baseTicket = baseTicket.value {
+			guard let ticketBranch = branch(withTicketId: baseTicket) else {
+				throw Error.invalidBranchFormat
+			}
+			pullRequestURLFactory.baseBranch = ticketBranch
+		} else {
+			pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
+		}
+		pullRequestURLFactory.targetBranch = currentBranchName
+
+		// Fetch or prompt for JIRA and GitHub credentials
 		let accessTokenStore = AccessTokenStore()
 		let accessTokenConfig = getOrPromptAccessTokenConfig(for: accessTokenStore)
 
 		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
 		let ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
 
+		// Fetch repo and ticket info
 		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
 		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
 
-		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
-		// TODO: fetch possible dependency branch from related tickets
-		pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
-		pullRequestURLFactory.targetBranch = currentBranchName
+		// Set PR title
 		pullRequestURLFactory.title = "[\(ticket.key)] \(ticket.fields.summary)"
 
+		// Set PR labels
 		let repoLabels = repoInfo.labels.map { $0.name }
 		var pullRequestLabels: [String] = []
 
@@ -127,6 +154,7 @@ class BurghCommand: Command {
 
 		pullRequestURLFactory.labels = pullRequestLabels.nilIfEmpty
 
+		// Set PR milestone from ticket fix version
 		if
 			let rawMilestone = ticket.fields.fixVersions.first?.name,
 			!rawMilestone.isEmpty
