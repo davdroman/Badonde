@@ -12,6 +12,7 @@ Done!
 
 ## What's ahead
 
+- [ ] Saved time reporting
 - [ ] Test coverage
 - [ ] Set up CI
 - [ ] Homebrew distribution
