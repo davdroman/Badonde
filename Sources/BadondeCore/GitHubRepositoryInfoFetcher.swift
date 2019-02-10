@@ -1,5 +1,4 @@
 import Foundation
-import Result
 
 struct GitHubRepositoryInfo {
 	struct Label: Codable {
