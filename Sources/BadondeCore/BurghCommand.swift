@@ -105,6 +105,20 @@ class BurghCommand: Command {
 			.contains(where: { $0.contains("\(word)") })
 	}
 
+	func diffIncludesFile(baseBranch: String, targetBranch: String, withContent content: String) -> Bool {
+		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
+			return false
+		}
+
+		return !diff
+			.split(separator: "\n")
+			.filter { $0.hasPrefix("+++ b/") }
+			.map { $0.dropFirst("+++ b/".count) }
+			.compactMap { try? capture(bash: "cat \($0) | grep \(content)").stdout }
+			.filter { !$0.isEmpty }
+			.isEmpty
+	}
+
 	func execute() throws {
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
@@ -160,13 +174,26 @@ class BurghCommand: Command {
 			let baseBranch = pullRequestURLFactory.baseBranch,
 			let targetBranch = pullRequestURLFactory.targetBranch
 		{
+			// Append UI tests label
 			let shouldAttachUITestLabel = diffIncludesFilename(
 				baseBranch: baseBranch,
 				targetBranch: targetBranch,
 				containing: "UITests"
 			)
+
 			if shouldAttachUITestLabel, let uiTestsLabel = repoLabels.fuzzyMatch(word: "ui tests") {
 				pullRequestURLFactory.labels.append(uiTestsLabel)
+			}
+
+			// Append unit tests label
+			let shouldAttachUnitTestLabel = diffIncludesFile(
+				baseBranch: baseBranch,
+				targetBranch: targetBranch,
+				withContent: "XCTestCase"
+			)
+
+			if shouldAttachUnitTestLabel, let unitTestsLabel = repoLabels.fuzzyMatch(word: "unit tests") {
+				pullRequestURLFactory.labels.append(unitTestsLabel)
 			}
 		}
 
