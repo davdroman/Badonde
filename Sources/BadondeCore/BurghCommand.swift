@@ -169,6 +169,17 @@ class BurghCommand: Command {
 		}
 
 		try run(bash: "open \"\(pullRequestURL)\"")
+
+		// Report PR data
+		guard let firebaseApiKey = configurationStore.additionalConfiguration?.firebaseApiKey else {
+			return
+		}
+
+		let reporter = PullRequestAnalyticsReporter(firebaseApiToken: firebaseApiKey)
+		reporter.isDependent = pullRequestURLFactory.labels?.contains("DEPENDENT") == true
+		reporter.labelCount = pullRequestURLFactory.labels?.count ?? 0
+		reporter.hasMilestone = pullRequestURLFactory.milestone != nil
+		reporter.report()
 	}
 
 	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> Configuration {
