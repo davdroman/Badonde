@@ -95,6 +95,16 @@ class BurghCommand: Command {
 			.replacingOccurrences(of: ".", with: "")
 	}
 
+	func diffIncludesFilename(baseBranch: String, targetBranch: String, containing word: String) -> Bool {
+		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
+			return false
+		}
+		return diff
+			.split(separator: "\n")
+			.filter { $0.hasPrefix("diff --git") }
+			.contains(where: { $0.contains("\(word)") })
+	}
+
 	func execute() throws {
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
@@ -143,6 +153,20 @@ class BurghCommand: Command {
 		if ticket.fields.issueType.isBug {
 			if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
 				pullRequestURLFactory.labels.append(bugLabel)
+			}
+		}
+
+		if
+			let baseBranch = pullRequestURLFactory.baseBranch,
+			let targetBranch = pullRequestURLFactory.targetBranch
+		{
+			let shouldAttachUITestLabel = diffIncludesFilename(
+				baseBranch: baseBranch,
+				targetBranch: targetBranch,
+				containing: "UITests"
+			)
+			if shouldAttachUITestLabel, let uiTestsLabel = repoLabels.fuzzyMatch(word: "ui tests") {
+				pullRequestURLFactory.labels.append(uiTestsLabel)
 			}
 		}
 
