@@ -13,7 +13,11 @@ public final class CommandLineTool {
 			name: "badonde",
 			version: "1.0.0",
 			description: "Effortless PR creation too",
-			commands: [BurghCommand(), ClearCommand()]
+			commands: [
+				BurghCommand(),
+				ClearCommand(),
+				SetFirebaseAPIKeyCommand()
+			]
 		)
 		_ = cli.go()
 	}
