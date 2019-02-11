@@ -12,7 +12,7 @@ Done!
 
 ## What's ahead
 
-- [ ] Saved time reporting
+- [x] Saved time reporting
 - [ ] Test coverage
 - [ ] Set up CI
 - [ ] Homebrew distribution
@@ -20,4 +20,4 @@ Done!
 - [ ] Derive need for UI/unit test labels from Git diff
 - [ ] Derive base branch dependency from "relates to" ticket attribute
 - [x] Fix bug where labels are sometimes not attached (by fetching all label pages)
-- [ ] Pack `burgh` alias on installation step (?)
+- [x] Pack `burgh` alias on installation step
