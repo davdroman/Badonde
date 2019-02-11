@@ -6,10 +6,10 @@ class ClearCommand: Command {
 	let shortDescription = "Clears credentials"
 
 	func execute() throws {
-		let accessTokenStore = AccessTokenStore()
-		guard accessTokenStore.config != nil else {
+		let store = ConfigurationStore()
+		guard store.configuration != nil else {
 			return
 		}
-		accessTokenStore.config = nil
+		try store.clearConfiguration()
 	}
 }

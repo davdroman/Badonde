@@ -121,11 +121,11 @@ class BurghCommand: Command {
 		pullRequestURLFactory.targetBranch = currentBranchName
 
 		// Fetch or prompt for JIRA and GitHub credentials
-		let accessTokenStore = AccessTokenStore()
-		let accessTokenConfig = getOrPromptAccessTokenConfig(for: accessTokenStore)
+		let configurationStore = ConfigurationStore()
+		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
-		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: accessTokenConfig.githubAccessToken)
-		let ticketFetcher = TicketFetcher(email: accessTokenConfig.jiraEmail, apiToken: accessTokenConfig.jiraApiToken)
+		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: configuration.githubAccessToken)
+		let ticketFetcher = TicketFetcher(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
 		// Fetch repo and ticket info
 		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
@@ -172,11 +172,11 @@ class BurghCommand: Command {
 		try run(bash: "open \"\(pullRequestURL)\"")
 	}
 
-	func getOrPromptAccessTokenConfig(for store: AccessTokenStore) -> AccessTokenConfig {
-		let accessTokenConfig: AccessTokenConfig
+	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> Configuration {
+		let configuration: Configuration
 
-		if let config = store.config {
-			accessTokenConfig = config
+		if let config = store.configuration {
+			configuration = config
 		} else {
 			let jiraEmailInput = Input.readLine(
 				prompt: "Enter JIRA email address:",
@@ -199,14 +199,14 @@ class BurghCommand: Command {
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			accessTokenConfig = AccessTokenConfig(
+			configuration = Configuration(
 				jiraEmail: jiraEmailInput,
 				jiraApiToken: jiraApiTokenInput,
 				githubAccessToken: githubAccessTokenInput
 			)
-			store.config = accessTokenConfig
+			try store.setConfiguration(configuration)
 		}
 
-		return accessTokenConfig
+		return configuration
 	}
 }
