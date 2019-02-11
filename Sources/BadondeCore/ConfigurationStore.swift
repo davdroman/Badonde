@@ -21,6 +21,7 @@ final class ConfigurationStore {
 
 	init() {
 		configuration = try? Configuration.read(from: ConfigurationStore.configurationFilePath)
+		additionalConfiguration = try? AdditionalConfiguration.read(from: ConfigurationStore.additionalConfigurationFilePath)
 	}
 
 	func setConfiguration(_ configuration: Configuration) throws {
