@@ -109,12 +109,14 @@ class BurghCommand: Command {
 
 		// Set PR base and target branches
 		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
+
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
 			guard let ticketBranch = branch(withTicketId: baseTicket) else {
 				throw Error.invalidBaseTicketId
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
+			pullRequestURLFactory.labels.append("DEPENDENT")
 		} else {
 			pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
 		}
@@ -136,23 +138,20 @@ class BurghCommand: Command {
 
 		// Set PR labels
 		let repoLabels = repoInfo.labels.map { $0.name }
-		var pullRequestLabels: [String] = []
 
 		// Append Bug label if ticket is a bug
 		if ticket.fields.issueType.isBug {
 			if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
-				pullRequestLabels.append(bugLabel)
+				pullRequestURLFactory.labels.append(bugLabel)
 			}
 		}
 
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
-				pullRequestLabels.append(epicLabel)
+				pullRequestURLFactory.labels.append(epicLabel)
 			}
 		}
-
-		pullRequestURLFactory.labels = pullRequestLabels.nilIfEmpty
 
 		// Set PR milestone from ticket fix version
 		if
