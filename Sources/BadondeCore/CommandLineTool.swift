@@ -16,7 +16,7 @@ public final class CommandLineTool {
 			commands: [
 				BurghCommand(),
 				ClearCommand(),
-				SetFirebaseAPIKeyCommand()
+				SetFirebaseAuthCommand()
 			]
 		)
 		_ = cli.go()
