@@ -7,7 +7,8 @@ struct Configuration: Codable {
 }
 
 struct AdditionalConfiguration: Codable {
-	var firebaseApiKey: String?
+	var firebaseProjectId: String?
+	var firebaseSecretToken: String?
 }
 
 final class ConfigurationStore {
