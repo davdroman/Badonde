@@ -10,6 +10,8 @@
 	<img src="https://img.shields.io/github/release/DavdRoman/Badonde.svg" alt="Latest stable release"/>
 </p>
 
+Badonde is a command line tool that combines the JIRA and GitHub APIs to make creating PRs a bliss.
+
 ## Installation
 
 Download the project's [zip file](https://github.com/DavdRoman/Badonde/archive/master.zip), unzip, and navigate to it on your terminal. Then:
