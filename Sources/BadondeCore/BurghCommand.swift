@@ -221,7 +221,8 @@ class BurghCommand: Command {
 
 		try run(bash: "open \"\(pullRequestURL)\"")
 
-		// Report PR data
+		// Report PR data (production only)
+		#if !DEBUG
 		guard
 			let firebaseProjectId = configurationStore.additionalConfiguration?.firebaseProjectId,
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
@@ -236,6 +237,7 @@ class BurghCommand: Command {
 			hasMilestone: pullRequestURLFactory.milestone != nil
 		)
 		try reporter.report(analyticsData)
+		#endif
 	}
 
 	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> Configuration {
