@@ -72,15 +72,15 @@ class BurghCommand: Command {
 		return developBranch
 	}
 
-	func branch(withTicketId ticketId: String) -> String? {
-		guard let localBranchesRaw = try? capture(bash: "git branch -a | grep \"\(ticketId)\"").stdout else {
+	func remoteBranch(withTicketId ticketId: String) -> String? {
+		guard let remoteBranchesRaw = try? capture(bash: "git branch -r | grep \"\(ticketId)\"").stdout else {
 			return nil
 		}
 
-		return localBranchesRaw
+		return remoteBranchesRaw
 			.replacingOccurrences(of: "  ", with: "")
 			.split(separator: "\n")
-			.map { $0.replacingOccurrences(of: "remotes/origin/", with: "") }
+			.map { $0.replacingOccurrences(of: "origin/", with: "") }
 			.first
 	}
 
@@ -136,7 +136,7 @@ class BurghCommand: Command {
 
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
-			guard let ticketBranch = branch(withTicketId: baseTicket) else {
+			guard let ticketBranch = remoteBranch(withTicketId: baseTicket) else {
 				throw Error.invalidBaseTicketId
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
