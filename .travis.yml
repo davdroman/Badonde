@@ -1,0 +1,12 @@
+os:
+  - osx
+language: objective-c
+osx_image: xcode10.1
+script:
+  - swift test
+branches:
+  only:
+    - master
+    - develop
+notifications:
+  email: false

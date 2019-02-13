@@ -26,6 +26,10 @@ let package = Package(
 		.target(
 			name: "BadondeCore",
 			dependencies: ["SwiftCLI", "SwiftyStringScore"]
+		),
+		.testTarget(
+			name: "BadondeCoreTests",
+			dependencies: ["BadondeCore"]
 		)
 	]
 )
