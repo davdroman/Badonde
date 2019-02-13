@@ -1,5 +1,3 @@
-# Badonde
-
 <p align="center">
 <img width="250" src="https://imgur.com/download/DYGHaDT" alt="Project header"/>
 </p>
