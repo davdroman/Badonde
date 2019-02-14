@@ -253,15 +253,19 @@ class BurghCommand: Command {
 					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
 				}
 			)
+			let jiraApiTokenUrl = "https://id.atlassian.com/manage/api-tokens"
+			try run(bash: "open \"\(jiraApiTokenUrl)\"")
 			let jiraApiTokenInput = Input.readLine(
-				prompt: "Enter JIRA API token (generated at https://id.atlassian.com/manage/api-tokens):",
+				prompt: "Enter JIRA API token (generated at \(jiraApiTokenUrl):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
+			let githubApiTokenUrl = "https://github.com/settings/tokens"
+			try run(bash: "open \"\(githubApiTokenUrl)\"")
 			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token (generated at https://github.com/settings/tokens):",
+				prompt: "Enter GitHub API token (generated at \(githubApiTokenUrl):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
