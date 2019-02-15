@@ -14,10 +14,16 @@ Badonde is a command line tool that combines the JIRA and GitHub APIs to make cr
 
 ## Installation
 
-Download the project's [zip file](https://github.com/DavdRoman/Badonde/archive/master.zip), unzip, and navigate to it on your terminal. Then:
+### [Mint](https://github.com/yonaskolb/Mint)
 
-```bash
-$ ./install.sh
+```sh
+mint install DavdRoman/Badonde
 ```
 
-Done!
+### Make
+
+```sh
+git clone https://github.com/DavdRoman/Badonde.git
+cd Badonde
+make
+```
