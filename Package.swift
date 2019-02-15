@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
 	name: "Badonde",
 	products: [
-		.executable(name: "badonde", targets: ["Badonde"])
+		.executable(name: "badonde", targets: ["Badonde"]),
+		.executable(name: "burgh", targets: ["Burgh"])
 	],
 	dependencies: [
 		.package(
@@ -30,6 +31,10 @@ let package = Package(
 		.testTarget(
 			name: "BadondeCoreTests",
 			dependencies: ["BadondeCore"]
+		),
+		.target(
+			name: "Burgh",
+			dependencies: ["SwiftCLI"]
 		)
 	]
 )

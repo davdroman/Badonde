@@ -2,11 +2,8 @@ import Foundation
 import SwiftCLI
 
 public final class CommandLineTool {
-	private let arguments: [String]
 
-	public init(arguments: [String] = CommandLine.arguments) {
-		self.arguments = arguments
-	}
+	public init() {}
 
 	public func run() throws {
 		let cli = CLI(
