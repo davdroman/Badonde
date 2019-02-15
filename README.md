@@ -23,7 +23,7 @@ mint install DavdRoman/Badonde
 ### Make
 
 ```sh
-git clone https://github.com/DavdRoman/Badonde.git
+git clone --single-branch --branch master https://github.com/DavdRoman/Badonde.git
 cd Badonde
 make
 ```
