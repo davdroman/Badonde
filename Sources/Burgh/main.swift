@@ -1,10 +1,10 @@
 import Foundation
 import SwiftCLI
 
-let arguments = CommandLine.arguments.dropFirst().joined(separator: " ")
+let commandComponents = ["badonde", "burgh"] + CommandLine.arguments.dropFirst()
 
 do {
-	try run(bash: ["badonde", "burgh", arguments].joined(separator: " "))
+	try run(bash: commandComponents.joined(separator: " "))
 } catch {
 	print(error)
 }
