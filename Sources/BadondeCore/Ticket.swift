@@ -41,6 +41,12 @@ struct TicketId: Codable {
 	}
 }
 
+extension TicketId: CustomStringConvertible {
+	var description: String {
+		return rawValue
+	}
+}
+
 struct Ticket: Codable {
 	let key: String
 	var fields: TicketFields
