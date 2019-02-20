@@ -19,14 +19,16 @@ public final class Logger {
 
 	public class func info(_ description: String) {
 		spinner?.info(text: description)
+		spinner = nil
 	}
 
-	public class func fail(_ error: Error) {
+	public class func fail() {
 		spinner?.fail()
-		print(error.localizedDescription)
+		spinner = nil
 	}
 
 	public class func finish() {
 		spinner?.succeed()
+		spinner = nil
 	}
 }
