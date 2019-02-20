@@ -1,10 +1,4 @@
 import Foundation
-import SwiftCLI
+@testable import BadondeCore
 
-let commandComponents = ["badonde", "burgh"] + CommandLine.arguments.dropFirst()
-
-do {
-	try run(bash: commandComponents.joined(separator: " "))
-} catch {
-	print(error)
-}
+CommandLineTool().run(with: [BurghCommand().name] + CommandLine.arguments.dropFirst())
