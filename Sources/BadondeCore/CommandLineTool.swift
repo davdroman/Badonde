@@ -5,7 +5,7 @@ public final class CommandLineTool {
 
 	public init() {}
 
-	public func run(with arguments: [String]? = nil) throws {
+	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
 			name: "badonde",
 			version: "1.2.2",
