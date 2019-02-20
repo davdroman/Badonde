@@ -16,6 +16,11 @@ extension IssueType {
 	}
 }
 
+extension URL {
+	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
+	static let githubApiTokenUrl = URL(string: "https://github.com/settings/tokens")!
+}
+
 class BurghCommand: Command {
 	enum Error: Swift.Error {
 		case invalidBaseTicketId
@@ -120,6 +125,7 @@ class BurghCommand: Command {
 	}
 
 	func execute() throws {
+		Logger.step("Deriving ticket id from current branch")
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
 			let ticketId = TicketId(branchName: currentBranchName)
@@ -127,6 +133,7 @@ class BurghCommand: Command {
 			throw Error.invalidBranchFormat
 		}
 
+		Logger.step("Deriving repo shorthand from remote configuration")
 		guard let repoShorthand = getRepositoryShorthand() else {
 			throw Error.missingGitRemote
 		}
@@ -136,29 +143,35 @@ class BurghCommand: Command {
 
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
+			Logger.step("Deriving base branch for ticket \(baseTicket)")
 			guard let ticketBranch = remoteBranch(withTicketId: baseTicket) else {
 				throw Error.invalidBaseTicketId
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
 			pullRequestURLFactory.labels.append("DEPENDENT")
 		} else {
+			Logger.step("Deriving base branch for \(currentBranchName)")
 			pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
 
 		// Fetch or prompt for JIRA and GitHub credentials
+		Logger.step("Reading configuration")
 		let configurationStore = ConfigurationStore()
 		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
 		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: configuration.githubAccessToken)
 		let ticketFetcher = TicketFetcher(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
-		// Fetch repo and ticket info
+		Logger.step("Fetching repo info for \(repoShorthand)")
 		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
+		Logger.step("Fetching ticket info for \(ticketId)")
 		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
 
 		// Set PR title
-		pullRequestURLFactory.title = "[\(ticket.key)] \(ticket.fields.summary)"
+		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
+		Logger.step("Setting title to \(pullRequestTitle)")
+		pullRequestURLFactory.title = pullRequestTitle
 
 		// Set PR labels
 		let repoLabels = repoInfo.labels.map { $0.name }
@@ -166,6 +179,7 @@ class BurghCommand: Command {
 		// Append Bug label if ticket is a bug
 		if ticket.fields.issueType.isBug {
 			if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
+				Logger.step("Setting bug label")
 				pullRequestURLFactory.labels.append(bugLabel)
 			}
 		}
@@ -182,6 +196,7 @@ class BurghCommand: Command {
 			)
 
 			if shouldAttachUITestLabel, let uiTestsLabel = repoLabels.fuzzyMatch(word: "ui tests") {
+				Logger.step("Setting UI tests label")
 				pullRequestURLFactory.labels.append(uiTestsLabel)
 			}
 
@@ -193,6 +208,7 @@ class BurghCommand: Command {
 			)
 
 			if shouldAttachUnitTestLabel, let unitTestsLabel = repoLabels.fuzzyMatch(word: "unit tests") {
+				Logger.step("Setting unit tests label")
 				pullRequestURLFactory.labels.append(unitTestsLabel)
 			}
 		}
@@ -200,6 +216,7 @@ class BurghCommand: Command {
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
+				Logger.step("Setting epic label to \(epic)")
 				pullRequestURLFactory.labels.append(epicLabel)
 			}
 		}
@@ -211,6 +228,7 @@ class BurghCommand: Command {
 		{
 			let repoMilestones = repoInfo.milestones.map({ $0.title })
 			if let milestone = repoMilestones.fuzzyMatch(word: rawMilestone) {
+				Logger.step("Setting milestone to \(milestone)")
 				pullRequestURLFactory.milestone = milestone
 			}
 		}
@@ -219,10 +237,12 @@ class BurghCommand: Command {
 			throw Error.invalidPullRequestURL
 		}
 
-		try run(bash: "open \"\(pullRequestURL)\"")
+		Logger.step("Opening PR page")
+		try openURL(pullRequestURL)
 
 		// Report PR data (production only)
 		#if !DEBUG
+		Logger.step("Reporting analytics data")
 		guard
 			let firebaseProjectId = configurationStore.additionalConfiguration?.firebaseProjectId,
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
@@ -238,6 +258,8 @@ class BurghCommand: Command {
 		)
 		try reporter.report(analyticsData)
 		#endif
+
+		Logger.finish()
 	}
 
 	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> Configuration {
@@ -246,6 +268,7 @@ class BurghCommand: Command {
 		if let config = store.configuration {
 			configuration = config
 		} else {
+			Logger.info("Configuration not found, credentials required")
 			let jiraEmailInput = Input.readLine(
 				prompt: "Enter JIRA email address:",
 				secure: false,
@@ -253,19 +276,17 @@ class BurghCommand: Command {
 					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
 				}
 			)
-			let jiraApiTokenUrl = "https://id.atlassian.com/manage/api-tokens"
-			try run(bash: "open \"\(jiraApiTokenUrl)\"")
+			openURL(.jiraApiTokenUrl, delay: 2)
 			let jiraApiTokenInput = Input.readLine(
-				prompt: "Enter JIRA API token (generated at \(jiraApiTokenUrl):",
+				prompt: "Enter JIRA API token (generated at \(URL.jiraApiTokenUrl):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			let githubApiTokenUrl = "https://github.com/settings/tokens"
-			try run(bash: "open \"\(githubApiTokenUrl)\"")
+			openURL(.githubApiTokenUrl, delay: 2)
 			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token (generated at \(githubApiTokenUrl):",
+				prompt: "Enter GitHub API token (generated at \(URL.githubApiTokenUrl):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
@@ -280,5 +301,16 @@ class BurghCommand: Command {
 		}
 
 		return configuration
+	}
+
+	func openURL(_ url: URL) throws {
+		try run(bash: "open \"\(url)\"")
+	}
+
+	func openURL(_ url: URL, delay: TimeInterval) {
+		let queue = DispatchQueue(label: "badonde_delay_queue")
+		queue.asyncAfter(deadline: .now() + 2) {
+			_ = try? self.openURL(url)
+		}
 	}
 }
