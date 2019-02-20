@@ -1,10 +1,8 @@
 import Foundation
 import BadondeCore
 
-let tool = CommandLineTool()
-
 do {
-	try tool.run()
+	try CommandLineTool().run()
 } catch {
-	print(error)
+	Logger.fail(error)
 }
