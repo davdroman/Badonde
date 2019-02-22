@@ -278,9 +278,7 @@ class BurghCommand: Command {
 					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
 				}
 			)
-			#if !DEBUG
 			openURL(.jiraApiTokenUrl, delay: 2)
-			#endif
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at \(URL.jiraApiTokenUrl):",
 				secure: true,
@@ -288,9 +286,7 @@ class BurghCommand: Command {
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			#if !DEBUG
 			openURL(.githubApiTokenUrl, delay: 2)
-			#endif
 			let githubAccessTokenInput = Input.readLine(
 				prompt: "Enter GitHub API token (generated at \(URL.githubApiTokenUrl):",
 				secure: true,
