@@ -230,7 +230,9 @@ class BurghCommand: Command {
 			}
 		}
 
-		let pullRequestURL = try pullRequestURLFactory.url()
+		guard let pullRequestURL = pullRequestURLFactory.url else {
+			throw Error.invalidPullRequestURL
+		}
 
 		Logger.step("Opening PR page")
 		try openURL(pullRequestURL)
