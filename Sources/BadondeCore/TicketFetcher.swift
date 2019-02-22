@@ -2,14 +2,6 @@ import Foundation
 
 final class TicketFetcher {
 
-	enum Error: Swift.Error {
-		case noTicket
-		case urlFormattingError
-		case jiraConnection
-		case noDataReceived
-		case authorizationEncodingError
-	}
-
 	let email: String
 	let apiToken: String
 	var authorizationValue: String? {
@@ -27,23 +19,19 @@ final class TicketFetcher {
 
 	func fetchTicket(with ticketId: TicketId) throws -> Ticket {
 		guard ticketId.rawValue != "NO-TICKET" else {
-			throw Error.noTicket
+			throw Error.noTicketId
 		}
 
 		return try requestTicket(with: ticketId, expanded: true)
 	}
 
 	private func requestTicket(with ticketId: TicketId, expanded: Bool = false) throws -> Ticket {
-		let jiraUrl = URL(
+		let url = try URL(
 			scheme: "https",
 			host: "asosmobile.atlassian.net",
 			path: "/rest/api/2/issue/\(ticketId.rawValue)",
 			queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 		)
-
-		guard let url = jiraUrl else {
-			throw Error.urlFormattingError
-		}
 
 		guard let authorizationValue = authorizationValue else {
 			throw Error.authorizationEncodingError
@@ -57,8 +45,8 @@ final class TicketFetcher {
 
 		let response = session.synchronousDataTask(with: request)
 
-		guard response.error == nil else {
-			throw Error.jiraConnection
+		if let error = response.error {
+			throw Error.jiraConnectionFailed(error)
 		}
 
 		guard let jsonData = response.data else {
