@@ -17,16 +17,12 @@ final class PullRequestAnalyticsReporter {
 	}
 
 	func report(_ pullRequestData: PullRequestAnalyticsData) throws {
-		let reportUrl = URL(
+		let url = try URL(
 			scheme: "https",
 			host: "\(firebaseProjectId).firebaseio.com",
 			path: "/pull-requests.json",
 			queryItems: [URLQueryItem(name: "auth", value: firebaseSecretToken)]
 		)
-
-		guard let url = reportUrl else {
-			throw Error.invalidEndpointURLFormat
-		}
 
 		let session = URLSession(configuration: .default)
 		var request = URLRequest(url: url)
