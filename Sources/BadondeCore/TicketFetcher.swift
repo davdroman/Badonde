@@ -26,16 +26,12 @@ final class TicketFetcher {
 	}
 
 	private func requestTicket(with ticketId: TicketId, expanded: Bool = false) throws -> Ticket {
-		let jiraUrl = URL(
+		let url = try URL(
 			scheme: "https",
 			host: "asosmobile.atlassian.net",
 			path: "/rest/api/2/issue/\(ticketId.rawValue)",
 			queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 		)
-
-		guard let url = jiraUrl else {
-			throw Error.invalidEndpointURLFormat
-		}
 
 		guard let authorizationValue = authorizationValue else {
 			throw Error.authorizationEncodingError
