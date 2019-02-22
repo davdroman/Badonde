@@ -15,7 +15,7 @@ final class Git {
 			return developBranch
 		}
 
-		let releaseBranch = localReleaseBranchesRaw
+		let releaseBranches = localReleaseBranchesRaw
 			.replacingOccurrences(of: "\n  ", with: "\n")
 			.split(separator: "\n")
 			.filter { $0.hasPrefix("release/") }
@@ -30,16 +30,21 @@ final class Git {
 				return (version: versionNumber, branch: releaseBranch)
 			}
 			.sorted { $0.version > $1.version }
-			.first?
-			.branch
 
-		if let releaseBranch = releaseBranch {
-			let numberOfCommitsToRelease = self.numberOfCommits(fromBranch: branch, toBranch: releaseBranch)
-			let numberOfCommitsToDevelop = self.numberOfCommits(fromBranch: branch, toBranch: developBranch)
+		guard
+			let firstReleaseBranch = releaseBranches[safe: 0],
+			let secondReleaseBranch = releaseBranches[safe: 1],
+			firstReleaseBranch.version == secondReleaseBranch.version // if both versions are the same, it means it's both a local and remote branch
+		else {
+			return developBranch
+		}
 
-			if numberOfCommitsToRelease <= numberOfCommitsToDevelop {
-				return releaseBranch
-			}
+		let releaseBranch = firstReleaseBranch.branch
+
+		let numberOfCommitsToRelease = self.numberOfCommits(fromBranch: branch, toBranch: releaseBranch)
+		let numberOfCommitsToDevelop = self.numberOfCommits(fromBranch: branch, toBranch: developBranch)
+		if numberOfCommitsToRelease <= numberOfCommitsToDevelop {
+			return releaseBranch
 		}
 
 		return developBranch
