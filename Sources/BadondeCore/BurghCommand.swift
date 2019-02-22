@@ -125,8 +125,6 @@ class BurghCommand: Command {
 	}
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
-
 		Logger.step("Deriving ticket id from current branch")
 		guard
 			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
@@ -311,7 +309,7 @@ class BurghCommand: Command {
 
 	func openURL(_ url: URL, delay: TimeInterval) {
 		let queue = DispatchQueue(label: "badonde_delay_queue")
-		queue.asyncAfter(deadline: .now() + delay) {
+		queue.asyncAfter(deadline: .now() + 2) {
 			_ = try? self.openURL(url)
 		}
 	}

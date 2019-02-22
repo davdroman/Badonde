@@ -1,4 +1,8 @@
 import Foundation
 import BadondeCore
 
-CommandLineTool().run()
+do {
+	try CommandLineTool().run()
+} catch {
+	Logger.fail(error)
+}
