@@ -1,12 +1,9 @@
-prefix ?= /usr/local
-bindir = $(prefix)/bin
-
 install:
 	swift build -c release -Xswiftc -static-stdlib
-	install .build/release/badonde $(bindir)
-	install .build/release/burgh $(bindir)
+	install .build/release/badonde /usr/local/bin
+	install .build/release/burgh /usr/local/bin
 
 uninstall:
-	rm -rf $(bindir)/badonde
-	rm -rf $(bindir)/burgh
+	rm -rf /usr/local/bin/badonde
+	rm -rf /usr/local/bin/burgh
 	rm -rf ~/.badonde
