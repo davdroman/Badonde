@@ -15,12 +15,6 @@ struct GitHubRepositoryInfo {
 
 final class GitHubRepositoryInfoFetcher {
 
-	enum Error: Swift.Error {
-		case urlFormattingError
-		case githubConnection
-		case noDataReceived
-	}
-
 	private let accessToken: String
 
 	init(accessToken: String) {
@@ -64,16 +58,12 @@ final class GitHubRepositoryInfoFetcher {
 		model: EndpointModel.Type,
 		queryItems: [URLQueryItem]? = nil
 	) throws -> [EndpointModel] {
-		let labelsUrl = URL(
+		let url = try URL(
 			scheme: "https",
 			host: "api.github.com",
 			path: "/repos/\(shorthand)/\(endpoint)",
 			queryItems: queryItems
 		)
-
-		guard let url = labelsUrl else {
-			throw Error.urlFormattingError
-		}
 
 		let session = URLSession(configuration: .default)
 		var request = URLRequest(url: url)
@@ -83,12 +73,12 @@ final class GitHubRepositoryInfoFetcher {
 
 		let response = session.synchronousDataTask(with: request)
 
-		guard response.error == nil else {
-			throw Error.githubConnection
+		if let error = response.error {
+			throw Error.githubConnectionFailed(error)
 		}
 
 		guard let jsonData = response.data else {
-			throw Error.noDataReceived
+			throw Error.noDataReceived(model)
 		}
 
 		return try JSONDecoder().decode([EndpointModel].self, from: jsonData)

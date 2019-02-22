@@ -1,9 +1,18 @@
-install:
-	swift build -c release -Xswiftc -static-stdlib
-	install .build/release/badonde /usr/local/bin
-	install .build/release/burgh /usr/local/bin
+prefix ?= /usr/local
+bindir = $(prefix)/bin
+
+build:
+	swift build --disable-sandbox -c release -Xswiftc -static-stdlib
+
+install: build
+	mkdir -p $(bindir)
+	install .build/release/badonde $(bindir)
+	install .build/release/burgh $(bindir)
+
+test:
+	swift test
 
 uninstall:
-	rm -rf /usr/local/bin/badonde
-	rm -rf /usr/local/bin/burgh
+	rm -rf $(bindir)/badonde
+	rm -rf $(bindir)/burgh
 	rm -rf ~/.badonde
