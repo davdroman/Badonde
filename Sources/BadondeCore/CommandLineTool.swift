@@ -5,7 +5,7 @@ public final class CommandLineTool {
 
 	public init() {}
 
-	public func run(with arguments: [String]? = nil) throws {
+	public func run() throws {
 		let cli = CLI(
 			name: "badonde",
 			version: "1.2.2",
@@ -16,10 +16,6 @@ public final class CommandLineTool {
 				SetFirebaseAuthCommand()
 			]
 		)
-		if let arguments = arguments {
-			_ = cli.go(with: arguments)
-		} else {
-			_ = cli.go()
-		}
+		_ = cli.go()
 	}
 }
