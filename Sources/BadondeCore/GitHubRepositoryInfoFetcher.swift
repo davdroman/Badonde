@@ -58,12 +58,16 @@ final class GitHubRepositoryInfoFetcher {
 		model: EndpointModel.Type,
 		queryItems: [URLQueryItem]? = nil
 	) throws -> [EndpointModel] {
-		let url = try URL(
+		let labelsUrl = URL(
 			scheme: "https",
 			host: "api.github.com",
 			path: "/repos/\(shorthand)/\(endpoint)",
 			queryItems: queryItems
 		)
+
+		guard let url = labelsUrl else {
+			throw Error.invalidEndpointURLFormat(model)
+		}
 
 		let session = URLSession(configuration: .default)
 		var request = URLRequest(url: url)
