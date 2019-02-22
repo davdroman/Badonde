@@ -1,16 +1,10 @@
 prefix ?= /usr/local
 bindir = $(prefix)/bin
 
-build:
+install:
 	swift build --disable-sandbox -c release -Xswiftc -static-stdlib
-
-install: build
-	mkdir -p $(bindir)
 	install .build/release/badonde $(bindir)
 	install .build/release/burgh $(bindir)
-
-test:
-	swift test
 
 uninstall:
 	rm -rf $(bindir)/badonde
