@@ -27,97 +27,6 @@ class BurghCommand: Command {
 	let shortDescription = "Generates and opens PR page"
 	let baseTicket = Key<String>("-t", "--base-ticket", description: "Ticket ID of the base branch")
 
-	func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
-		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {
-			return 0
-		}
-		return Int(commitCount) ?? 0
-	}
-
-	func baseBranch(forBranch branch: String) -> String {
-		let developBranch = "develop"
-
-		guard let localReleaseBranchesRaw = try? capture(bash: "git branch | grep \"release\"").stdout else {
-			return developBranch
-		}
-
-		let releaseBranch = localReleaseBranchesRaw
-			.replacingOccurrences(of: "\n  ", with: "\n")
-			.split(separator: "\n")
-			.filter { $0.hasPrefix("release/") }
-			.compactMap { releaseBranch -> (version: Int, branch: String)? in
-				let releaseBranch = String(releaseBranch)
-				let versionNumberString = releaseBranch
-					.replacingOccurrences(of: "release/", with: "")
-					.replacingOccurrences(of: ".", with: "")
-				guard let versionNumber = Int(versionNumberString) else {
-					return nil
-				}
-				return (version: versionNumber, branch: releaseBranch)
-			}
-			.sorted { $0.version > $1.version }
-			.first?
-			.branch
-
-		if let releaseBranch = releaseBranch {
-			let numberOfCommitsToRelease = self.numberOfCommits(fromBranch: branch, toBranch: releaseBranch)
-			let numberOfCommitsToDevelop = self.numberOfCommits(fromBranch: branch, toBranch: developBranch)
-
-			if numberOfCommitsToRelease <= numberOfCommitsToDevelop {
-				return releaseBranch
-			}
-		}
-
-		return developBranch
-	}
-
-	func remoteBranch(withTicketId ticketId: String) -> String? {
-		guard let remoteBranchesRaw = try? capture(bash: "git branch -r | grep \"\(ticketId)\"").stdout else {
-			return nil
-		}
-
-		return remoteBranchesRaw
-			.replacingOccurrences(of: "  ", with: "")
-			.split(separator: "\n")
-			.map { $0.replacingOccurrences(of: "origin/", with: "") }
-			.first
-	}
-
-	func getRepositoryShorthand() -> String? {
-		guard let repositoryURL = try? capture(bash: "git ls-remote --get-url origin").stdout else {
-			return nil
-		}
-		return repositoryURL
-			.drop(while: { $0 != ":" })
-			.prefix(while: { $0 != "." })
-			.replacingOccurrences(of: ":", with: "")
-			.replacingOccurrences(of: ".", with: "")
-	}
-
-	func diffIncludesFilename(baseBranch: String, targetBranch: String, containing word: String) -> Bool {
-		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
-			return false
-		}
-		return diff
-			.split(separator: "\n")
-			.filter { $0.hasPrefix("diff --git") }
-			.contains(where: { $0.contains("\(word)") })
-	}
-
-	func diffIncludesFile(baseBranch: String, targetBranch: String, withContent content: String) -> Bool {
-		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
-			return false
-		}
-
-		return !diff
-			.split(separator: "\n")
-			.filter { $0.hasPrefix("+++ b/") }
-			.map { $0.dropFirst("+++ b/".count) }
-			.compactMap { try? capture(bash: "cat \($0) | grep \(content)").stdout }
-			.filter { !$0.isEmpty }
-			.isEmpty
-	}
-
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
 
@@ -131,7 +40,7 @@ class BurghCommand: Command {
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
-		guard let repoShorthand = getRepositoryShorthand() else {
+		guard let repoShorthand = Git.getRepositoryShorthand() else {
 			throw Error.missingGitRemote
 		}
 
@@ -141,14 +50,14 @@ class BurghCommand: Command {
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
 			Logger.step("Deriving base branch for ticket '\(baseTicket)'")
-			guard let ticketBranch = remoteBranch(withTicketId: baseTicket) else {
+			guard let ticketBranch = Git.remoteBranch(withTicketId: baseTicket) else {
 				throw Error.invalidBaseTicketId(baseTicket)
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
 			pullRequestURLFactory.labels.append("DEPENDENT")
 		} else {
 			Logger.step("Deriving base branch for '\(currentBranchName)'")
-			pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
+			pullRequestURLFactory.baseBranch = Git.baseBranch(forBranch: currentBranchName)
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
 
@@ -186,7 +95,7 @@ class BurghCommand: Command {
 			let targetBranch = pullRequestURLFactory.targetBranch
 		{
 			// Append UI tests label
-			let shouldAttachUITestLabel = diffIncludesFilename(
+			let shouldAttachUITestLabel = Git.diffIncludesFilename(
 				baseBranch: baseBranch,
 				targetBranch: targetBranch,
 				containing: "UITests"
@@ -198,7 +107,7 @@ class BurghCommand: Command {
 			}
 
 			// Append unit tests label
-			let shouldAttachUnitTestLabel = diffIncludesFile(
+			let shouldAttachUnitTestLabel = Git.diffIncludesFile(
 				baseBranch: baseBranch,
 				targetBranch: targetBranch,
 				withContent: "XCTestCase"
