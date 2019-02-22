@@ -8,12 +8,6 @@ struct PullRequestAnalyticsData: Codable {
 
 final class PullRequestAnalyticsReporter {
 
-	enum Error: Swift.Error {
-		case urlFormattingError
-		case firebaseConnection
-		case noDataReceived
-	}
-
 	private let firebaseProjectId: String
 	private let firebaseSecretToken: String
 
@@ -31,7 +25,7 @@ final class PullRequestAnalyticsReporter {
 		)
 
 		guard let url = reportUrl else {
-			throw Error.urlFormattingError
+			throw Error.invalidEndpointURLFormat
 		}
 
 		let session = URLSession(configuration: .default)
@@ -41,8 +35,8 @@ final class PullRequestAnalyticsReporter {
 
 		let response = session.synchronousDataTask(with: request)
 
-		guard response.error == nil else {
-			throw Error.firebaseConnection
+		if let error = response.error {
+			throw Error.firebaseConnectionFailed(error)
 		}
 	}
 }
