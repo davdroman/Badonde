@@ -8,7 +8,7 @@ public final class CommandLineTool {
 	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
 			name: "badonde",
-			version: "1.2.2",
+			version: "1.3.0",
 			description: "Effortless PR creation tool",
 			commands: [
 				BurghCommand(),
