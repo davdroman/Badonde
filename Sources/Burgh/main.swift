@@ -1,4 +1,4 @@
 import Foundation
-@testable import BadondeCore
+import BadondeCore
 
-CommandLineTool().run(with: [BurghCommand().name] + CommandLine.arguments.dropFirst())
+CommandLineTool().run(with: ["burgh"] + CommandLine.arguments.dropFirst())
