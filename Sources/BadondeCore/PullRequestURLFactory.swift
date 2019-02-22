@@ -13,8 +13,8 @@ class PullRequestURLFactory: Codable {
 		self.repositoryShorthand = repositoryShorthand
 	}
 
-	func url() throws -> URL {
-		return try URL(
+	var url: URL? {
+		return URL(
 			scheme: "https",
 			host: "github.com",
 			path: urlPath,
