@@ -140,14 +140,14 @@ class BurghCommand: Command {
 
 		// TODO: fetch possible dependency branch from related tickets?
 		if let baseTicket = baseTicket.value {
-			Logger.step("Deriving base branch for ticket \(baseTicket)")
+			Logger.step("Deriving base branch for ticket '\(baseTicket)'")
 			guard let ticketBranch = remoteBranch(withTicketId: baseTicket) else {
 				throw Error.invalidBaseTicketId(baseTicket)
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
 			pullRequestURLFactory.labels.append("DEPENDENT")
 		} else {
-			Logger.step("Deriving base branch for \(currentBranchName)")
+			Logger.step("Deriving base branch for '\(currentBranchName)'")
 			pullRequestURLFactory.baseBranch = baseBranch(forBranch: currentBranchName)
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
@@ -160,14 +160,14 @@ class BurghCommand: Command {
 		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: configuration.githubAccessToken)
 		let ticketFetcher = TicketFetcher(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
-		Logger.step("Fetching repo info for \(repoShorthand)")
+		Logger.step("Fetching repo info for '\(repoShorthand)'")
 		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
-		Logger.step("Fetching ticket info for \(ticketId)")
+		Logger.step("Fetching ticket info for '\(ticketId)'")
 		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
-		Logger.step("Setting title to \(pullRequestTitle)")
+		Logger.step("Setting title to '\(pullRequestTitle)'")
 		pullRequestURLFactory.title = pullRequestTitle
 
 		// Set PR labels
@@ -213,7 +213,7 @@ class BurghCommand: Command {
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
-				Logger.step("Setting epic label to \(epic)")
+				Logger.step("Setting epic label to '\(epic)'")
 				pullRequestURLFactory.labels.append(epicLabel)
 			}
 		}
@@ -225,7 +225,7 @@ class BurghCommand: Command {
 		{
 			let repoMilestones = repoInfo.milestones.map({ $0.title })
 			if let milestone = repoMilestones.fuzzyMatch(word: rawMilestone) {
-				Logger.step("Setting milestone to \(milestone)")
+				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestURLFactory.milestone = milestone
 			}
 		}
@@ -275,7 +275,7 @@ class BurghCommand: Command {
 			openURL(.jiraApiTokenUrl, delay: 2)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
-				prompt: "Enter JIRA API token (generated at \(URL.jiraApiTokenUrl):",
+				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)':",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
@@ -285,7 +285,7 @@ class BurghCommand: Command {
 			openURL(.githubApiTokenUrl, delay: 2)
 			#endif
 			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token (generated at \(URL.githubApiTokenUrl):",
+				prompt: "Enter GitHub API token (generated at '\(URL.githubApiTokenUrl)':",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
