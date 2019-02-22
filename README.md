@@ -14,6 +14,12 @@ Badonde is a command line tool that combines the JIRA and GitHub APIs to make cr
 
 ## Installation
 
+### Homebrew
+
+```sh
+brew install davdroman/formulae/badonde
+```
+
 ### [Mint](https://github.com/yonaskolb/Mint)
 
 ```sh
