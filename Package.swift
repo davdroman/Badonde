@@ -17,10 +17,6 @@ let package = Package(
 		.package(
 			url: "https://github.com/DavdRoman/SwiftyStringScore",
 			.branch("master")
-		),
-		.package(
-			url: "https://github.com/DavdRoman/CLISpinner",
-			.branch("master")
 		)
 	],
 	targets: [
@@ -30,7 +26,7 @@ let package = Package(
 		),
 		.target(
 			name: "BadondeCore",
-			dependencies: ["SwiftCLI", "SwiftyStringScore", "CLISpinner"]
+			dependencies: ["SwiftCLI", "SwiftyStringScore"]
 		),
 		.testTarget(
 			name: "BadondeCoreTests",
@@ -38,7 +34,7 @@ let package = Package(
 		),
 		.target(
 			name: "Burgh",
-			dependencies: ["BadondeCore"]
+			dependencies: ["SwiftCLI"]
 		)
 	]
 )

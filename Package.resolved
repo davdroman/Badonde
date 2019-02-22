@@ -2,24 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "CLISpinner",
-        "repositoryURL": "https://github.com/DavdRoman/CLISpinner",
-        "state": {
-          "branch": "master",
-          "revision": "b15eacb7dfac0e6305f106795177a363552ee940",
-          "version": null
-        }
-      },
-      {
-        "package": "Rainbow",
-        "repositoryURL": "https://github.com/onevcat/Rainbow",
-        "state": {
-          "branch": null,
-          "revision": "797a68d0a642609424b08f11eb56974a54d5f6e2",
-          "version": "3.1.4"
-        }
-      },
-      {
         "package": "SwiftCLI",
         "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
         "state": {
