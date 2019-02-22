@@ -5,17 +5,21 @@ public final class CommandLineTool {
 
 	public init() {}
 
-	public func run() throws {
+	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
 			name: "badonde",
-			version: "1.2.2",
-			description: "Effortless PR creation too",
+			version: "1.3.0",
+			description: "Effortless PR creation tool",
 			commands: [
 				BurghCommand(),
 				ClearCommand(),
 				SetFirebaseAuthCommand()
 			]
 		)
-		_ = cli.go()
+		if let arguments = arguments {
+			_ = cli.go(with: arguments)
+		} else {
+			_ = cli.go()
+		}
 	}
 }
