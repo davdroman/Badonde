@@ -1,4 +1,8 @@
 import Foundation
 import BadondeCore
 
-CommandLineTool().run(with: ["burgh"] + CommandLine.arguments.dropFirst())
+do {
+	try CommandLineTool().run(with: ["burgh"] + CommandLine.arguments.dropFirst())
+} catch {
+	Logger.fail(error)
+}
