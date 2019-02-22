@@ -21,10 +21,10 @@
       },
       {
         "package": "SwiftCLI",
-        "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
+        "repositoryURL": "https://github.com/DavdRoman/SwiftCLI",
         "state": {
           "branch": "master",
-          "revision": "5318c37d3cacc8780f50b87a8840a6774320ebdf",
+          "revision": "72d5aea762651b468691385f6ce9cb8c648a580d",
           "version": null
         }
       },
