@@ -12,7 +12,7 @@ let package = Package(
 	dependencies: [
 		.package(
 			url: "https://github.com/jakeheis/SwiftCLI",
-			from: "5.0.0"
+			.branch("master")
 		),
 		.package(
 			url: "https://github.com/DavdRoman/SwiftyStringScore",
