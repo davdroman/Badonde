@@ -22,12 +22,6 @@ extension URL {
 }
 
 class BurghCommand: Command {
-	enum Error: Swift.Error {
-		case invalidBaseTicketId
-		case invalidBranchFormat
-		case invalidPullRequestURL
-		case missingGitRemote
-	}
 
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
@@ -128,11 +122,12 @@ class BurghCommand: Command {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
 
 		Logger.step("Deriving ticket id from current branch")
-		guard
-			let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout,
-			let ticketId = TicketId(branchName: currentBranchName)
-		else {
-			throw Error.invalidBranchFormat
+		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
+			throw Error.noGitRepositoryFound
+		}
+
+		guard let ticketId = TicketId(branchName: currentBranchName) else {
+			throw Error.invalidBranchFormat(currentBranchName)
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
@@ -147,7 +142,7 @@ class BurghCommand: Command {
 		if let baseTicket = baseTicket.value {
 			Logger.step("Deriving base branch for ticket \(baseTicket)")
 			guard let ticketBranch = remoteBranch(withTicketId: baseTicket) else {
-				throw Error.invalidBaseTicketId
+				throw Error.invalidBaseTicketId(baseTicket)
 			}
 			pullRequestURLFactory.baseBranch = ticketBranch
 			pullRequestURLFactory.labels.append("DEPENDENT")
