@@ -9,7 +9,7 @@ public final class CommandLineTool {
 		let cli = CLI(
 			name: "badonde",
 			version: "1.3.1",
-			description: "Effortless PR creation tool",
+			description: "Painless PR-ing",
 			commands: [
 				BurghCommand(),
 				ClearCommand(),
