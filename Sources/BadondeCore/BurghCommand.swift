@@ -122,7 +122,7 @@ class BurghCommand: Command {
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
-				Logger.step("Setting epic label to '\(epic)'")
+				Logger.step("Setting epic label to '\(epicLabel)'")
 				pullRequestURLFactory.labels.append(epicLabel)
 			}
 		}
