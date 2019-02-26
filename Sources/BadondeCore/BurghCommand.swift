@@ -45,18 +45,14 @@ class BurghCommand: Command {
 		// Set PR base and target branches
 		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
 
-		// TODO: fetch possible dependency branch from related tickets?
 		if let baseBranchValue = baseBranch.value {
-			Logger.step("Deriving base branch from term '\(baseBranchValue)'")
 			guard let baseBranch = Git.remoteBranch(containing: baseBranchValue) else {
 				throw Error.invalidBaseBranch(baseBranchValue)
 			}
-			if baseBranch.isTicketBranch {
-				pullRequestURLFactory.labels.append("DEPENDENT")
-			}
+			Logger.step("Using base branch '\(baseBranch)'")
 			pullRequestURLFactory.baseBranch = baseBranch
 		} else {
-			Logger.step("Deriving base branch for '\(currentBranchName)'")
+			Logger.step("Using repository default base branch '\(repoInfo.defaultBranch)'")
 			pullRequestURLFactory.baseBranch = repoInfo.defaultBranch
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
@@ -68,6 +64,14 @@ class BurghCommand: Command {
 
 		// Set PR labels
 		let repoLabels = repoInfo.labels.map { $0.name }
+
+		// Append dependency label if base branch is another ticket
+		if pullRequestURLFactory.baseBranch?.isTicketBranch == true {
+			if let dependencyLabel = repoLabels.fuzzyMatch(word: "depend") {
+				Logger.step("Setting dependency label")
+				pullRequestURLFactory.labels.append(dependencyLabel)
+			}
+		}
 
 		// Append Bug label if ticket is a bug
 		if ticket.fields.issueType.isBug {
