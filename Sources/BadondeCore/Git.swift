@@ -47,7 +47,7 @@ final class Git {
 	}
 
 	class func diffIncludesFilename(baseBranch: String, targetBranch: String, containing word: String) -> Bool {
-		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
+		guard let diff = try? capture(bash: "git diff \(baseBranch)...\(targetBranch)").stdout else {
 			return false
 		}
 		return diff
@@ -57,7 +57,7 @@ final class Git {
 	}
 
 	class func diffIncludesFile(baseBranch: String, targetBranch: String, withContent content: String) -> Bool {
-		guard let diff = try? capture(bash: "git diff \(baseBranch)..\(targetBranch)").stdout else {
+		guard let diff = try? capture(bash: "git diff \(baseBranch)...\(targetBranch)").stdout else {
 			return false
 		}
 
