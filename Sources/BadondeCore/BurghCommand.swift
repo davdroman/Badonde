@@ -1,21 +1,6 @@
 import Foundation
 import SwiftCLI
 
-extension TicketId {
-	init?(branchName: String) {
-		guard let ticketId = branchName.split(separator: "_").first else {
-			return nil
-		}
-		self.init(rawValue: String(ticketId))
-	}
-}
-
-extension IssueType {
-	var isBug: Bool {
-		return ["Bug", "Story Defect"].contains(name)
-	}
-}
-
 extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
 	static let githubApiTokenUrl = URL(string: "https://github.com/settings/tokens")!
@@ -25,7 +10,7 @@ class BurghCommand: Command {
 
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
-	let baseTicket = Key<String>("-t", "--base-ticket", description: "Ticket ID of the base branch")
+	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
 
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
@@ -44,23 +29,6 @@ class BurghCommand: Command {
 			throw Error.missingGitRemote
 		}
 
-		// Set PR base and target branches
-		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
-
-		// TODO: fetch possible dependency branch from related tickets?
-		if let baseTicket = baseTicket.value {
-			Logger.step("Deriving base branch for ticket '\(baseTicket)'")
-			guard let ticketBranch = Git.remoteBranch(withTicketId: baseTicket) else {
-				throw Error.invalidBaseTicketId(baseTicket)
-			}
-			pullRequestURLFactory.baseBranch = ticketBranch
-			pullRequestURLFactory.labels.append("DEPENDENT")
-		} else {
-			Logger.step("Deriving base branch for '\(currentBranchName)'")
-			pullRequestURLFactory.baseBranch = Git.baseBranch(forBranch: currentBranchName)
-		}
-		pullRequestURLFactory.targetBranch = currentBranchName
-
 		// Fetch or prompt for JIRA and GitHub credentials
 		Logger.step("Reading configuration")
 		let configurationStore = ConfigurationStore()
@@ -73,6 +41,25 @@ class BurghCommand: Command {
 		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
 		Logger.step("Fetching ticket info for '\(ticketId)'")
 		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
+
+		// Set PR base and target branches
+		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
+
+		// TODO: fetch possible dependency branch from related tickets?
+		if let baseBranchValue = baseBranch.value {
+			Logger.step("Deriving base branch from term '\(baseBranchValue)'")
+			guard let baseBranch = Git.remoteBranch(containing: baseBranchValue) else {
+				throw Error.invalidBaseBranch(baseBranchValue)
+			}
+			if baseBranch.isTicketBranch {
+				pullRequestURLFactory.labels.append("DEPENDENT")
+			}
+			pullRequestURLFactory.baseBranch = baseBranch
+		} else {
+			Logger.step("Deriving base branch for '\(currentBranchName)'")
+			pullRequestURLFactory.baseBranch = repoInfo.defaultBranch
+		}
+		pullRequestURLFactory.targetBranch = currentBranchName
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
