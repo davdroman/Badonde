@@ -1,5 +1,20 @@
 import SwiftCLI
 
+extension TicketId {
+	init?(branchName: String) {
+		guard let ticketId = branchName.split(separator: "_").first else {
+			return nil
+		}
+		self.init(rawValue: String(ticketId))
+	}
+}
+
+extension String {
+	var isTicketBranch: Bool {
+		return split(separator: "_").first?.contains("-") == true
+	}
+}
+
 final class Git {
 	class func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
 		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {
@@ -8,50 +23,8 @@ final class Git {
 		return Int(commitCount) ?? 0
 	}
 
-	class func baseBranch(forBranch branch: String) -> String {
-		let developBranch = "develop"
-
-		guard let localReleaseBranchesRaw = try? capture(bash: "git branch | grep \"release\"").stdout else {
-			return developBranch
-		}
-
-		let releaseBranches = localReleaseBranchesRaw
-			.replacingOccurrences(of: "\n  ", with: "\n")
-			.split(separator: "\n")
-			.filter { $0.hasPrefix("release/") }
-			.compactMap { releaseBranch -> (version: Int, branch: String)? in
-				let releaseBranch = String(releaseBranch)
-				let versionNumberString = releaseBranch
-					.replacingOccurrences(of: "release/", with: "")
-					.replacingOccurrences(of: ".", with: "")
-				guard let versionNumber = Int(versionNumberString) else {
-					return nil
-				}
-				return (version: versionNumber, branch: releaseBranch)
-			}
-			.sorted { $0.version > $1.version }
-
-		guard
-			let firstReleaseBranch = releaseBranches[safe: 0],
-			let secondReleaseBranch = releaseBranches[safe: 1],
-			firstReleaseBranch.version == secondReleaseBranch.version // if both versions are the same, it means it's both a local and remote branch
-		else {
-			return developBranch
-		}
-
-		let releaseBranch = firstReleaseBranch.branch
-
-		let numberOfCommitsToRelease = self.numberOfCommits(fromBranch: branch, toBranch: releaseBranch)
-		let numberOfCommitsToDevelop = self.numberOfCommits(fromBranch: branch, toBranch: developBranch)
-		if numberOfCommitsToRelease <= numberOfCommitsToDevelop {
-			return releaseBranch
-		}
-
-		return developBranch
-	}
-
-	class func remoteBranch(withTicketId ticketId: String) -> String? {
-		guard let remoteBranchesRaw = try? capture(bash: "git branch -r | grep \"\(ticketId)\"").stdout else {
+	class func remoteBranch(containing term: String) -> String? {
+		guard let remoteBranchesRaw = try? capture(bash: "git branch -r | grep \"\(term)\"").stdout else {
 			return nil
 		}
 

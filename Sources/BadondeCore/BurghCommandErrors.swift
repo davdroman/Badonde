@@ -3,7 +3,7 @@ import SwiftCLI
 extension BurghCommand {
 	enum Error {
 		case noGitRepositoryFound
-		case invalidBaseTicketId(String)
+		case invalidBaseBranch(String)
 		case invalidBranchFormat(String)
 		case missingGitRemote
 		case invalidPullRequestURL
@@ -15,8 +15,8 @@ extension BurghCommand.Error: ProcessError {
 		switch self {
 		case .noGitRepositoryFound:
 			return "☛ No Git repository found in current directory"
-		case .invalidBaseTicketId(let ticketId):
-			return "☛ No remote branch found matching specified base ticket id '\(ticketId)'"
+		case .invalidBaseBranch(let branch):
+			return "☛ No remote branch found matching specified term '\(branch)'"
 		case .invalidBranchFormat(let branch):
 			return "☛ Invalid ticket format for current branch '\(branch)'"
 		case .missingGitRemote:
