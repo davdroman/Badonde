@@ -108,3 +108,10 @@ struct IssueType: Codable {
 		case avatarID = "avatarId"
 	}
 }
+
+extension IssueType {
+	var isBug: Bool {
+		return ["Bug", "Story Defect"].contains(name)
+	}
+}
+
