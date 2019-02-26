@@ -134,20 +134,18 @@ class BurghCommand: Command {
 		// Report PR data (production only)
 		#if !DEBUG
 		Logger.step("Reporting analytics data")
-		guard
+		if
 			let firebaseProjectId = configurationStore.additionalConfiguration?.firebaseProjectId,
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
-		else {
-			return
+		{
+			let reporter = PullRequestAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+			let analyticsData = PullRequestAnalyticsData(
+				isDependent: pullRequestURLFactory.labels?.contains("DEPENDENT") == true,
+				labelCount: pullRequestURLFactory.labels?.count ?? 0,
+				hasMilestone: pullRequestURLFactory.milestone != nil
+			)
+			try reporter.report(analyticsData)
 		}
-
-		let reporter = PullRequestAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-		let analyticsData = PullRequestAnalyticsData(
-			isDependent: pullRequestURLFactory.labels?.contains("DEPENDENT") == true,
-			labelCount: pullRequestURLFactory.labels?.count ?? 0,
-			hasMilestone: pullRequestURLFactory.milestone != nil
-		)
-		try reporter.report(analyticsData)
 		#endif
 
 		Logger.finish()
