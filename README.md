@@ -23,13 +23,13 @@ brew install davdroman/formulae/badonde
 ### [Mint](https://github.com/yonaskolb/Mint)
 
 ```sh
-mint install DavdRoman/Badonde
+mint install davdroman/Badonde
 ```
 
 ### Make
 
 ```sh
-git clone --single-branch --branch master https://github.com/DavdRoman/Badonde.git
+git clone --single-branch --branch master https://github.com/davdroman/Badonde.git
 cd Badonde
 make
 ```
