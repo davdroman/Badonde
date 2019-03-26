@@ -22,14 +22,7 @@ struct GitHubRepositoryInfo {
 	var milestones: [Milestone]
 }
 
-final class GitHubRepositoryInfoFetcher {
-
-	private let accessToken: String
-
-	init(accessToken: String) {
-		self.accessToken = accessToken
-	}
-
+final class GitHubRepositoryInfoFetcher: GitHubAPI {
 	func fetchRepositoryInfo(withRepositoryShorthand shorthand: String) throws -> GitHubRepositoryInfo {
 		let repository = try fetchRepository(withRepositoryShorthand: shorthand)
 		let labels = try fetchAllRepositoryLabels(withRepositoryShorthand: shorthand)
@@ -72,39 +65,6 @@ final class GitHubRepositoryInfoFetcher {
 			currentPage += 1
 		}
 		return labels
-	}
-
-	private func fetchRepositoryInfo<EndpointModel: Codable>(
-		withRepositoryShorthand shorthand: String,
-		endpoint: String?,
-		model: EndpointModel.Type,
-		queryItems: [URLQueryItem]? = nil
-	) throws -> EndpointModel {
-		let endpoint = endpoint.map { "/\($0)" } ?? ""
-		let url = try URL(
-			scheme: "https",
-			host: "api.github.com",
-			path: "/repos/\(shorthand)\(endpoint)",
-			queryItems: queryItems
-		)
-
-		let session = URLSession(configuration: .default)
-		var request = URLRequest(url: url)
-		request.httpMethod = "GET"
-		request.setValue("token \(accessToken)", forHTTPHeaderField: "Authorization")
-		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-		let response = session.synchronousDataTask(with: request)
-
-		if let error = response.error {
-			throw Error.githubConnectionFailed(error)
-		}
-
-		guard let jsonData = response.data else {
-			throw Error.noDataReceived(model)
-		}
-
-		return try JSONDecoder().decode(EndpointModel.self, from: jsonData)
 	}
 }
 

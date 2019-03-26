@@ -1,13 +1,13 @@
 import SwiftCLI
 
-extension GitHubRepositoryInfoFetcher {
+extension GitHubAPI {
 	enum Error {
 		case githubConnectionFailed(Swift.Error)
 		case noDataReceived(Any.Type)
 	}
 }
 
-extension GitHubRepositoryInfoFetcher.Error: ProcessError {
+extension GitHubAPI.Error: ProcessError {
 	var message: String? {
 		switch self {
 		case .githubConnectionFailed(let error):
