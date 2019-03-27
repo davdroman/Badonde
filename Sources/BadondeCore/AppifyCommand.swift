@@ -20,10 +20,11 @@ class AppifyCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
 
-		Logger.step("Reading configuration")
+		Logger.step("Checking for existing configuration")
 		let configurationStore = ConfigurationStore()
 		let configuration = try BurghCommand().getOrPromptConfiguration(for: configurationStore) // FIXME: refactor me
 
+		Logger.step("Searching for latest .app template available")
 		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
@@ -42,14 +43,17 @@ class AppifyCommand: Command {
 		let tmpAppPath = "\(folderPath)/\(appName)"
 		let workflowFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/document.wflow")
 
+		Logger.step("Downloading .app template")
 		try run(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
 		try run(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
 
+		Logger.step("Setting up Badonde.app for your current project folder")
 		let currentDirectory = try capture(bash: "pwd").stdout
 		var workflowFileContents = try String(data: Data(contentsOf: workflowFilePath), encoding: .utf8)
 		workflowFileContents = workflowFileContents?.replacingOccurrences(of: "{PATH_TO_PROJECT_DIR}", with: "<string>\(currentDirectory)</string>")
 		try workflowFileContents?.write(to: workflowFilePath, atomically: true, encoding: .utf8)
 
+		Logger.step("Installing Badonde.app")
 		let appPath = "/Applications/\(appName)"
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
