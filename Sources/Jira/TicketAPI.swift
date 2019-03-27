@@ -18,15 +18,15 @@ extension Ticket {
 			self.apiToken = apiToken
 		}
 
-		public func fetchTicket(with key: Key) throws -> Ticket {
+		public func getTicket(with key: Key) throws -> Ticket {
 			guard key.rawValue != "NO-TICKET" else {
 				throw Error.noTicketKey
 			}
 
-			return try requestTicket(with: key, expanded: true)
+			return try getTicket(with: key, expanded: true)
 		}
 
-		private func requestTicket(with key: Key, expanded: Bool = false) throws -> Ticket {
+		private func getTicket(with key: Key, expanded: Bool) throws -> Ticket {
 			let url = try URL(
 				scheme: "https",
 				host: "asosmobile.atlassian.net",
@@ -57,10 +57,10 @@ extension Ticket {
 			var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
 
 			if let epicKey = ticket.fields.epicKey {
-				let epic = try requestTicket(with: epicKey)
+				let epic = try getTicket(with: epicKey, expanded: false)
 				ticket.fields.epicSummary = epic.fields.summary
 			} else if let parentTicketId = ticket.fields.parentTicket?.key {
-				let parentTicket = try requestTicket(with: parentTicketId, expanded: true)
+				let parentTicket = try getTicket(with: parentTicketId, expanded: true)
 				ticket.fields.epicSummary = parentTicket.fields.epicSummary
 			}
 
