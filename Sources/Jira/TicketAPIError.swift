@@ -2,7 +2,6 @@ import Foundation
 
 extension Ticket.API {
 	public enum Error {
-		case noTicketKey
 		case jiraConnectionFailed(Swift.Error)
 		case noDataReceived
 		case authorizationEncodingError
@@ -12,8 +11,6 @@ extension Ticket.API {
 extension Ticket.API.Error: Swift.Error {
 	public var localizedDescription: String {
 		switch self {
-		case .noTicketKey:
-			return "☛ Current branch is a 'NO-TICKET', please use a ticket prefixed branch"
 		case .jiraConnectionFailed(let error):
 			return "☛ JIRA API call failed with error: \(error)"
 		case .noDataReceived:
