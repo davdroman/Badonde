@@ -2,14 +2,14 @@ import Foundation
 
 extension Label {
 	public final class API: GitHub.API {
-		public func fetchAllRepositoryLabels(for shorthand: Repository.Shorthand) throws -> [Label] {
+		public func getLabels(for shorthand: Repository.Shorthand) throws -> [Label] {
 			var labels: [Label] = []
 			var currentPage = 1
 			while true {
-				let newLabels = try fetchRepositoryInfo(
+				let newLabels = try get(
+					[Label].self,
 					for: shorthand,
 					endpoint: "labels",
-					model: [Label].self,
 					queryItems: [URLQueryItem(name: "page", value: "\(currentPage)")]
 				)
 				guard !newLabels.isEmpty else {

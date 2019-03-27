@@ -52,14 +52,14 @@ class BurghCommand: Command {
 			pullRequestURLFactory.baseBranch = baseBranch
 		} else {
 			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
-			let defaultBranch = try repoAPI.fetchRepository(for: repoShorthand).defaultBranch
+			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
 			Logger.step("Using repository default base branch '\(defaultBranch)'")
 			pullRequestURLFactory.baseBranch = defaultBranch
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
 
 		Logger.step("Fetching ticket info for '\(ticketId)'")
-		let ticket = try ticketAPI.fetchTicket(with: ticketId)
+		let ticket = try ticketAPI.getTicket(with: ticketId)
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
@@ -67,7 +67,7 @@ class BurghCommand: Command {
 		pullRequestURLFactory.title = pullRequestTitle
 
 		Logger.step("Fetching repo labels for '\(repoShorthand)'")
-		let labels = try labelAPI.fetchAllRepositoryLabels(for: repoShorthand).map({ $0.name })
+		let labels = try labelAPI.getLabels(for: repoShorthand).map({ $0.name })
 
 		// Append dependency label if base branch is another ticket
 		if pullRequestURLFactory.baseBranch?.isTicketBranch == true {
@@ -128,7 +128,7 @@ class BurghCommand: Command {
 			!rawMilestone.isEmpty
 		{
 			Logger.step("Fetching repo milestones for '\(repoShorthand)'")
-			let milestones = try milestoneAPI.fetchAllRepositoryMilestones(for: repoShorthand).map({ $0.title })
+			let milestones = try milestoneAPI.getMilestones(for: repoShorthand).map({ $0.title })
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestURLFactory.milestone = milestone

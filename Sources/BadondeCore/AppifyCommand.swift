@@ -25,7 +25,7 @@ class AppifyCommand: Command {
 		let configuration = try BurghCommand().getOrPromptConfiguration(for: configurationStore) // FIXME: refactor me
 
 		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
-		let possibleLatestReleaseAsset = try releaseAPI.fetchAllReleases(for: "davdroman/Badonde")
+		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
 			.sorted(by: { $0.date > $1.date })
 			.first(where: { !$0.assets.isEmpty })?
