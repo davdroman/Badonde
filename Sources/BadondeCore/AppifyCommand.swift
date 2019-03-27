@@ -1,6 +1,7 @@
 import Foundation
 import SwiftCLI
 import GitHub
+import OSAKit
 
 class AppifyCommand: Command {
 	let name = "appify"
@@ -30,7 +31,7 @@ class AppifyCommand: Command {
 		let zipPath = folderPath + ".zip"
 		let appName = "Badonde.app"
 		let tmpAppPath = "\(folderPath)/\(appName)"
-		let workflowFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/document.wflow")
+		let applescriptFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/Resources/Scripts/main.scpt")
 
 		Logger.step("Downloading .app template")
 		try run(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
@@ -38,13 +39,22 @@ class AppifyCommand: Command {
 
 		Logger.step("Setting up Badonde.app for your current project folder")
 		let currentDirectory = try capture(bash: "pwd").stdout
-		var workflowFileContents = try String(data: Data(contentsOf: workflowFilePath), encoding: .utf8)
-		workflowFileContents = workflowFileContents?.replacingOccurrences(of: "{PATH_TO_PROJECT_DIR}", with: "<string>\(currentDirectory)</string>")
-		try workflowFileContents?.write(to: workflowFilePath, atomically: true, encoding: .utf8)
+		let applescript = try OSAScript(contentsOf: applescriptFilePath, languageInstance: nil, using: OSAStorageOptions.compileIntoContext)
+		let newApplescriptSource = applescript.source.replacingOccurrences(of: "{PATH_TO_PROJECT_DIR}", with: currentDirectory)
+		let newApplescript = OSAScript(source: newApplescriptSource)
+		guard let newApplescriptCompiledSource = newApplescript.compiledData(forType: "scpt", using: OSAStorageOptions.stayOpenApplet, error: nil) else {
+			throw Error.appCompilationFailed
+		}
+		try newApplescriptCompiledSource.write(to: applescriptFilePath, options: .atomic)
 
 		Logger.step("Installing Badonde.app")
 		let appPath = "/Applications/\(appName)"
+		try run(bash: "rm -rf \(appPath)")
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
+
+		Logger.step("Cleaning up...")
+		try run(bash: "rm -rf \(zipPath)")
+		try run(bash: "rm -rf \(folderPath)")
 
 		Logger.finish()
 	}
