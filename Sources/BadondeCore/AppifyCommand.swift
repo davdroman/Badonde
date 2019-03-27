@@ -1,5 +1,6 @@
 import Foundation
 import SwiftCLI
+import GitHub
 
 class AppifyCommand: Command {
 	let name = "appify"
@@ -23,8 +24,8 @@ class AppifyCommand: Command {
 		let configurationStore = ConfigurationStore()
 		let configuration = try BurghCommand().getOrPromptConfiguration(for: configurationStore) // FIXME: refactor me
 
-		let releasesAPI = GitHubReleaseAPI(accessToken: configuration.githubAccessToken)
-		let possibleLatestReleaseAsset = try releasesAPI.fetchAllReleases(withRepositoryShorthand: "davdroman/Badonde")
+		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
+		let possibleLatestReleaseAsset = try releaseAPI.fetchAllReleases(for: "davdroman/Badonde")
 			.lazy
 			.sorted(by: { $0.date > $1.date })
 			.first(where: { !$0.assets.isEmpty })?

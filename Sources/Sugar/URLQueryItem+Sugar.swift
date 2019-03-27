@@ -1,7 +1,7 @@
 import Foundation
 
 extension URLQueryItem {
-	init?(name: String, mandatoryValue: String?) {
+	public init?(name: String, mandatoryValue: String?) {
 		guard let value = mandatoryValue else {
 			return nil
 		}
