@@ -15,10 +15,10 @@ open class API {
 		self.accessToken = accessToken
 	}
 
-	func fetchRepositoryInfo<EndpointModel: Codable>(
+	func get<EndpointModel: Codable>(
+		_ model: EndpointModel.Type,
 		for shorthand: Repository.Shorthand,
 		endpoint: String?,
-		model: EndpointModel.Type,
 		queryItems: [URLQueryItem]? = nil
 	) throws -> EndpointModel {
 		let endpoint = endpoint.map { "/\($0)" } ?? ""

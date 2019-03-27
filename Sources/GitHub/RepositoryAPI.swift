@@ -2,11 +2,11 @@ import Foundation
 
 extension Repository {
 	public final class API: GitHub.API {
-		public func fetchRepository(for shorthand: Repository.Shorthand) throws -> Repository {
-			return try fetchRepositoryInfo(
+		public func getRepository(with shorthand: Repository.Shorthand) throws -> Repository {
+			return try get(
+				Repository.self,
 				for: shorthand,
-				endpoint: nil,
-				model: Repository.self
+				endpoint: nil
 			)
 		}
 	}
