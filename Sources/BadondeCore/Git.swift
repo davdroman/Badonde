@@ -1,19 +1,5 @@
 import SwiftCLI
-
-extension TicketId {
-	init?(branchName: String) {
-		guard let ticketId = branchName.split(separator: "_").first else {
-			return nil
-		}
-		self.init(rawValue: String(ticketId))
-	}
-}
-
-extension String {
-	var isTicketBranch: Bool {
-		return split(separator: "_").first?.contains("-") == true
-	}
-}
+import Jira
 
 final class Git {
 	class func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
