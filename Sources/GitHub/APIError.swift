@@ -1,14 +1,14 @@
-import SwiftCLI
+import Foundation
 
-extension GitHubAPI {
-	enum Error {
+extension API {
+	public enum Error {
 		case githubConnectionFailed(Swift.Error)
 		case noDataReceived(Any.Type)
 	}
 }
 
-extension GitHubAPI.Error: ProcessError {
-	var message: String? {
+extension API.Error: Swift.Error {
+	public var localizedDescription: String {
 		switch self {
 		case .githubConnectionFailed(let error):
 			return "☛ GitHub API call failed with error: \(error)"

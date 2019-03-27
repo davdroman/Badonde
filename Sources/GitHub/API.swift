@@ -6,16 +6,17 @@
 //
 
 import Foundation
+import Sugar
 
-open class GitHubAPI {
+open class API {
 	private let accessToken: String
 
-	init(accessToken: String) {
+	public init(accessToken: String) {
 		self.accessToken = accessToken
 	}
 
 	func fetchRepositoryInfo<EndpointModel: Codable>(
-		withRepositoryShorthand shorthand: String,
+		for shorthand: Repository.Shorthand,
 		endpoint: String?,
 		model: EndpointModel.Type,
 		queryItems: [URLQueryItem]? = nil
