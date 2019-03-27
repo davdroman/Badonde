@@ -1,5 +1,4 @@
 import SwiftCLI
-import Jira
 
 final class Git {
 	class func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
