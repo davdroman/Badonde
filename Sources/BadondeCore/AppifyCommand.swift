@@ -6,17 +6,6 @@ class AppifyCommand: Command {
 	let name = "appify"
 	let shortDescription = "Generates an .app for your specific project"
 
-	enum Error: ProcessError {
-		case noAppTemplateAvailable
-
-		var message: String? {
-			switch self {
-			case .noAppTemplateAvailable:
-				return "No .app templates available on GitHub, please contact d@vidroman.dev"
-			}
-		}
-	}
-
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
 

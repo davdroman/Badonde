@@ -1,4 +1,4 @@
-import SwiftCLI
+import Foundation
 
 extension BurghCommand {
 	enum Error {
@@ -11,8 +11,8 @@ extension BurghCommand {
 	}
 }
 
-extension BurghCommand.Error: ProcessError {
-	var message: String? {
+extension BurghCommand.Error: Swift.Error {
+	var localizedDescription: String {
 		switch self {
 		case .noGitRepositoryFound:
 			return "☛ No Git repository found in current directory"
