@@ -75,22 +75,12 @@ extension Ticket {
 extension Ticket.Fields {
 	public struct FixVersion: Codable {
 		public let name: String
-
-		enum CodingKeys: String, CodingKey {
-			case name = "name"
-		}
 	}
 }
 
 extension Ticket.Fields {
 	public struct IssueType: Codable {
 		public let name: String
-		public let isSubtask: Bool
-
-		enum CodingKeys: String, CodingKey {
-			case name = "name"
-			case isSubtask = "subtask"
-		}
 	}
 }
 
