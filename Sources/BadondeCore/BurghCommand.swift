@@ -22,8 +22,12 @@ class BurghCommand: Command {
 			throw Error.noGitRepositoryFound
 		}
 
-		guard let ticketId = Ticket.Key(branchName: currentBranchName) else {
+		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
+		}
+
+		guard ticketKey.rawValue != "NO-TICKET" else {
+			throw Error.noTicketKey
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
@@ -58,8 +62,8 @@ class BurghCommand: Command {
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
 
-		Logger.step("Fetching ticket info for '\(ticketId)'")
-		let ticket = try ticketAPI.getTicket(with: ticketId)
+		Logger.step("Fetching ticket info for '\(ticketKey)'")
+		let ticket = try ticketAPI.getTicket(with: ticketKey)
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"

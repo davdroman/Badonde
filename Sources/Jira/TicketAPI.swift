@@ -19,10 +19,6 @@ extension Ticket {
 		}
 
 		public func getTicket(with key: Key) throws -> Ticket {
-			guard key.rawValue != "NO-TICKET" else {
-				throw Error.noTicketKey
-			}
-
 			return try getTicket(with: key, expanded: true)
 		}
 
