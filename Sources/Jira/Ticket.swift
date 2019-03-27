@@ -19,8 +19,8 @@ extension Ticket {
 			guard
 				let prefix = components[safe: 0],
 				let number = components[safe: 1]
-				else {
-					return nil
+			else {
+				return nil
 			}
 			self.init(prefix: String(prefix), number: String(number))
 		}
