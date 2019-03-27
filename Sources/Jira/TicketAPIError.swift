@@ -1,18 +1,18 @@
-import SwiftCLI
+import Foundation
 
-extension TicketFetcher{
-	enum Error {
-		case noTicketId
+extension Ticket.API {
+	public enum Error {
+		case noTicketKey
 		case jiraConnectionFailed(Swift.Error)
 		case noDataReceived
 		case authorizationEncodingError
 	}
 }
 
-extension TicketFetcher.Error: ProcessError {
-	var message: String? {
+extension Ticket.API.Error: Swift.Error {
+	public var localizedDescription: String {
 		switch self {
-		case .noTicketId:
+		case .noTicketKey:
 			return "☛ Current branch is a 'NO-TICKET', please use a ticket prefixed branch"
 		case .jiraConnectionFailed(let error):
 			return "☛ JIRA API call failed with error: \(error)"

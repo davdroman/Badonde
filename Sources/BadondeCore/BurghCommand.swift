@@ -1,6 +1,7 @@
 import Foundation
 import SwiftCLI
 import GitHub
+import Jira
 
 extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
@@ -21,7 +22,7 @@ class BurghCommand: Command {
 			throw Error.noGitRepositoryFound
 		}
 
-		guard let ticketId = TicketId(branchName: currentBranchName) else {
+		guard let ticketId = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
 		}
 
@@ -38,7 +39,7 @@ class BurghCommand: Command {
 		let labelAPI = Label.API(accessToken: configuration.githubAccessToken)
 		let milestoneAPI = Milestone.API(accessToken: configuration.githubAccessToken)
 		let repoAPI = Repository.API(accessToken: configuration.githubAccessToken)
-		let ticketFetcher = TicketFetcher(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
+		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
 		// Set PR base and target branches
 		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
@@ -58,7 +59,7 @@ class BurghCommand: Command {
 		pullRequestURLFactory.targetBranch = currentBranchName
 
 		Logger.step("Fetching ticket info for '\(ticketId)'")
-		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
+		let ticket = try ticketAPI.fetchTicket(with: ticketId)
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
