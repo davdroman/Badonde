@@ -1,5 +1,7 @@
 import Foundation
 import SwiftCLI
+import GitHub
+import Jira
 
 extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
@@ -20,8 +22,12 @@ class BurghCommand: Command {
 			throw Error.noGitRepositoryFound
 		}
 
-		guard let ticketId = TicketId(branchName: currentBranchName) else {
+		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
+		}
+
+		guard ticketKey.rawValue != "NO-TICKET" else {
+			throw Error.noTicketKey
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
@@ -34,13 +40,10 @@ class BurghCommand: Command {
 		let configurationStore = ConfigurationStore()
 		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
-		let repoInfoFetcher = GitHubRepositoryInfoFetcher(accessToken: configuration.githubAccessToken)
-		let ticketFetcher = TicketFetcher(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
-
-		Logger.step("Fetching repo info for '\(repoShorthand)'")
-		let repoInfo = try repoInfoFetcher.fetchRepositoryInfo(withRepositoryShorthand: repoShorthand)
-		Logger.step("Fetching ticket info for '\(ticketId)'")
-		let ticket = try ticketFetcher.fetchTicket(with: ticketId)
+		let labelAPI = Label.API(accessToken: configuration.githubAccessToken)
+		let milestoneAPI = Milestone.API(accessToken: configuration.githubAccessToken)
+		let repoAPI = Repository.API(accessToken: configuration.githubAccessToken)
+		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
 		// Set PR base and target branches
 		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
@@ -52,22 +55,27 @@ class BurghCommand: Command {
 			Logger.step("Using base branch '\(baseBranch)'")
 			pullRequestURLFactory.baseBranch = baseBranch
 		} else {
-			Logger.step("Using repository default base branch '\(repoInfo.defaultBranch)'")
-			pullRequestURLFactory.baseBranch = repoInfo.defaultBranch
+			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
+			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
+			Logger.step("Using repository default base branch '\(defaultBranch)'")
+			pullRequestURLFactory.baseBranch = defaultBranch
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
+
+		Logger.step("Fetching ticket info for '\(ticketKey)'")
+		let ticket = try ticketAPI.getTicket(with: ticketKey)
 
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
 		Logger.step("Setting title to '\(pullRequestTitle)'")
 		pullRequestURLFactory.title = pullRequestTitle
 
-		// Set PR labels
-		let repoLabels = repoInfo.labels.map { $0.name }
+		Logger.step("Fetching repo labels for '\(repoShorthand)'")
+		let labels = try labelAPI.getLabels(for: repoShorthand).map({ $0.name })
 
 		// Append dependency label if base branch is another ticket
 		if pullRequestURLFactory.baseBranch?.isTicketBranch == true {
-			if let dependencyLabel = repoLabels.fuzzyMatch(word: "depend") {
+			if let dependencyLabel = labels.fuzzyMatch(word: "depend") {
 				Logger.step("Setting dependency label")
 				pullRequestURLFactory.labels.append(dependencyLabel)
 			}
@@ -75,7 +83,7 @@ class BurghCommand: Command {
 
 		// Append Bug label if ticket is a bug
 		if ticket.fields.issueType.isBug {
-			if let bugLabel = repoLabels.fuzzyMatch(word: "bug") {
+			if let bugLabel = labels.fuzzyMatch(word: "bug") {
 				Logger.step("Setting bug label")
 				pullRequestURLFactory.labels.append(bugLabel)
 			}
@@ -92,7 +100,7 @@ class BurghCommand: Command {
 				containing: "UITests"
 			)
 
-			if shouldAttachUITestLabel, let uiTestsLabel = repoLabels.fuzzyMatch(word: "ui tests") {
+			if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
 				Logger.step("Setting UI tests label")
 				pullRequestURLFactory.labels.append(uiTestsLabel)
 			}
@@ -104,7 +112,7 @@ class BurghCommand: Command {
 				withContent: "XCTestCase"
 			)
 
-			if shouldAttachUnitTestLabel, let unitTestsLabel = repoLabels.fuzzyMatch(word: "unit tests") {
+			if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
 				Logger.step("Setting unit tests label")
 				pullRequestURLFactory.labels.append(unitTestsLabel)
 			}
@@ -112,7 +120,7 @@ class BurghCommand: Command {
 
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
-			if let epicLabel = repoLabels.fuzzyMatch(word: epic) {
+			if let epicLabel = labels.fuzzyMatch(word: epic) {
 				Logger.step("Setting epic label to '\(epicLabel)'")
 				pullRequestURLFactory.labels.append(epicLabel)
 			}
@@ -123,8 +131,9 @@ class BurghCommand: Command {
 			let rawMilestone = ticket.fields.fixVersions.first?.name,
 			!rawMilestone.isEmpty
 		{
-			let repoMilestones = repoInfo.milestones.map({ $0.title })
-			if let milestone = repoMilestones.fuzzyMatch(word: rawMilestone) {
+			Logger.step("Fetching repo milestones for '\(repoShorthand)'")
+			let milestones = try milestoneAPI.getMilestones(for: repoShorthand).map({ $0.title })
+			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestURLFactory.milestone = milestone
 			}

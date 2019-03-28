@@ -1,4 +1,5 @@
 import Foundation
+import Sugar
 
 struct PullRequestAnalyticsData: Codable {
 	var isDependent: Bool
