@@ -56,6 +56,8 @@ class AppifyCommand: Command {
 		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "rm -rf \(folderPath)")
 
+		try run(bash: "open -R \(appPath)")
+
 		Logger.finish()
 	}
 }
