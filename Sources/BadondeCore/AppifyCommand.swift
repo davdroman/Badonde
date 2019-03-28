@@ -5,7 +5,7 @@ import OSAKit
 
 class AppifyCommand: Command {
 	let name = "appify"
-	let shortDescription = "Generates an .app for your specific project"
+	let shortDescription = "Generates a Badonde.app for your specific project"
 
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
@@ -52,7 +52,7 @@ class AppifyCommand: Command {
 		try run(bash: "rm -rf \(appPath)")
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
-		Logger.step("Cleaning up...")
+		Logger.step("Cleaning up")
 		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "rm -rf \(folderPath)")
 
