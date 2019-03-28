@@ -1,20 +1,5 @@
 import SwiftCLI
 
-extension TicketId {
-	init?(branchName: String) {
-		guard let ticketId = branchName.split(separator: "_").first else {
-			return nil
-		}
-		self.init(rawValue: String(ticketId))
-	}
-}
-
-extension String {
-	var isTicketBranch: Bool {
-		return split(separator: "_").first?.contains("-") == true
-	}
-}
-
 final class Git {
 	class func numberOfCommits(fromBranch: String, toBranch: String) -> Int {
 		guard let commitCount = try? capture(bash: "git log origin/\(toBranch)..origin/\(fromBranch) --oneline | wc -l").stdout else {

@@ -1,7 +1,7 @@
 import Foundation
 
 extension URLSession {
-	func synchronousDataTask(with request: URLRequest) -> (data: Data?, response: URLResponse?, error: Error?) {
+	public func synchronousDataTask(with request: URLRequest) -> (data: Data?, response: URLResponse?, error: Error?) {
 		let semaphore = DispatchSemaphore(value: 0)
 		var result: (Data?, URLResponse?, Error?)?
 		let dataTask = self.dataTask(with: request) { data, response, error in
