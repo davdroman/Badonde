@@ -1,7 +1,6 @@
 import Foundation
 
 class PullRequestURLFactory: Codable {
-
 	var repositoryShorthand: String
 	var baseBranch: String?
 	var targetBranch: String?

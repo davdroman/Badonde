@@ -11,6 +11,7 @@ public final class CommandLineTool {
 			version: "1.4.2",
 			description: "Painless PR-ing",
 			commands: [
+				AppifyCommand(),
 				BurghCommand(),
 				ClearCommand(),
 				SetFirebaseAuthCommand()

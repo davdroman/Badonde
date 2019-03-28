@@ -1,4 +1,4 @@
-import SwiftCLI
+import Foundation
 
 extension PullRequestAnalyticsReporter {
 	enum Error {
@@ -7,8 +7,8 @@ extension PullRequestAnalyticsReporter {
 	}
 }
 
-extension PullRequestAnalyticsReporter.Error: ProcessError {
-	var message: String? {
+extension PullRequestAnalyticsReporter.Error: Swift.Error {
+	var localizedDescription: String {
 		switch self {
 		case .firebaseConnectionFailed(let error):
 			return "☛ Firebase API call failed with error: \(error)"
