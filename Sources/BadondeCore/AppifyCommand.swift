@@ -16,10 +16,12 @@ class AppifyCommand: Command {
 
 		Logger.step("Searching for latest .app template available")
 		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
+		let currentVersion = CommandLineTool.Constant.version
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
-			.sorted(by: { $0.date > $1.date })
-			.first(where: { !$0.assets.isEmpty })?
+			.filter { $0.version.compare(currentVersion, options: .numeric) != .orderedDescending }
+			.sorted { $0.date > $1.date }
+			.first { !$0.assets.isEmpty }?
 			.assets
 			.first
 
