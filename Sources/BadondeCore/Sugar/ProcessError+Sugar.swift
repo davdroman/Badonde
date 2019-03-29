@@ -10,6 +10,12 @@ extension GitHub.API.Error: ProcessError {
 	}
 }
 
+extension Jira.Ticket.API.Error: ProcessError {
+	public var message: String? {
+		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+	}
+}
+
 extension ProcessError {
 	public var message: String? {
 		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
