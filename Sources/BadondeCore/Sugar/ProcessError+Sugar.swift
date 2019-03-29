@@ -1,13 +1,21 @@
 import SwiftCLI
+import GitHub
+import Jira
 
-extension ProcessError where Self: Swift.Error {
-	var message: String? {
-		return localizedDescription
+// Explicit declaration needed for some reason.
+// I think it might be a Swift bug but haven't dug into it.
+extension GitHub.API.Error: ProcessError {
+	public var message: String? {
+		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension ProcessError {
-	var exitStatus: Int32 {
+	public var message: String? {
+		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+	}
+
+	public var exitStatus: Int32 {
 		return 1
 	}
 }

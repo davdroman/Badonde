@@ -31,11 +31,11 @@ open class API {
 		let response = session.synchronousDataTask(with: request)
 
 		if let error = response.error {
-			throw Error.githubConnectionFailed(error)
+			throw error
 		}
 
-		guard let jsonData = response.data else {
-			throw Error.noDataReceived(model)
+		guard let httpResponse = response.response as? HTTPURLResponse, let jsonData = response.data else {
+			fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
 		}
 
 		let jsonDecoder = JSONDecoder()
@@ -67,6 +67,12 @@ open class API {
 				)
 			}
 		}
-		return try jsonDecoder.decode(EndpointModel.self, from: jsonData)
+
+		switch httpResponse.statusCode {
+		case 400...599:
+			throw try jsonDecoder.decode(Error.self, from: jsonData)
+		default:
+			return try jsonDecoder.decode(EndpointModel.self, from: jsonData)
+		}
 	}
 }
