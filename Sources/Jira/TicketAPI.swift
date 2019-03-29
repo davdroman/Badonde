@@ -43,11 +43,15 @@ extension Ticket {
 			let response = session.synchronousDataTask(with: request)
 
 			if let error = response.error {
-				throw Error.jiraConnectionFailed(error)
+				throw error
 			}
 
-			guard let jsonData = response.data else {
-				throw Error.noDataReceived
+			guard let httpResponse = response.response as? HTTPURLResponse, let jsonData = response.data else {
+				fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
+			}
+
+			guard !(400...599).contains(httpResponse.statusCode) else {
+				throw Error.http(httpResponse.statusCode)
 			}
 
 			var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
