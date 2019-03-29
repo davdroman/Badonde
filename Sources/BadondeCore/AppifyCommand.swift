@@ -8,7 +8,7 @@ class AppifyCommand: Command {
 	let shortDescription = "Generates a Badonde.app for your specific project"
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
+		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
 		Logger.step("Checking for existing configuration")
 		let configurationStore = ConfigurationStore()
