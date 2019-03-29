@@ -8,7 +8,7 @@ public final class CommandLineTool {
 	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
 			name: "badonde",
-			version: "1.5.0",
+			version: "1.5.1",
 			description: "Painless PR-ing",
 			commands: [
 				AppifyCommand(),
