@@ -6,7 +6,7 @@ class ClearCommand: Command {
 	let shortDescription = "Clears credentials"
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
+		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
 		Logger.step("Removing existing configuration")
 		let store = ConfigurationStore()

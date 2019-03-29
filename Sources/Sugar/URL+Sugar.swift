@@ -28,7 +28,7 @@ extension URL.Error: Swift.Error {
 	public var localizedDescription: String {
 		switch self {
 		case .invalidURL(let urlComponents):
-			return ["☛ URL formatting failed. Info:", "☛ \(urlComponents)"].joined(separator: "\n")
+			return ["URL formatting failed. Info:", "\(urlComponents)"].joined(separator: "\n")
 		}
 	}
 }
