@@ -15,7 +15,7 @@ class BurghCommand: Command {
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown throughout the codepath
+		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
 		Logger.step("Deriving ticket id from current branch")
 		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
