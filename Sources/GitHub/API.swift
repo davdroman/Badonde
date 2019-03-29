@@ -1,10 +1,3 @@
-//
-//  GitHubAPI.swift
-//  BadondeCore
-//
-//  Created by David Roman Aguirre on 26/03/2019.
-//
-
 import Foundation
 import Sugar
 
