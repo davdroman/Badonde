@@ -1,42 +1,42 @@
 import XCTest
-@testable import BadondeCore
+@testable import GitHub
 
-final class PullRequestURLFactoryTests: XCTestCase {
+final class PullRequestTests: XCTestCase {
 	func testFactory_urlIsValid_withRepositoryShorthandOnly() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		XCTAssertEqual(try factory.url().absoluteString, "https://github.com/user/repo/compare/")
 	}
 
 	func testFactory_urlIsValid_withBaseBranch_withTargetBranch() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		XCTAssertEqual(try factory.url().absoluteString, "https://github.com/user/repo/compare/base...target")
 	}
 
 	func testFactory_urlIsValid_withoutBaseBranch_withTargetBranch() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = nil
 		factory.targetBranch = "target"
 		XCTAssertEqual(try factory.url().absoluteString, "https://github.com/user/repo/compare/target")
 	}
 
 	func testFactory_urlIsValid_withBaseBranch_withoutTargetBranch() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = nil
 		XCTAssertEqual(try factory.url().absoluteString, "https://github.com/user/repo/compare/base...")
 	}
 
 	func testFactory_urlIsValid_withoutBaseBranch_withoutTargetBranch() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = nil
 		factory.targetBranch = nil
 		XCTAssertEqual(try factory.url().absoluteString, "https://github.com/user/repo/compare/")
 	}
 
 	func testFactory_urlIsValid_withBranches_withTitle() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		factory.title = "Title of the PR 100% correctly encoded with extra emoji sauce! 🍗🥗💪🏃‍♂️"
@@ -44,7 +44,7 @@ final class PullRequestURLFactoryTests: XCTestCase {
 	}
 
 	func testFactory_urlIsValid_withBranches_withZeroLabels() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		factory.labels = []
@@ -52,7 +52,7 @@ final class PullRequestURLFactoryTests: XCTestCase {
 	}
 
 	func testFactory_urlIsValid_withBranches_withOneLabel() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		factory.labels = ["Label 1"]
@@ -60,7 +60,7 @@ final class PullRequestURLFactoryTests: XCTestCase {
 	}
 
 	func testFactory_urlIsValid_withBranches_withMultipleLabels() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		factory.labels = ["Label 1", "Label 2", "Label 3"]
@@ -68,7 +68,7 @@ final class PullRequestURLFactoryTests: XCTestCase {
 	}
 
 	func testFactory_urlIsValid_withBranches_withMilestone() {
-		let factory = PullRequestURLFactory(repositoryShorthand: "user/repo")
+		let factory = PullRequest(repositoryShorthand: "user/repo")
 		factory.baseBranch = "base"
 		factory.targetBranch = "target"
 		factory.milestone = "RT ∞"

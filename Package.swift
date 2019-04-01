@@ -39,10 +39,6 @@ let package = Package(
 				"Sugar"
 			]
 		),
-		.testTarget(
-			name: "BadondeCoreTests",
-			dependencies: ["BadondeCore"]
-		),
 		.target(
 			name: "Burgh",
 			dependencies: ["BadondeCore"]
@@ -50,6 +46,10 @@ let package = Package(
 		.target(
 			name: "GitHub",
 			dependencies: ["Sugar"]
+		),
+		.testTarget(
+			name: "GitHubTests",
+			dependencies: ["GitHub"]
 		),
 		.target(
 			name: "Jira",
