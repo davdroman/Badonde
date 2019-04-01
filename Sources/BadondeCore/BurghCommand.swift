@@ -155,13 +155,8 @@ class BurghCommand: Command {
 			let firebaseProjectId = configurationStore.additionalConfiguration?.firebaseProjectId,
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
 		{
-			let reporter = PullRequestAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			let analyticsData = PullRequestAnalyticsData(
-				isDependent: pullRequestURLFactory.labels?.contains("DEPENDENT") == true,
-				labelCount: pullRequestURLFactory.labels?.count ?? 0,
-				hasMilestone: pullRequestURLFactory.milestone != nil
-			)
-			try reporter.report(analyticsData)
+			let reporter = PullRequest.Analytics.Reporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+			try reporter.report(pullRequest.analyticsData)
 		}
 		#endif
 
