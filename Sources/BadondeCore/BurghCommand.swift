@@ -57,8 +57,14 @@ class BurghCommand: Command {
 		} else {
 			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
 			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
-			Logger.step("Using repository default base branch '\(defaultBranch)'")
-			pullRequestURLFactory.baseBranch = defaultBranch
+			Logger.step("Deriving base branch by commit proximity")
+			if let baseBranch = Git.closestBranch(to: currentBranchName, priorityBranch: defaultBranch) {
+				Logger.step("Using base branch '\(baseBranch)'")
+				pullRequestURLFactory.baseBranch = baseBranch
+			} else {
+				Logger.step("Using repo default branch '\(defaultBranch)'")
+				pullRequestURLFactory.baseBranch = defaultBranch
+			}
 		}
 		pullRequestURLFactory.targetBranch = currentBranchName
 
