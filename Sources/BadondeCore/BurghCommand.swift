@@ -115,7 +115,7 @@ class BurghCommand: Command {
 			let shouldAttachUnitTestLabel = Git.diffIncludesFile(
 				baseBranch: baseBranch,
 				targetBranch: targetBranch,
-				withContent: "XCTestCase"
+				withContent: ": XCTestCase {"
 			)
 
 			if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
