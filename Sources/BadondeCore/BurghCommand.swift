@@ -46,27 +46,27 @@ class BurghCommand: Command {
 		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
 		// Set PR base and target branches
-		let pullRequestURLFactory = PullRequestURLFactory(repositoryShorthand: repoShorthand)
+		let pullRequest = PullRequest(repositoryShorthand: repoShorthand)
 
 		if let baseBranchValue = baseBranch.value {
 			guard let baseBranch = Git.remoteBranch(containing: baseBranchValue) else {
 				throw Error.invalidBaseBranch(baseBranchValue)
 			}
 			Logger.step("Using base branch '\(baseBranch)'")
-			pullRequestURLFactory.baseBranch = baseBranch
+			pullRequest.baseBranch = baseBranch
 		} else {
 			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
 			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
 			Logger.step("Deriving base branch by commit proximity")
 			if let baseBranch = Git.closestBranch(to: currentBranchName, priorityBranch: defaultBranch) {
 				Logger.step("Using base branch '\(baseBranch)'")
-				pullRequestURLFactory.baseBranch = baseBranch
+				pullRequest.baseBranch = baseBranch
 			} else {
 				Logger.step("Using repo default branch '\(defaultBranch)'")
-				pullRequestURLFactory.baseBranch = defaultBranch
+				pullRequest.baseBranch = defaultBranch
 			}
 		}
-		pullRequestURLFactory.targetBranch = currentBranchName
+		pullRequest.targetBranch = currentBranchName
 
 		Logger.step("Fetching ticket info for '\(ticketKey)'")
 		let ticket = try ticketAPI.getTicket(with: ticketKey)
@@ -74,16 +74,16 @@ class BurghCommand: Command {
 		// Set PR title
 		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
 		Logger.step("Setting title to '\(pullRequestTitle)'")
-		pullRequestURLFactory.title = pullRequestTitle
+		pullRequest.title = pullRequestTitle
 
 		Logger.step("Fetching repo labels for '\(repoShorthand)'")
 		let labels = try labelAPI.getLabels(for: repoShorthand).map({ $0.name })
 
 		// Append dependency label if base branch is another ticket
-		if pullRequestURLFactory.baseBranch?.isTicketBranch == true {
+		if pullRequest.baseBranch?.isTicketBranch == true {
 			if let dependencyLabel = labels.fuzzyMatch(word: "depend") {
 				Logger.step("Setting dependency label")
-				pullRequestURLFactory.labels.append(dependencyLabel)
+				pullRequest.labels.append(dependencyLabel)
 			}
 		}
 
@@ -91,13 +91,13 @@ class BurghCommand: Command {
 		if ticket.fields.issueType.isBug {
 			if let bugLabel = labels.fuzzyMatch(word: "bug") {
 				Logger.step("Setting bug label")
-				pullRequestURLFactory.labels.append(bugLabel)
+				pullRequest.labels.append(bugLabel)
 			}
 		}
 
 		if
-			let baseBranch = pullRequestURLFactory.baseBranch,
-			let targetBranch = pullRequestURLFactory.targetBranch
+			let baseBranch = pullRequest.baseBranch,
+			let targetBranch = pullRequest.targetBranch
 		{
 			// Append UI tests label
 			let shouldAttachUITestLabel = Git.diffIncludesFilename(
@@ -108,7 +108,7 @@ class BurghCommand: Command {
 
 			if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
 				Logger.step("Setting UI tests label")
-				pullRequestURLFactory.labels.append(uiTestsLabel)
+				pullRequest.labels.append(uiTestsLabel)
 			}
 
 			// Append unit tests label
@@ -120,7 +120,7 @@ class BurghCommand: Command {
 
 			if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
 				Logger.step("Setting unit tests label")
-				pullRequestURLFactory.labels.append(unitTestsLabel)
+				pullRequest.labels.append(unitTestsLabel)
 			}
 		}
 
@@ -128,7 +128,7 @@ class BurghCommand: Command {
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = labels.fuzzyMatch(word: epic) {
 				Logger.step("Setting epic label to '\(epicLabel)'")
-				pullRequestURLFactory.labels.append(epicLabel)
+				pullRequest.labels.append(epicLabel)
 			}
 		}
 
@@ -141,14 +141,12 @@ class BurghCommand: Command {
 			let milestones = try milestoneAPI.getMilestones(for: repoShorthand).map({ $0.title })
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
-				pullRequestURLFactory.milestone = milestone
+				pullRequest.milestone = milestone
 			}
 		}
 
-		let pullRequestURL = try pullRequestURLFactory.url()
-
 		Logger.step("Opening PR page")
-		try openURL(pullRequestURL)
+		try openURL(pullRequest.url())
 
 		// Report PR data (production only)
 		#if !DEBUG

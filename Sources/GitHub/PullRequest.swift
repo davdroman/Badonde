@@ -1,18 +1,20 @@
 import Foundation
 
-class PullRequestURLFactory: Codable {
-	var repositoryShorthand: String
-	var baseBranch: String?
-	var targetBranch: String?
-	var title: String?
-	var labels: [String]?
-	var milestone: String?
+public class PullRequest: Codable {
+	public var repositoryShorthand: String
+	public var baseBranch: String?
+	public var targetBranch: String?
+	public var title: String?
+	public var labels: [String]?
+	public var milestone: String?
 
-	init(repositoryShorthand: String) {
+	public init(repositoryShorthand: String) {
 		self.repositoryShorthand = repositoryShorthand
 	}
+}
 
-	func url() throws -> URL {
+extension PullRequest {
+	public func url() throws -> URL {
 		return try URL(
 			scheme: "https",
 			host: "github.com",
