@@ -45,45 +45,49 @@ class BurghCommand: Command {
 		let repoAPI = Repository.API(accessToken: configuration.githubAccessToken)
 		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
-		// Set PR base and target branches
-		let pullRequest = PullRequest(repositoryShorthand: repoShorthand)
+		// Set up PR properties to be assigned
+		let pullRequestBaseBranch: String
+		let pullRequestTargetBranch: String
+		let pullRequestTitle: String
+		var pullRequestLabels: [String] = []
+		var pullRequestMilestone: String?
 
+		// Set PR base and target branches
 		if let baseBranchValue = baseBranch.value {
 			guard let baseBranch = Git.remoteBranch(containing: baseBranchValue) else {
 				throw Error.invalidBaseBranch(baseBranchValue)
 			}
 			Logger.step("Using base branch '\(baseBranch)'")
-			pullRequest.baseBranch = baseBranch
+			pullRequestBaseBranch = baseBranch
 		} else {
 			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
 			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
 			Logger.step("Deriving base branch by commit proximity")
 			if let baseBranch = Git.closestBranch(to: currentBranchName, priorityBranch: defaultBranch) {
 				Logger.step("Using base branch '\(baseBranch)'")
-				pullRequest.baseBranch = baseBranch
+				pullRequestBaseBranch = baseBranch
 			} else {
 				Logger.step("Using repo default branch '\(defaultBranch)'")
-				pullRequest.baseBranch = defaultBranch
+				pullRequestBaseBranch = defaultBranch
 			}
 		}
-		pullRequest.targetBranch = currentBranchName
+		pullRequestTargetBranch = currentBranchName
 
 		Logger.step("Fetching ticket info for '\(ticketKey)'")
 		let ticket = try ticketAPI.getTicket(with: ticketKey)
 
 		// Set PR title
-		let pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
-		Logger.step("Setting title to '\(pullRequestTitle)'")
-		pullRequest.title = pullRequestTitle
+		pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
+		Logger.step("Title set to '\(pullRequestTitle)'")
 
 		Logger.step("Fetching repo labels for '\(repoShorthand)'")
 		let labels = try labelAPI.getLabels(for: repoShorthand).map({ $0.name })
 
 		// Append dependency label if base branch is another ticket
-		if pullRequest.baseBranch?.isTicketBranch == true {
+		if pullRequestBaseBranch.isTicketBranch {
 			if let dependencyLabel = labels.fuzzyMatch(word: "depend") {
 				Logger.step("Setting dependency label")
-				pullRequest.labels.append(dependencyLabel)
+				pullRequestLabels.append(dependencyLabel)
 			}
 		}
 
@@ -91,44 +95,37 @@ class BurghCommand: Command {
 		if ticket.fields.issueType.isBug {
 			if let bugLabel = labels.fuzzyMatch(word: "bug") {
 				Logger.step("Setting bug label")
-				pullRequest.labels.append(bugLabel)
+				pullRequestLabels.append(bugLabel)
 			}
 		}
 
-		if
-			let baseBranch = pullRequest.baseBranch,
-			let targetBranch = pullRequest.targetBranch
-		{
-			// Append UI tests label
-			let shouldAttachUITestLabel = Git.diffIncludesFilename(
-				baseBranch: baseBranch,
-				targetBranch: targetBranch,
-				containing: "UITests"
-			)
+		// Append UI tests label
+		let shouldAttachUITestLabel = Git.diffIncludesFilename(
+			baseBranch: pullRequestBaseBranch,
+			targetBranch: pullRequestTargetBranch,
+			containing: "UITests"
+		)
+		if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
+			Logger.step("Setting UI tests label")
+			pullRequestLabels.append(uiTestsLabel)
+		}
 
-			if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
-				Logger.step("Setting UI tests label")
-				pullRequest.labels.append(uiTestsLabel)
-			}
-
-			// Append unit tests label
-			let shouldAttachUnitTestLabel = Git.diffIncludesFile(
-				baseBranch: baseBranch,
-				targetBranch: targetBranch,
-				withContent: ": XCTestCase {"
-			)
-
-			if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
-				Logger.step("Setting unit tests label")
-				pullRequest.labels.append(unitTestsLabel)
-			}
+		// Append unit tests label
+		let shouldAttachUnitTestLabel = Git.diffIncludesFile(
+			baseBranch: pullRequestBaseBranch,
+			targetBranch: pullRequestTargetBranch,
+			withContent: ": XCTestCase {"
+		)
+		if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
+			Logger.step("Setting unit tests label")
+			pullRequestLabels.append(unitTestsLabel)
 		}
 
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = labels.fuzzyMatch(word: epic) {
 				Logger.step("Setting epic label to '\(epicLabel)'")
-				pullRequest.labels.append(epicLabel)
+				pullRequestLabels.append(epicLabel)
 			}
 		}
 
@@ -141,11 +138,19 @@ class BurghCommand: Command {
 			let milestones = try milestoneAPI.getMilestones(for: repoShorthand).map({ $0.title })
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
-				pullRequest.milestone = milestone
+				pullRequestMilestone = milestone
 			}
 		}
 
 		Logger.step("Opening PR page")
+		let pullRequest = PullRequest(
+			repositoryShorthand: repoShorthand,
+			baseBranch: pullRequestBaseBranch,
+			targetBranch: pullRequestTargetBranch,
+			title: pullRequestTitle,
+			labels: pullRequestLabels,
+			milestone: pullRequestMilestone
+		)
 		try openURL(pullRequest.url())
 
 		// Report PR data (production only)
