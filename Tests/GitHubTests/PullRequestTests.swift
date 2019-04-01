@@ -28,13 +28,13 @@ final class PullRequestTests: XCTestCase {
 }
 
 extension PullRequestTests {
-	enum Constant {
+	private enum Constant {
 		static let repositoryShorthand = "user/repo"
 		static let baseBranch = "base"
 		static let targetBranch = "target"
 	}
 
-	func pullRequest(title: String = "", labels: [String] = [], milestone: String? = nil) -> PullRequest {
+	private func pullRequest(title: String = "", labels: [String] = [], milestone: String? = nil) -> PullRequest {
 		return PullRequest.init(
 			repositoryShorthand: Constant.repositoryShorthand,
 			baseBranch: Constant.baseBranch,
