@@ -1,15 +1,27 @@
 import Foundation
 
 public class PullRequest: Codable {
-	public var repositoryShorthand: String
-	public var baseBranch: String?
-	public var targetBranch: String?
-	public var title: String?
-	public var labels: [String]?
+	public var repositoryShorthand: Repository.Shorthand
+	public var baseBranch: String
+	public var targetBranch: String
+	public var title: String
+	public var labels: [String]
 	public var milestone: String?
 
-	public init(repositoryShorthand: String) {
+	public init(
+		repositoryShorthand: Repository.Shorthand,
+		baseBranch: String,
+		targetBranch: String,
+		title: String,
+		labels: [String],
+		milestone: String?
+	) {
 		self.repositoryShorthand = repositoryShorthand
+		self.baseBranch = baseBranch
+		self.targetBranch = targetBranch
+		self.title = title
+		self.labels = labels
+		self.milestone = milestone
 	}
 }
 
@@ -18,29 +30,12 @@ extension PullRequest {
 		return try URL(
 			scheme: "https",
 			host: "github.com",
-			path: urlPath,
+			path: "/\(repositoryShorthand)/compare/\(baseBranch)...\(targetBranch)",
 			queryItems: [
-				URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title),
-				URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels?.joined(separator: ",")),
+				URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title.nilIfEmpty),
+				URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels.nilIfEmpty?.joined(separator: ",")),
 				URLQueryItem(name: CodingKeys.milestone.stringValue, mandatoryValue: milestone)
 			]
 		)
-	}
-
-	private var urlPath: String {
-		var path = "/\(repositoryShorthand)/compare"
-
-		switch (baseBranch, targetBranch) {
-		case let (base?, target?):
-			path.append(contentsOf: "/\(base)...\(target)")
-		case let (nil, target?):
-			path.append(contentsOf: "/\(target)")
-		case let (base?, nil):
-			path.append(contentsOf: "/\(base)...")
-		case (nil, nil):
-			path.append(contentsOf: "/")
-		}
-
-		return path
 	}
 }

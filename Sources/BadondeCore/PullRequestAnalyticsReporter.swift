@@ -5,8 +5,8 @@ import Sugar
 extension PullRequest {
 	var analyticsData: AnalyticsReporter.Data {
 		return AnalyticsReporter.Data(
-			isDependent: labels?.contains("DEPENDENT") == true,
-			labelCount: labels?.count ?? 0,
+			isDependent: baseBranch.isTicketBranch,
+			labelCount: labels.count,
 			hasMilestone: milestone != nil
 		)
 	}
