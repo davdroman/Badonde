@@ -106,7 +106,7 @@ final class Git {
 			.split(separator: "\n")
 			.filter { $0.hasPrefix("+++ b/") }
 			.map { $0.dropFirst("+++ b/".count) }
-			.compactMap { try? capture(bash: "cat \($0) | grep \(content)").stdout }
+			.compactMap { try? capture(bash: "cat \($0) | grep \"\(content)\"").stdout }
 			.filter { !$0.isEmpty }
 			.isEmpty
 	}
