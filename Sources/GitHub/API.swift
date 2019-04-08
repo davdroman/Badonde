@@ -28,24 +28,17 @@ open class API {
 		request.setValue("token \(accessToken)", forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-		let response = session.synchronousDataTask(with: request)
-
-		if let error = response.error {
-			throw error
-		}
-
-		guard let httpResponse = response.response as? HTTPURLResponse, let jsonData = response.data else {
-			fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
-		}
+		let resultValue = try session.synchronousDataTask(with: request).get()
+		let statusCode = (resultValue.response as? HTTPURLResponse)?.statusCode ?? 200
 
 		let jsonDecoder = JSONDecoder()
 		jsonDecoder.dateDecodingStrategy = .iso8601
 
-		switch httpResponse.statusCode {
+		switch statusCode {
 		case 400...599:
-			throw try jsonDecoder.decode(Error.self, from: jsonData)
+			throw try jsonDecoder.decode(Error.self, from: resultValue.data)
 		default:
-			return try jsonDecoder.decode(EndpointModel.self, from: jsonData)
+			return try jsonDecoder.decode(EndpointModel.self, from: resultValue.data)
 		}
 	}
 }
