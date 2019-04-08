@@ -39,34 +39,7 @@ open class API {
 		}
 
 		let jsonDecoder = JSONDecoder()
-		// TODO: change deployment target to 10.12 when upgrading to Swift 5
-		// https://github.com/apple/swift-evolution/blob/master/proposals/0236-package-manager-platform-deployment-settings.md
-		if #available(OSX 10.12, *) {
-			jsonDecoder.dateDecodingStrategy = .iso8601
-		} else {
-			let formatter = DateFormatter()
-			formatter.calendar = Calendar(identifier: .iso8601)
-			formatter.locale = Locale(identifier: "en_US_POSIX")
-			formatter.timeZone = TimeZone(secondsFromGMT: 0)
-
-			jsonDecoder.dateDecodingStrategy = .custom { decoder -> Date in
-				let container = try decoder.singleValueContainer()
-				let dateStr = try container.decode(String.self)
-
-				formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-				if let date = formatter.date(from: dateStr) {
-					return date
-				}
-				formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
-				if let date = formatter.date(from: dateStr) {
-					return date
-				}
-				throw DecodingError.dataCorruptedError(
-					in: container,
-					debugDescription: "Invalid ISO-8601 format on value \(dateStr)"
-				)
-			}
-		}
+		jsonDecoder.dateDecodingStrategy = .iso8601
 
 		switch httpResponse.statusCode {
 		case 400...599:
