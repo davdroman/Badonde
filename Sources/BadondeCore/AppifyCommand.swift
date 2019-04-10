@@ -54,6 +54,10 @@ class AppifyCommand: Command {
 		try run(bash: "rm -rf \(appPath)")
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
+		Logger.step("Adding app to Script Menu")
+		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
+		try run(bash: "open '/System/Library/CoreServices/Script Menu.app'")
+
 		Logger.step("Cleaning up")
 		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "rm -rf \(folderPath)")
