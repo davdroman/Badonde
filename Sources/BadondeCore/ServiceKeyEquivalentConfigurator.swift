@@ -12,11 +12,6 @@ struct Service {
 
 extension Service {
 	final class KeyEquivalentConfigurator {
-		enum Error: Swift.Error {
-			case minimumVersionOfMacOSRequired10_2
-			case invalidConfigurationFormat
-		}
-
 		enum Constant {
 			static let pbsPlistPathComponent = "Library/Preferences/pbs.plist"
 			static let serviceStatusKey = "NSServicesStatus"
@@ -26,17 +21,13 @@ extension Service {
 		private var configuration: [String: Any]
 
 		init() throws {
-			guard
-				let configuration = try PropertyListSerialization.propertyList(
-					from: Data(contentsOf: URL.homeDirectory().appendingPathComponent(Constant.pbsPlistPathComponent)),
-					options: .mutableContainersAndLeaves,
-					format: nil
-				) as? [String: Any]
-			else {
-				throw Error.invalidConfigurationFormat
-			}
+			let configuration = try? PropertyListSerialization.propertyList(
+				from: Data(contentsOf: URL.homeDirectory().appendingPathComponent(Constant.pbsPlistPathComponent)),
+				options: .mutableContainersAndLeaves,
+				format: nil
+			)
 
-			self.configuration = configuration
+			self.configuration = configuration as? [String: Any] ?? [String: Any]()
 		}
 
 		func addKeyEquivalent(_ keyEquivalent: String, for service: Service) throws {
