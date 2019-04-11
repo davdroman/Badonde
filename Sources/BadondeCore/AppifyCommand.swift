@@ -58,6 +58,20 @@ class AppifyCommand: Command {
 		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
 		try run(bash: "open '/System/Library/CoreServices/Script Menu.app'")
 
+		Logger.step("Installing service")
+		let serviceName = "Run Badonde"
+		let serviceFilename = "Run\\ Badonde.workflow"
+		let servicePath = "~/Library/Services/\(serviceFilename)"
+		try run(bash: "rm -rf \(servicePath)")
+		let tmpServicePath = "\(folderPath)/\(serviceFilename)"
+		try run(bash: "cp -rf \(tmpServicePath) \(servicePath)")
+		try run(bash: "/System/Library/CoreServices/pbs -flush")
+
+		Logger.step("Setting up shortcut ⌃⌥⌘B")
+		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
+		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
+		try run(bash: "defaults read pbs > /dev/null")
+
 		Logger.step("Cleaning up")
 		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "rm -rf \(folderPath)")
