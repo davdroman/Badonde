@@ -7,7 +7,7 @@ extension Repository {
 	}
 }
 
-extension Repository.Shorthand: RawRepresentable {
+extension Repository.Shorthand: Equatable, RawRepresentable {
 	private enum Constant {
 		static let componentRegex = "^[a-z\\d](?:[a-z\\d]|-(?=[a-z\\d])){0,38}$"
 	}
