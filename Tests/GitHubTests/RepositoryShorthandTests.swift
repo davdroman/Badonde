@@ -5,7 +5,7 @@ final class RepositoryShorthandTests: XCTestCase {
 	// MARK: init(rawValue:) tests
 
 	func testRepositoryShorthand_initWithRawValue_validUsername_validRepository() {
-		let shorthand = Repository.Shorthand(rawValue: "user-123/repo-123")
+		let shorthand = Repository.Shorthand(rawValue: "user-123/Repo-123")
 		XCTAssertNotNil(shorthand)
 	}
 
