@@ -31,7 +31,7 @@ class BurghCommand: Command {
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
-		guard let repoShorthand = Git.getRepositoryShorthand() else {
+		guard let repoShorthand = Git.getRepositoryShorthand().flatMap(Repository.Shorthand.init(rawValue:)) else {
 			throw Error.missingGitRemote
 		}
 
