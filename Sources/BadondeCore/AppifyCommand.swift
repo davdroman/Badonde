@@ -56,7 +56,11 @@ class AppifyCommand: Command {
 
 		Logger.step("Adding app to Script Menu")
 		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
-		try run(bash: "open '/System/Library/CoreServices/Script Menu.app'")
+		do {
+			try run(bash: "open '/System/Library/CoreServices/Script Menu.app' &> /dev/null")
+		} catch {
+			Logger.info("App was added to the Script Menu, to show go to Script Editor.app -> Preferences -> Show Script menu in menu bar")
+		}
 
 		Logger.step("Installing service")
 		let serviceName = "Run Badonde"
