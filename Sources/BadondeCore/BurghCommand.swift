@@ -10,6 +10,12 @@ extension URL {
 
 class BurghCommand: Command {
 
+	#if !DEBUG
+	enum Constant {
+		static let urlOpeningDelay: TimeInterval = 1.5
+	}
+	#endif
+
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
@@ -183,7 +189,7 @@ class BurghCommand: Command {
 				}
 			)
 			#if !DEBUG
-			openURL(.jiraApiTokenUrl, delay: 2)
+			openURL(.jiraApiTokenUrl, delay: Constant.urlOpeningDelay)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)':",
@@ -193,7 +199,7 @@ class BurghCommand: Command {
 				}
 			)
 			#if !DEBUG
-			openURL(.githubApiTokenUrl, delay: 2)
+			openURL(.githubApiTokenUrl, delay: Constant.urlOpeningDelay)
 			#endif
 			let githubAccessTokenInput = Input.readLine(
 				prompt: "Enter GitHub API token (generated at '\(URL.githubApiTokenUrl)':",
