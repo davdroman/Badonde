@@ -34,11 +34,14 @@ final class Git {
 	}
 
 	class func closestBranch(to targetBranch: String, priorityBranch: String? = nil) -> String? {
-		guard let rawBranches = try? capture(bash: "git branch | cut -c 3-").stdout else {
+		guard let rawBranches = try? capture(bash: "git branch -r | cut -c 3- | cut -d ' ' -f1").stdout else {
 			return nil
 		}
 
-		let branches = rawBranches.split(separator: "\n").map({ String($0) })
+		let branches = rawBranches
+			.split(separator: "\n")
+			.filter { $0 != "origin/HEAD" }
+			.map { String($0) }
 
 		let commitsAndBranches = numberOfCommits(
 			fromBranch: targetBranch,
@@ -48,6 +51,7 @@ final class Git {
 
 		let sortedBranchesWithSameCommits = commitsAndBranches
 			.filter { $0.commits > 0 }
+			.map { (branch: $0.branch.replacingOccurrences(of: "origin/", with: ""), commits: $0.commits) }
 			.sorted { $0.commits < $1.commits }
 			.reduce([BranchAndCommits]()) { (result, branchAndCommits) -> [BranchAndCommits] in
 				guard let lastBranchAndCommits = result.last, lastBranchAndCommits.commits != branchAndCommits.commits else {
