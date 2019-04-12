@@ -127,6 +127,17 @@ class BurghCommand: Command {
 			pullRequestLabels.append(unitTestsLabel)
 		}
 
+		// Append feature toggle label
+		let shouldAttachFeatureToggleLabel = Git.diffIncludesFile(
+			baseBranch: pullRequestBaseBranch,
+			targetBranch: pullRequestTargetBranch,
+			withContent: "enum Feature:"
+		)
+		if shouldAttachFeatureToggleLabel, let featureToggleLabel = labels.fuzzyMatch(word: "feature toggle") {
+			Logger.step("Setting feature toggle label")
+			pullRequestLabels.append(featureToggleLabel)
+		}
+
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = labels.fuzzyMatch(word: epic) {
