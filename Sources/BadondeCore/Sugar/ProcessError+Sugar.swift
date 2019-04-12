@@ -43,7 +43,7 @@ extension BurghCommand.Error: ProcessError {
 	}
 }
 
-extension PullRequestAnalyticsReporter.Error: ProcessError {
+extension PullRequest.AnalyticsReporter.Error: ProcessError {
 	var message: String? {
 		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
