@@ -36,7 +36,9 @@ class AppifyCommand: Command {
 		let applescriptFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/Resources/Scripts/main.scpt")
 
 		Logger.step("Downloading .app template")
+		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
+		try run(bash: "rm -rf \(folderPath)")
 		try run(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
 
 		Logger.step("Setting up Badonde.app for your current project folder")
@@ -75,10 +77,6 @@ class AppifyCommand: Command {
 		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
 		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
 		try run(bash: "defaults read pbs > /dev/null")
-
-		Logger.step("Cleaning up")
-		try run(bash: "rm -rf \(zipPath)")
-		try run(bash: "rm -rf \(folderPath)")
 
 		try run(bash: "open -R \(appPath)")
 
