@@ -3,13 +3,19 @@ import SwiftCLI
 
 public final class CommandLineTool {
 
+	enum Constant {
+		static let name = "badonde"
+		static let version = "1.7.1"
+		static let description = "Painless PR-ing"
+	}
+
 	public init() {}
 
 	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
-			name: "badonde",
-			version: "1.5.1",
-			description: "Painless PR-ing",
+			name: Constant.name,
+			version: Constant.version,
+			description: Constant.description,
 			commands: [
 				AppifyCommand(),
 				BurghCommand(),
@@ -17,10 +23,12 @@ public final class CommandLineTool {
 				SetFirebaseAuthCommand()
 			]
 		)
+		let exitStatus: Int32
 		if let arguments = arguments {
-			_ = cli.go(with: arguments)
+			exitStatus = cli.go(with: arguments)
 		} else {
-			_ = cli.go()
+			exitStatus = cli.go()
 		}
+		exit(exitStatus)
 	}
 }

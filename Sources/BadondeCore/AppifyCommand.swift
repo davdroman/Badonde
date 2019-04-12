@@ -16,10 +16,12 @@ class AppifyCommand: Command {
 
 		Logger.step("Searching for latest .app template available")
 		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
+		let currentVersion = CommandLineTool.Constant.version
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
-			.sorted(by: { $0.date > $1.date })
-			.first(where: { !$0.assets.isEmpty })?
+			.filter { $0.version.compare(currentVersion, options: .numeric) != .orderedDescending }
+			.sorted { $0.date > $1.date }
+			.first { !$0.assets.isEmpty }?
 			.assets
 			.first
 
@@ -34,7 +36,9 @@ class AppifyCommand: Command {
 		let applescriptFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/Resources/Scripts/main.scpt")
 
 		Logger.step("Downloading .app template")
+		try run(bash: "rm -rf \(zipPath)")
 		try run(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
+		try run(bash: "rm -rf \(folderPath)")
 		try run(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
 
 		Logger.step("Setting up Badonde.app for your current project folder")
@@ -52,9 +56,27 @@ class AppifyCommand: Command {
 		try run(bash: "rm -rf \(appPath)")
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
-		Logger.step("Cleaning up")
-		try run(bash: "rm -rf \(zipPath)")
-		try run(bash: "rm -rf \(folderPath)")
+		Logger.step("Adding app to Script Menu")
+		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
+		do {
+			try run(bash: "open '/System/Library/CoreServices/Script Menu.app' &> /dev/null")
+		} catch {
+			Logger.info("App was added to the Script Menu, to show go to Script Editor.app -> Preferences -> Show Script menu in menu bar")
+		}
+
+		Logger.step("Installing service")
+		let serviceName = "Run Badonde"
+		let serviceFilename = "Run\\ Badonde.workflow"
+		let servicePath = "~/Library/Services/\(serviceFilename)"
+		try run(bash: "rm -rf \(servicePath)")
+		let tmpServicePath = "\(folderPath)/\(serviceFilename)"
+		try run(bash: "cp -rf \(tmpServicePath) \(servicePath)")
+		try run(bash: "/System/Library/CoreServices/pbs -flush")
+
+		Logger.step("Setting up shortcut ⌃⌥⌘B (CMD+ALT+CTRL+B)")
+		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
+		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
+		try run(bash: "defaults read pbs > /dev/null")
 
 		try run(bash: "open -R \(appPath)")
 
