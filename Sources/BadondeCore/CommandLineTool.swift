@@ -23,10 +23,12 @@ public final class CommandLineTool {
 				SetFirebaseAuthCommand()
 			]
 		)
+		let exitStatus: Int32
 		if let arguments = arguments {
-			_ = cli.go(with: arguments)
+			exitStatus = cli.go(with: arguments)
 		} else {
-			_ = cli.go()
+			exitStatus = cli.go()
 		}
+		exit(exitStatus)
 	}
 }
