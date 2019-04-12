@@ -73,7 +73,7 @@ class AppifyCommand: Command {
 		try run(bash: "cp -rf \(tmpServicePath) \(servicePath)")
 		try run(bash: "/System/Library/CoreServices/pbs -flush")
 
-		Logger.step("Setting up shortcut ⌃⌥⌘B (CMD+ALT+CTRL+B")
+		Logger.step("Setting up shortcut ⌃⌥⌘B (CMD+ALT+CTRL+B)")
 		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
 		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
 		try run(bash: "defaults read pbs > /dev/null")
