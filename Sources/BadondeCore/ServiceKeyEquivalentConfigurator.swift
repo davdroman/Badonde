@@ -13,7 +13,7 @@ struct Service {
 extension Service {
 	final class KeyEquivalentConfigurator {
 		enum Constant {
-			static let pbsPlistPathComponent = "Library/Preferences/pbs.plist"
+			static let pbsPlistPath = FileManager().homeDirectoryForCurrentUser.appendingPathComponent("Library/Preferences/pbs.plist")
 			static let serviceStatusKey = "NSServicesStatus"
 			static let keyEquivalentKey = "key_equivalent"
 		}
@@ -22,7 +22,7 @@ extension Service {
 
 		init() throws {
 			let configuration = try? PropertyListSerialization.propertyList(
-				from: Data(contentsOf: URL.homeDirectory().appendingPathComponent(Constant.pbsPlistPathComponent)),
+				from: Data(contentsOf: Constant.pbsPlistPath),
 				options: .mutableContainersAndLeaves,
 				format: nil
 			)
@@ -41,8 +41,7 @@ extension Service {
 			services[service.key] = [Constant.keyEquivalentKey: keyEquivalent]
 			configuration[Constant.serviceStatusKey] = services
 
-			let pbsPlistURL = try URL.homeDirectory().appendingPathComponent(Constant.pbsPlistPathComponent)
-			try configurationData().write(to: pbsPlistURL)
+			try configurationData().write(to: Constant.pbsPlistPath)
 		}
 
 		private func configurationData() throws -> Data {
