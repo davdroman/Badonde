@@ -4,9 +4,9 @@ import SwiftCLI
 final class Git {
 	typealias BranchAndCommits = (branch: String, commits: Int)
 
-	class func numberOfCommits(fromBranch: String, toBranches: [String], after date: Date = .init(timeIntervalSince1970: 0)) -> [BranchAndCommits] {
-		let unixDate = Int(date.timeIntervalSince1970)
-		let commands = toBranches.map { "git rev-list --count --after=\"\(unixDate)\" \($0)..\(fromBranch)" }.joined(separator: ";")
+	class func numberOfCommits(fromBranch: String, toBranches: [String], after date: Date? = nil) -> [BranchAndCommits] {
+		let afterParameter = (date?.timeIntervalSince1970).map({ " --after=\"\($0)\"" }) ?? ""
+		let commands = toBranches.map { "git rev-list --count\(afterParameter) \($0)..\(fromBranch)" }.joined(separator: ";")
 
 		guard let commitCount = try? capture(bash: commands).stdout else {
 			return []
@@ -21,6 +21,17 @@ final class Git {
 				}
 				return (branch: toBranches[$0.offset], commits: element)
 			}
+	}
+
+	class func isBranchAheadOfRemote(branch: String) -> Bool {
+		guard let commits = numberOfCommits(fromBranch: branch, toBranches: ["origin/\(branch)"]).first?.commits else {
+			return false
+		}
+		return commits > 0
+	}
+
+	class func pushBranch(branch: String) {
+		_ = try? capture(bash: "git push origin \(branch)")
 	}
 
 	class func latestCommitDate(for branch: String) -> Date? {
