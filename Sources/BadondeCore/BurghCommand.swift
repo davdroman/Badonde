@@ -23,6 +23,8 @@ class BurghCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
+		let startDate = Date()
+
 		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
 			throw Error.noGitRepositoryFound
 		}
@@ -183,7 +185,7 @@ class BurghCommand: Command {
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
 		{
 			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			try reporter.report(pullRequest.analyticsData)
+			try reporter.report(pullRequest.analyticsData(startDate: startDate))
 		}
 		#endif
 
