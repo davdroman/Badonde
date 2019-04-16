@@ -4,9 +4,9 @@ import SwiftCLI
 final class Git {
 	typealias BranchAndCommits = (branch: String, commits: Int)
 
-	class func numberOfCommits(fromBranch: String, toBranches: [String], after date: Date = .init(timeIntervalSince1970: 0)) -> [BranchAndCommits] {
-		let unixDate = Int(date.timeIntervalSince1970)
-		let commands = toBranches.map { "git rev-list --count --after=\"\(unixDate)\" \($0)..\(fromBranch)" }.joined(separator: ";")
+	class func numberOfCommits(fromBranch: String, toBranches: [String], after date: Date? = nil) -> [BranchAndCommits] {
+		let afterParameter = (date?.timeIntervalSince1970).map({ " --after=\"\($0)\"" }) ?? ""
+		let commands = toBranches.map { "git rev-list --count\(afterParameter) \($0)..\(fromBranch)" }.joined(separator: ";")
 
 		guard let commitCount = try? capture(bash: commands).stdout else {
 			return []
@@ -23,6 +23,17 @@ final class Git {
 			}
 	}
 
+	class func isBranchAheadOfRemote(branch: String) -> Bool {
+		guard let commits = numberOfCommits(fromBranch: branch, toBranches: ["origin/\(branch)"]).first?.commits else {
+			return false
+		}
+		return commits > 0
+	}
+
+	class func pushBranch(branch: String) {
+		_ = try? capture(bash: "git push origin \(branch)")
+	}
+
 	class func latestCommitDate(for branch: String) -> Date? {
 		guard
 			let rawLatestCommitDateUnix = try? capture(bash: "git log -1 --pretty=format:%ct \(branch)").stdout,
@@ -34,11 +45,14 @@ final class Git {
 	}
 
 	class func closestBranch(to targetBranch: String, priorityBranch: String? = nil) -> String? {
-		guard let rawBranches = try? capture(bash: "git branch | cut -c 3-").stdout else {
+		guard let rawBranches = try? capture(bash: "git branch -r | cut -c 3- | cut -d ' ' -f1").stdout else {
 			return nil
 		}
 
-		let branches = rawBranches.split(separator: "\n").map({ String($0) })
+		let branches = rawBranches
+			.split(separator: "\n")
+			.filter { $0 != "origin/HEAD" }
+			.map { String($0) }
 
 		let commitsAndBranches = numberOfCommits(
 			fromBranch: targetBranch,
@@ -48,6 +62,7 @@ final class Git {
 
 		let sortedBranchesWithSameCommits = commitsAndBranches
 			.filter { $0.commits > 0 }
+			.map { (branch: $0.branch.replacingOccurrences(of: "origin/", with: ""), commits: $0.commits) }
 			.sorted { $0.commits < $1.commits }
 			.reduce([BranchAndCommits]()) { (result, branchAndCommits) -> [BranchAndCommits] in
 				guard let lastBranchAndCommits = result.last, lastBranchAndCommits.commits != branchAndCommits.commits else {

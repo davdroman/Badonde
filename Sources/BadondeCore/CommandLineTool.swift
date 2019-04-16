@@ -5,7 +5,7 @@ public final class CommandLineTool {
 
 	enum Constant {
 		static let name = "badonde"
-		static let version = "1.6.1"
+		static let version = "1.8.0"
 		static let description = "Painless PR-ing"
 	}
 
@@ -23,10 +23,12 @@ public final class CommandLineTool {
 				SetFirebaseAuthCommand()
 			]
 		)
+		let exitStatus: Int32
 		if let arguments = arguments {
-			_ = cli.go(with: arguments)
+			exitStatus = cli.go(with: arguments)
 		} else {
-			_ = cli.go()
+			exitStatus = cli.go()
 		}
+		exit(exitStatus)
 	}
 }
