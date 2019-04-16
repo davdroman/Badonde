@@ -20,6 +20,10 @@ public final class Logger {
 		spinner = nil
 	}
 
+	public class func succeed() {
+		spinner?.succeed()
+	}
+
 	public class func finish() {
 		spinner?.succeed()
 		spinner = nil
