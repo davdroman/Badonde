@@ -23,11 +23,16 @@ class BurghCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		Logger.step("Deriving ticket id from current branch")
 		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
 			throw Error.noGitRepositoryFound
 		}
 
+		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
+			Logger.step("Local branch is ahead of remote, pushing changes now")
+			Git.pushBranch(branch: currentBranchName)
+		}
+
+		Logger.step("Deriving ticket id from current branch")
 		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
 		}
