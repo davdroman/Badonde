@@ -10,6 +10,12 @@ extension URL {
 
 class BurghCommand: Command {
 
+	#if !DEBUG
+	enum Constant {
+		static let urlOpeningDelay: TimeInterval = 1.5
+	}
+	#endif
+
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
@@ -17,11 +23,16 @@ class BurghCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		Logger.step("Deriving ticket id from current branch")
 		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
 			throw Error.noGitRepositoryFound
 		}
 
+		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
+			Logger.step("Local branch is ahead of remote, pushing changes now")
+			Git.pushBranch(branch: currentBranchName)
+		}
+
+		Logger.step("Deriving ticket id from current branch")
 		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
 		}
@@ -31,7 +42,7 @@ class BurghCommand: Command {
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
-		guard let repoShorthand = Git.getRepositoryShorthand() else {
+		guard let repoShorthand = Git.getRepositoryShorthand().flatMap(Repository.Shorthand.init(rawValue:)) else {
 			throw Error.missingGitRemote
 		}
 
@@ -121,6 +132,17 @@ class BurghCommand: Command {
 			pullRequestLabels.append(unitTestsLabel)
 		}
 
+		// Append feature toggle label
+		let shouldAttachFeatureToggleLabel = Git.diffIncludesFile(
+			baseBranch: pullRequestBaseBranch,
+			targetBranch: pullRequestTargetBranch,
+			withContent: "enum Feature:"
+		)
+		if shouldAttachFeatureToggleLabel, let featureToggleLabel = labels.fuzzyMatch(word: "feature toggle") {
+			Logger.step("Setting feature toggle label")
+			pullRequestLabels.append(featureToggleLabel)
+		}
+
 		// Append ticket's epic label if similar name is found in repo labels
 		if let epic = ticket.fields.epicSummary {
 			if let epicLabel = labels.fuzzyMatch(word: epic) {
@@ -183,7 +205,7 @@ class BurghCommand: Command {
 				}
 			)
 			#if !DEBUG
-			openURL(.jiraApiTokenUrl, delay: 2)
+			openURL(.jiraApiTokenUrl, delay: Constant.urlOpeningDelay)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)':",
@@ -193,7 +215,7 @@ class BurghCommand: Command {
 				}
 			)
 			#if !DEBUG
-			openURL(.githubApiTokenUrl, delay: 2)
+			openURL(.githubApiTokenUrl, delay: Constant.urlOpeningDelay)
 			#endif
 			let githubAccessTokenInput = Input.readLine(
 				prompt: "Enter GitHub API token (generated at '\(URL.githubApiTokenUrl)':",
