@@ -97,9 +97,11 @@ final class Git {
 		}
 		return repositoryURL
 			.drop(while: { $0 != ":" })
-			.prefix(while: { $0 != "." })
 			.replacingOccurrences(of: ":", with: "")
-			.replacingOccurrences(of: ".", with: "")
+			.dropLast(4)
+			.split(separator: "/")
+			.suffix(2)
+			.joined(separator: "/")
 	}
 
 	class func diffIncludesFilename(baseBranch: String, targetBranch: String, containing word: String) -> Bool {
