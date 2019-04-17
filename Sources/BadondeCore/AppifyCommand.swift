@@ -57,6 +57,7 @@ class AppifyCommand: Command {
 		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
 		Logger.step("Adding app to Script Menu")
+		try run(bash: "mkdir -p ~/Library/Scripts")
 		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
 		do {
 			try run(bash: "open '/System/Library/CoreServices/Script Menu.app' &> /dev/null")
