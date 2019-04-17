@@ -29,11 +29,6 @@ class BurghCommand: Command {
 			throw Error.noGitRepositoryFound
 		}
 
-		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
-			Logger.step("Local branch is ahead of remote, pushing changes now")
-			Git.pushBranch(branch: currentBranchName)
-		}
-
 		Logger.step("Deriving ticket id from current branch")
 		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
 			throw Error.invalidBranchFormat(currentBranchName)
@@ -41,6 +36,11 @@ class BurghCommand: Command {
 
 		guard ticketKey.rawValue != "NO-TICKET" else {
 			throw Error.noTicketKey
+		}
+
+		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
+			Logger.step("Local branch is ahead of remote, pushing changes now")
+			Git.pushBranch(branch: currentBranchName)
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
