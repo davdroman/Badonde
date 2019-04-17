@@ -5,7 +5,7 @@ public final class CommandLineTool {
 
 	enum Constant {
 		static let name = "badonde"
-		static let version = "1.8.3"
+		static let version = "1.8.4"
 		static let description = "Painless PR-ing"
 	}
 
