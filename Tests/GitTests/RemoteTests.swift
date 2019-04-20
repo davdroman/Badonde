@@ -5,6 +5,7 @@ import TestSugar
 final class RemoteInteractorMock: RemoteInteractor {
 	enum Fixture: String, FixtureLoadable {
 		var sourceFilePath: String { return #file }
+		var fixtureFileExtension: String { return "txt" }
 
 		case allRemotes = "all_remotes"
 		case originRemote = "origin_url"
