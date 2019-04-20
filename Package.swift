@@ -49,7 +49,7 @@ let package = Package(
 		),
 		.target(
 			name: "Git",
-			dependencies: []
+			dependencies: ["SwiftCLI"]
 		),
 		.target(
 			name: "GitHub",
