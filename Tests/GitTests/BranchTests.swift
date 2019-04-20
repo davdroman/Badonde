@@ -19,6 +19,11 @@ final class BranchTests: XCTestCase {
 		XCTAssertEqual(branchB.name, "remotes/origin/my-branch")
 		XCTAssertEqual(branchB.source, .local)
 		XCTAssertEqual(branchB.fullName, "remotes/origin/my-branch")
+
+		let branchC = Branch(name: "refs/remotes/origin/my-branch", source: .local)
+		XCTAssertEqual(branchC.name, "refs/remotes/origin/my-branch")
+		XCTAssertEqual(branchC.source, .local)
+		XCTAssertEqual(branchC.fullName, "refs/remotes/origin/my-branch")
 	}
 
 	func testBranchInit_withRemoteSource_normalName() {
@@ -38,6 +43,11 @@ final class BranchTests: XCTestCase {
 		XCTAssertEqual(branchB.name, "my-branch")
 		XCTAssertEqual(branchB.source, Constant.remoteSource)
 		XCTAssertEqual(branchB.fullName, "origin/my-branch")
+
+		let branchC = Branch(name: "refs/remotes/origin/my-branch", source: Constant.remoteSource)
+		XCTAssertEqual(branchC.name, "my-branch")
+		XCTAssertEqual(branchC.source, Constant.remoteSource)
+		XCTAssertEqual(branchC.fullName, "origin/my-branch")
 	}
 }
 
