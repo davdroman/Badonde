@@ -57,19 +57,21 @@ let package = Package(
 		),
 		.testTarget(
 			name: "GitTests",
-			dependencies: ["Git"]
+			dependencies: ["Git", "TestSugar"]
 		),
 		.testTarget(
 			name: "GitHubTests",
 			dependencies: ["GitHub"]
 		),
 		.target(
+			name: "TestSugar"
+		),
+		.target(
 			name: "Jira",
 			dependencies: ["Sugar"]
 		),
 		.target(
-			name: "Sugar",
-			dependencies: []
+			name: "Sugar"
 		)
 	]
 )
