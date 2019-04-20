@@ -22,6 +22,14 @@ final class RemoteInteractorMock: RemoteInteractor {
 }
 
 final class RemoteTests: XCTestCase {
+	func testInit() {
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		XCTAssertEqual(remote.name, "origin")
+		XCTAssertEqual(remote.url.absoluteString, "git@github.com:user/repo.git")
+	}
+}
+
+extension RemoteTests {
 	func testRemoteGetAll() throws {
 		let interactor = RemoteInteractorMock()
 		let allRemotes = try Remote.getAll(interactor: interactor)
