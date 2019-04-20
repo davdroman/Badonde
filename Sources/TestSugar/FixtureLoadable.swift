@@ -48,7 +48,19 @@ extension Array {
 
 public protocol FixtureLoadable {
 	var sourceFilePath: String { get }
+	var fixtureFolderSuffix: String { get }
+	var fixtureFileExtension: String { get }
 	func load<T: URLContentInitializable>(as type: T.Type) throws -> T
+}
+
+extension FixtureLoadable {
+	public var fixtureFolderSuffix: String {
+		return "Fixtures"
+	}
+
+	public var fixtureFileExtension: String {
+		return "json"
+	}
 }
 
 public extension FixtureLoadable where Self: RawRepresentable, Self.RawValue == String {
@@ -57,7 +69,7 @@ public extension FixtureLoadable where Self: RawRepresentable, Self.RawValue == 
 		let fileNameWithoutExtension = sourceFileURL.lastPathComponent.prefix(while: { $0 != "." })
 		return URL(fileURLWithPath: sourceFilePath)
 			.deletingLastPathComponent()
-			.appendingPathComponent("\(fileNameWithoutExtension)Fixtures/\(rawValue).txt")
+			.appendingPathComponent("\(fileNameWithoutExtension)\(fixtureFolderSuffix)/\(rawValue).\(fixtureFileExtension)")
 	}
 
 	func load<T: URLContentInitializable>(as type: T.Type) throws -> T {
