@@ -1,0 +1,5 @@
+origin/HEAD -> origin/develop
+origin/develop
+origin/master
+origin/standalone-git-module
+origin/swift-5
