@@ -36,8 +36,10 @@ extension RemoteTests {
 
 		let remoteA = allRemotes.first
 		let remoteB = allRemotes.dropFirst().first
+
 		XCTAssertEqual(remoteA?.name, "origin")
 		XCTAssertEqual(remoteA?.url.absoluteString, "https://github.com/user/repo.git")
+
 		XCTAssertEqual(remoteB?.name, "ssh_origin")
 		XCTAssertEqual(remoteB?.url.absoluteString, "git@github.com:user/repo.git")
 	}
