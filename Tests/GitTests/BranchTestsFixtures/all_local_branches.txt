@@ -1,0 +1,4 @@
+develop
+master
+standalone-git-module
+swift-5

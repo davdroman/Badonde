@@ -1,5 +1,9 @@
 import Foundation
 
+public protocol BranchInteractor {
+	func getAllBranches(from source: Branch.Source) throws -> String
+}
+
 public struct Branch: Equatable {
 	public enum Source: Equatable {
 		case local
@@ -23,7 +27,11 @@ public struct Branch: Equatable {
 		return prefix + name
 	}
 
-	public init(name: String, source: Source) {
+	public init(name: String, source: Source) throws {
+		guard name.rangeOfCharacter(from: .whitespaces) == nil else {
+			throw Error.nameContainsInvalidCharacters
+		}
+
 		switch source {
 		case .local:
 			self.name = name
@@ -36,5 +44,16 @@ public struct Branch: Equatable {
 		}
 
 		self.source = source
+	}
+}
+
+extension Branch {
+	public static func getAll(from source: Branch.Source, interactor: BranchInteractor? = nil) throws -> [Branch] {
+		let interactor = interactor ?? SwiftCLI()
+
+		return try interactor.getAllBranches(from: source)
+			.split(separator: "\n")
+			.map { String($0) }
+			.compactMap { try? Branch(name: $0, source: source) }
 	}
 }
