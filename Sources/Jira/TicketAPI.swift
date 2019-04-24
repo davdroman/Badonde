@@ -40,21 +40,14 @@ extension Ticket {
 			request.setValue("Basic \(authorizationValue)", forHTTPHeaderField: "Authorization")
 			request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-			let response = session.synchronousDataTask(with: request)
+			let resultValue = try session.synchronousDataTask(with: request).get()
+			let statusCode = (resultValue.response as? HTTPURLResponse)?.statusCode ?? 200
 
-			if let error = response.error {
-				throw error
+			guard !(400...599).contains(statusCode) else {
+				throw Error.http(statusCode)
 			}
 
-			guard let httpResponse = response.response as? HTTPURLResponse, let jsonData = response.data else {
-				fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
-			}
-
-			guard !(400...599).contains(httpResponse.statusCode) else {
-				throw Error.http(httpResponse.statusCode)
-			}
-
-			var ticket = try JSONDecoder().decode(Ticket.self, from: jsonData)
+			var ticket = try JSONDecoder().decode(Ticket.self, from: resultValue.data)
 
 			if let epicKey = ticket.fields.epicKey {
 				let epic = try getTicket(with: epicKey, expanded: false)
