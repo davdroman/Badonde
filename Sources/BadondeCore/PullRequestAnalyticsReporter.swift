@@ -3,11 +3,13 @@ import GitHub
 import Sugar
 
 extension PullRequest {
-	var analyticsData: AnalyticsReporter.Data {
+	func analyticsData(startDate: Date) -> AnalyticsReporter.Data {
 		return AnalyticsReporter.Data(
 			isDependent: baseBranch.isTicketBranch,
 			labelCount: labels.count,
-			hasMilestone: milestone != nil
+			hasMilestone: milestone != nil,
+			elapsedTime: Date().timeIntervalSince(startDate),
+			timestamp: startDate
 		)
 	}
 }
@@ -18,6 +20,8 @@ extension PullRequest {
 			var isDependent: Bool
 			var labelCount: Int
 			var hasMilestone: Bool
+			var elapsedTime: TimeInterval
+			var timestamp: Date
 		}
 
 		private let firebaseProjectId: String
@@ -39,7 +43,9 @@ extension PullRequest {
 			let session = URLSession(configuration: .default)
 			var request = URLRequest(url: url)
 			request.httpMethod = "POST"
-			request.httpBody = try JSONEncoder().encode(analyticsData)
+			let encoder = JSONEncoder()
+			encoder.dateEncodingStrategy = .secondsSince1970
+			request.httpBody = try encoder.encode(analyticsData)
 
 			let resultValue = try session.synchronousDataTask(with: request).get()
 			let statusCode = (resultValue.response as? HTTPURLResponse)?.statusCode ?? 200
