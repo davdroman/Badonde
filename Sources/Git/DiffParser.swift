@@ -28,15 +28,15 @@ extension Diff {
 			var hunks: [Hunk] = []
 			var currentHunk: Hunk?
 
-			rawDiffContent.enumerateLines { line, _ in
+			for line in rawDiffContent.components(separatedBy: "\n") {
 				// Skip headers
 				guard !line.starts(with: "+++ ") else {
 					addedFile = String(line.dropFirst(4))
-					return
+					continue
 				}
 				guard !line.starts(with: "--- ") else {
 					removedFile = String(line.dropFirst(4))
-					return
+					continue
 				}
 
 				if let match = self.regex.firstMatch(in: line, options: [], range: NSMakeRange(0, line.utf16.count)) {
@@ -64,7 +64,7 @@ extension Diff {
 						let text = match.group(6, in: line)
 					{
 						guard var hunk = currentHunk else {
-							fatalError("Found a git diff line without a hunk header")
+							throw Error.hunkHeaderMissing
 						}
 
 						let lineType: Diff.Hunk.Line.Kind
@@ -76,6 +76,7 @@ extension Diff {
 						case " ":
 							lineType = .unchanged
 						default:
+							// Will never happen if the regex remains unchanged
 							fatalError("Unexpected group 2 character: \(delta)")
 						}
 
@@ -91,7 +92,7 @@ extension Diff {
 			}
 
 			guard let added = addedFile, let removed = removedFile else {
-				fatalError("Couldn't find +++ &/or --- files")
+				throw Error.filePathsNotFound
 			}
 
 			return (addedFile: added, removedFile: removed, hunks: hunks)

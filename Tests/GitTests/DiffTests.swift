@@ -12,6 +12,9 @@ final class DiffTests: XCTestCase {
 		case renamedFileMode = "renamed_file_mode"
 		case deletedFileMode = "deleted_file_mode"
 		case multiFileChange = "multi_file_change"
+
+		case hunkHeaderMissing = "hunk_header_missing"
+		case addedFileMissing = "added_file_missing"
 	}
 
 	func testInit_noNewline() throws {
@@ -195,6 +198,32 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(hunkC4?.lines.additions.count, 2)
 		XCTAssertEqual(hunkC4?.lines.deletions.count, 2)
 		XCTAssertEqual(hunkC4?.lines.unchanged.count, 6)
+	}
+
+	func testInit_hunkHeaderMissing() throws {
+		let diffFileContent = try Fixture.hunkHeaderMissing.load(as: String.self)
+
+		XCTAssertThrowsError(try [Diff](rawDiffContent: diffFileContent)) { error in
+			switch error {
+			case Diff.Error.hunkHeaderMissing:
+				break
+			default:
+				XCTFail("Diff initializer threw the wrong error")
+			}
+		}
+	}
+
+	func testInit_addedFileMissing() throws {
+		let diffFileContent = try Fixture.addedFileMissing.load(as: String.self)
+
+		XCTAssertThrowsError(try [Diff](rawDiffContent: diffFileContent)) { error in
+			switch error {
+			case Diff.Error.filePathsNotFound:
+				break
+			default:
+				XCTFail("Diff initializer threw the wrong error")
+			}
+		}
 	}
 }
 
