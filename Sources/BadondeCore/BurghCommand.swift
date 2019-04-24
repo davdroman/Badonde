@@ -23,13 +23,10 @@ class BurghCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
+		let startDate = Date()
+
 		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
 			throw Error.noGitRepositoryFound
-		}
-
-		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
-			Logger.step("Local branch is ahead of remote, pushing changes now")
-			Git.pushBranch(branch: currentBranchName)
 		}
 
 		Logger.step("Deriving ticket id from current branch")
@@ -39,6 +36,11 @@ class BurghCommand: Command {
 
 		guard ticketKey.rawValue != "NO-TICKET" else {
 			throw Error.noTicketKey
+		}
+
+		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
+			Logger.step("Local branch is ahead of remote, pushing changes now")
+			Git.pushBranch(branch: currentBranchName)
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
@@ -183,7 +185,7 @@ class BurghCommand: Command {
 			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
 		{
 			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			try reporter.report(pullRequest.analyticsData)
+			try reporter.report(pullRequest.analyticsData(startDate: startDate))
 		}
 		#endif
 
