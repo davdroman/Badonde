@@ -80,7 +80,7 @@ final class DiffTests: XCTestCase {
 
 		XCTAssertEqual(hunk?.lines.additions.count, 10)
 		XCTAssertEqual(hunk?.lines.deletions.count, 16)
-		XCTAssertEqual(hunk?.lines.unchanged.count, 2)
+		XCTAssertEqual(hunk?.lines.unchanged.count, 9)
 	}
 
 	func testInit_deletedFileMode() throws {
