@@ -47,18 +47,11 @@ extension PullRequest {
 			encoder.dateEncodingStrategy = .secondsSince1970
 			request.httpBody = try encoder.encode(analyticsData)
 
-			let response = session.synchronousDataTask(with: request)
+			let resultValue = try session.synchronousDataTask(with: request).get()
+			let statusCode = (resultValue.response as? HTTPURLResponse)?.statusCode ?? 200
 
-			if let error = response.error {
-				throw error
-			}
-
-			guard let httpResponse = response.response as? HTTPURLResponse else {
-				fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
-			}
-
-			if 400...599 ~= httpResponse.statusCode {
-				throw Error.http(httpResponse.statusCode)
+			if 400...599 ~= statusCode {
+				throw Error.http(statusCode)
 			}
 		}
 	}
