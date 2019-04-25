@@ -48,7 +48,9 @@ extension RemoteTests {
 		XCTAssertEqual(remoteB?.name, "ssh_origin")
 		XCTAssertEqual(remoteB?.url.absoluteString, "git@github.com:user/repo.git")
 	}
+}
 
+extension RemoteTests {
 	func testRemoteDefaultBranch() throws {
 		let interactor = RemoteInteractorMock()
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
