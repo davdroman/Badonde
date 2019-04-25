@@ -1,5 +1,9 @@
 import Foundation
 
+public protocol DiffInteractor {
+	func diff(baseBranch: String, targetBranch: String) throws -> String
+}
+
 public struct Diff: Equatable, CustomStringConvertible {
 	public var addedFile: String
 	public var removedFile: String
@@ -91,5 +95,29 @@ extension Array where Element == Diff {
 			.components(separatedBy: "diff --git ")
 			.filter { !$0.isEmpty }
 			.map { try Diff(rawDiffContent: $0) }
+	}
+}
+
+extension Diff {
+	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
+		let interactor = interactor ?? SwiftCLI()
+
+		let rawDiffContent = try interactor.diff(
+			baseBranch: baseBranch.fullName,
+			targetBranch: targetBranch.fullName
+		)
+		self = try Diff(rawDiffContent: rawDiffContent)
+	}
+}
+
+extension Array where Element == Diff {
+	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
+		let interactor = interactor ?? SwiftCLI()
+
+		let rawDiffContent = try interactor.diff(
+			baseBranch: baseBranch.fullName,
+			targetBranch: targetBranch.fullName
+		)
+		self = try [Diff](rawDiffContent: rawDiffContent)
 	}
 }

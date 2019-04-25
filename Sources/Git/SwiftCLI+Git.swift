@@ -27,3 +27,9 @@ extension SwiftCLI: BranchInteractor {
 		}
 	}
 }
+
+extension SwiftCLI: DiffInteractor {
+	func diff(baseBranch: String, targetBranch: String) throws -> String {
+		return try capture(bash: "git diff \(baseBranch)...\(targetBranch)").stdout
+	}
+}
