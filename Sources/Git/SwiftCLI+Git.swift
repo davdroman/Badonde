@@ -11,6 +11,10 @@ extension SwiftCLI: RemoteInteractor {
 	func getURL(forRemote remote: String) throws -> String {
 		return try capture(bash: "git remote get-url \(remote)").stdout
 	}
+
+	func defaultBranch(forRemote remote: String) throws -> String {
+		return try capture(bash: "git symbolic-ref refs/remotes/\(remote)/HEAD | sed 's@^refs/remotes/\(remote)/@@'").stdout
+	}
 }
 
 extension SwiftCLI: BranchInteractor {

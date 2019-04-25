@@ -8,8 +8,9 @@ final class RemoteInteractorMock: RemoteInteractor {
 		var fixtureFileExtension: String { return "txt" }
 
 		case allRemotes = "all_remotes"
-		case originRemote = "origin_url"
-		case sshOriginRemote = "ssh_origin_url"
+		case originRemoteURL = "origin_url"
+		case sshOriginRemoteURL = "ssh_origin_url"
+		case originDefaultBranch = "origin_default_branch"
 	}
 
 	func getAllRemotes() throws -> String {
@@ -18,6 +19,10 @@ final class RemoteInteractorMock: RemoteInteractor {
 
 	func getURL(forRemote remote: String) throws -> String {
 		return try Fixture(rawValue: remote + "_url")!.load(as: String.self)
+	}
+
+	func defaultBranch(forRemote remote: String) throws -> String {
+		return try Fixture.originDefaultBranch.load(as: String.self)
 	}
 }
 
@@ -42,5 +47,14 @@ extension RemoteTests {
 
 		XCTAssertEqual(remoteB?.name, "ssh_origin")
 		XCTAssertEqual(remoteB?.url.absoluteString, "git@github.com:user/repo.git")
+	}
+
+	func testRemoteDefaultBranch() throws {
+		let interactor = RemoteInteractorMock()
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let defaultBranch = try remote.defaultBranch(interactor: interactor)
+		let expectedDefaultBranch = try Branch(name: "develop", source: .remote(remote))
+
+		XCTAssertEqual(defaultBranch, expectedDefaultBranch)
 	}
 }
