@@ -7,11 +7,18 @@ final class CommitInteractorMock: CommitInteractor {
 		var sourceFilePath: String { return #file }
 		var fixtureFileExtension: String { return "txt" }
 
+		case commitCountZero = "commit_count_zero"
 		case commitCountSingle = "commit_count_single"
 		case commitCountMultiple = "commit_count_multiple"
 	}
 
+	var returnCommitCountZero = false
+
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String {
+		guard !returnCommitCountZero else {
+			return try Fixture.commitCountZero.load(as: String.self)
+		}
+
 		switch baseBranches.count {
 		case 0:
 			return ""
