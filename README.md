@@ -31,5 +31,5 @@ mint install davdroman/Badonde
 ```sh
 git clone --single-branch --branch master https://github.com/davdroman/Badonde.git
 cd Badonde
-make
+make install
 ```
