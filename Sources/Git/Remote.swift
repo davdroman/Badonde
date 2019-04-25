@@ -20,8 +20,7 @@ extension Remote {
 		let interactor = interactor ?? SwiftCLI()
 
 		return try interactor.getAllRemotes()
-			.split(separator: "\n")
-			.map { String($0) }
+			.components(separatedBy: "\n")
 			.compactMap { remoteName in
 				guard let remoteURL = try? URL(string: interactor.getURL(forRemote: remoteName)) else {
 					return nil

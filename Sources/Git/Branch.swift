@@ -52,8 +52,7 @@ extension Branch {
 		let interactor = interactor ?? SwiftCLI()
 
 		return try interactor.getAllBranches(from: source)
-			.split(separator: "\n")
-			.map { String($0) }
+			.components(separatedBy: "\n")
 			.compactMap { try? Branch(name: $0, source: source) }
 	}
 }
