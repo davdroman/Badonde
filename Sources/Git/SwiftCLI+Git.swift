@@ -33,3 +33,9 @@ extension SwiftCLI: DiffInteractor {
 		return try capture(bash: "git diff \(baseBranch)...\(targetBranch)").stdout
 	}
 }
+
+extension SwiftCLI: PushInteractor {
+	func perform(remote: String, branch: String) throws {
+		return try run(bash: "git push \(remote) \(branch)")
+	}
+}
