@@ -184,3 +184,24 @@ extension BranchTests {
 		XCTAssertEqual(latestCommit.body, "")
 	}
 }
+
+extension BranchTests {
+	func testBranchIsAheadOfRemote() throws {
+		let interactor = CommitInteractorMock()
+		let branch = try Branch(name: "develop", source: .local)
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+
+		XCTAssertTrue(isAhead)
+	}
+
+	func testBranchIsNotAheadOfRemote() throws {
+		let interactor = CommitInteractorMock()
+		interactor.returnCommitCountZero = true
+		let branch = try Branch(name: "develop", source: .local)
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+
+		XCTAssertFalse(isAhead)
+	}
+}

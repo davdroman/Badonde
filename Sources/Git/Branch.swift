@@ -62,4 +62,13 @@ extension Branch {
 
 		return try Commit(rawCommitContent: interactor.latestCommit(for: self))
 	}
+
+	public func isAhead(of remote: Remote, interactor: CommitInteractor? = nil) throws -> Bool {
+		let interactor = interactor ?? SwiftCLI()
+
+		var remoteBranch = self
+		remoteBranch.source = .remote(remote)
+
+		return try Commit.count(baseBranch: remoteBranch, targetBranch: self, interactor: interactor) > 0
+	}
 }
