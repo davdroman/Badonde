@@ -15,36 +15,36 @@ extension ProcessError {
 
 extension GitHub.API.Error: ProcessError {
 	public var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension Jira.Ticket.API.Error: ProcessError {
 	public var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension URL.Error: ProcessError {
 	public var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension AppifyCommand.Error: ProcessError {
 	var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension BurghCommand.Error: ProcessError {
 	var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
 
 extension PullRequest.AnalyticsReporter.Error: ProcessError {
 	var message: String? {
-		return localizedDescription.split(separator: "\n").map { "☛ " + $0 }.joined(separator: "\n")
+		return localizedDescription.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
