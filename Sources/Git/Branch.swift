@@ -2,6 +2,7 @@ import Foundation
 
 public protocol BranchInteractor {
 	func getAllBranches(from source: Branch.Source) throws -> String
+	func latestCommit(for branch: Branch) throws -> String
 }
 
 public struct Branch: Equatable {
@@ -54,5 +55,11 @@ extension Branch {
 		return try interactor.getAllBranches(from: source)
 			.components(separatedBy: "\n")
 			.compactMap { try? Branch(name: $0, source: source) }
+	}
+
+	public func latestCommit(interactor: BranchInteractor? = nil) throws -> Commit {
+		let interactor = interactor ?? SwiftCLI()
+
+		return try Commit(rawCommitContent: interactor.latestCommit(for: self))
 	}
 }

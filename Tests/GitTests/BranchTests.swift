@@ -10,6 +10,8 @@ final class BranchInteractorMock: BranchInteractor {
 		case allLocalBranches = "all_local_branches"
 		case allOriginRemoteBranches = "all_origin_remote_branches"
 		case allSshOriginRemoteBranches = "all_ssh_origin_remote_branches"
+
+		case latestCommitForDevelopBranch = "latest_commit_develop_branch"
 	}
 
 	func getAllBranches(from source: Branch.Source) throws -> String {
@@ -19,6 +21,10 @@ final class BranchInteractorMock: BranchInteractor {
 		case .remote(let remote):
 			return try Fixture(rawValue: "all_\(remote.name)_remote_branches")!.load(as: String.self)
 		}
+	}
+
+	func latestCommit(for branch: Branch) throws -> String {
+		return try Fixture(rawValue: "latest_commit_\(branch.name)_branch")!.load(as: String.self)
 	}
 }
 
@@ -161,5 +167,20 @@ extension BranchTests {
 
 		XCTAssertEqual(branchD?.name, "swift-5")
 		XCTAssertEqual(branchD?.source, Constant.sshOriginRemoteSource)
+	}
+}
+
+extension BranchTests {
+	func testBranchLatestCommit() throws {
+		let interactor = BranchInteractorMock()
+		let branch = try Branch(name: "develop", source: .local)
+		let latestCommit = try branch.latestCommit(interactor: interactor)
+
+		XCTAssertEqual(latestCommit.hash, "4dbb765e835823d2d8842f8e9a1f62eb5999ccab")
+		XCTAssertEqual(latestCommit.author.name, "davdroman")
+		XCTAssertEqual(latestCommit.author.email, "d@vidroman.me")
+		XCTAssertEqual(latestCommit.date.timeIntervalSince1970, 1556186505)
+		XCTAssertEqual(latestCommit.subject, "Fix `make` installation command in README")
+		XCTAssertEqual(latestCommit.body, "")
 	}
 }
