@@ -3,6 +3,7 @@ import Foundation
 public protocol RemoteInteractor {
 	func getAllRemotes() throws -> String
 	func getURL(forRemote remote: String) throws -> String
+	func defaultBranch(forRemote remote: String) throws -> String
 }
 
 public struct Remote: Equatable {
@@ -27,5 +28,14 @@ extension Remote {
 				}
 				return Remote(name: remoteName, url: remoteURL)
 			}
+	}
+
+	public func defaultBranch(interactor: RemoteInteractor? = nil) throws -> Branch {
+		let interactor = interactor ?? SwiftCLI()
+
+		return try Branch(
+			name: interactor.defaultBranch(forRemote: name),
+			source: .remote(self)
+		)
 	}
 }
