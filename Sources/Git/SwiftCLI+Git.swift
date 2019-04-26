@@ -18,6 +18,10 @@ extension SwiftCLI: RemoteInteractor {
 }
 
 extension SwiftCLI: BranchInteractor {
+	func getCurrentBranch() throws -> String {
+		return try capture(bash: "git rev-parse --abbrev-ref HEAD").stdout
+	}
+
 	func getAllBranches(from source: Branch.Source) throws -> String {
 		switch source {
 		case .local:

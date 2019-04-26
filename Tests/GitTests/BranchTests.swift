@@ -7,11 +7,17 @@ final class BranchInteractorMock: BranchInteractor {
 		var sourceFilePath: String { return #file }
 		var fixtureFileExtension: String { return "txt" }
 
+		case currentBranch = "current_branch"
+
 		case allLocalBranches = "all_local_branches"
 		case allOriginRemoteBranches = "all_origin_remote_branches"
 		case allSshOriginRemoteBranches = "all_ssh_origin_remote_branches"
 
 		case latestCommitForDevelopBranch = "latest_commit_develop_branch"
+	}
+
+	func getCurrentBranch() throws -> String {
+		return try Fixture.currentBranch.load(as: String.self)
 	}
 
 	func getAllBranches(from source: Branch.Source) throws -> String {
@@ -93,6 +99,15 @@ final class BranchTests: XCTestCase {
 		XCTAssertEqual(branchC.name, "my-branch")
 		XCTAssertEqual(branchC.source, Constant.originRemoteSource)
 		XCTAssertEqual(branchC.fullName, "origin/my-branch")
+	}
+}
+
+extension BranchTests {
+	func testBranchGetCurrent() throws {
+		let interactor = BranchInteractorMock()
+		let currentBranch = try Branch.current(interactor: interactor)
+
+		XCTAssertEqual(currentBranch.name, "standalone-git-module")
 	}
 }
 
