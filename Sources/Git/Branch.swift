@@ -1,6 +1,7 @@
 import Foundation
 
 public protocol BranchInteractor {
+	func getCurrentBranch() throws -> String
 	func getAllBranches(from source: Branch.Source) throws -> String
 	func latestCommit(for branch: Branch) throws -> String
 }
@@ -49,6 +50,12 @@ public struct Branch: Equatable {
 }
 
 extension Branch {
+	public static func current(interactor: BranchInteractor? = nil) throws -> Branch {
+		let interactor = interactor ?? SwiftCLI()
+
+		return try Branch(name: interactor.getCurrentBranch(), source: .local)
+	}
+
 	public static func getAll(from source: Branch.Source, interactor: BranchInteractor? = nil) throws -> [Branch] {
 		let interactor = interactor ?? SwiftCLI()
 
