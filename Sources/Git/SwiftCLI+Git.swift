@@ -30,12 +30,6 @@ extension SwiftCLI: BranchInteractor {
 			return try capture(bash: "git branch -r | grep '\(remote.name)/' | cut -c 3-").stdout
 		}
 	}
-
-	func latestCommit(for branch: Branch) throws -> String {
-		let boundary = "%n---BADONDE-BOUNDARY---%n"
-		let format = ["H", "an", "ae", "ct", "s", "b"].map { "%" + $0 }.joined(separator: boundary)
-		return try capture(bash: "git show -s --format='\(format)' \(branch.fullName)").stdout
-	}
 }
 
 extension SwiftCLI: CommitInteractor {
