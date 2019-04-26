@@ -19,10 +19,14 @@ class BurghCommand: Command {
 	let shortDescription = "Generates and opens PR page"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
 
+	let startDate: Date
+
+	init(startDate: Date) {
+		self.startDate = startDate
+	}
+
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
-		let startDate = Date()
 
 		// TODO: use config's remote or default to origin
 		// https://github.com/davdroman/Badonde/issues/58
