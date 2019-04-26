@@ -26,8 +26,8 @@ extension SwiftCLI: BranchInteractor {
 		switch source {
 		case .local:
 			return try capture(bash: "git branch | cut -c 3-").stdout
-		case .remote(let remoteName):
-			return try capture(bash: "git branch -r | grep '\(remoteName)/' | cut -c 3-").stdout
+		case .remote(let remote):
+			return try capture(bash: "git branch -r | grep '\(remote.name)/' | cut -c 3-").stdout
 		}
 	}
 
