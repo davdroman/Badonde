@@ -9,7 +9,8 @@ extension PullRequest {
 			labelCount: labels.count,
 			hasMilestone: milestone != nil,
 			elapsedTime: Date().timeIntervalSince(startDate),
-			timestamp: startDate
+			timestamp: startDate,
+			version: CommandLineTool.Constant.version
 		)
 	}
 }
@@ -22,6 +23,7 @@ extension PullRequest {
 			var hasMilestone: Bool
 			var elapsedTime: TimeInterval
 			var timestamp: Date
+			var version: String
 		}
 
 		private let firebaseProjectId: String
