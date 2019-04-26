@@ -1,6 +1,7 @@
 import Foundation
 import SwiftCLI
 import GitHub
+import Git
 import Jira
 
 extension URL {
@@ -10,11 +11,12 @@ extension URL {
 
 class BurghCommand: Command {
 
-	#if !DEBUG
 	enum Constant {
+		static let defaultRemoteName = "origin"
+		#if !DEBUG
 		static let urlOpeningDelay: TimeInterval = 1.5
+		#endif
 	}
-	#endif
 
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
@@ -25,28 +27,34 @@ class BurghCommand: Command {
 
 		let startDate = Date()
 
-		guard let currentBranchName = try? capture(bash: "git rev-parse --abbrev-ref HEAD").stdout else {
-			throw Error.noGitRepositoryFound
+		// TODO: use config's remote or default to origin
+		// https://github.com/davdroman/Badonde/issues/58
+		guard let remote = try Remote.getAll().first(where: { $0.name == Constant.defaultRemoteName }) else {
+			throw Error.gitRemoteMissing
 		}
 
+		let currentBranch = try Branch.current()
+
 		Logger.step("Deriving ticket id from current branch")
-		guard let ticketKey = Ticket.Key(branchName: currentBranchName) else {
-			throw Error.invalidBranchFormat(currentBranchName)
+		guard let ticketKey = Ticket.Key(branchName: currentBranch.name) else {
+			throw Error.invalidBranchFormat(currentBranch.name)
 		}
 
 		guard ticketKey.rawValue != "NO-TICKET" else {
 			throw Error.noTicketKey
 		}
 
-		if Git.isBranchAheadOfRemote(branch: currentBranchName) {
+		// TODO: tweak depending on "git.autopush" config value.
+		// If disabled, show an info step letting the user know
+		// the branch needs pushing.
+		// https://github.com/davdroman/Badonde/issues/57
+		if try currentBranch.isAhead(of: remote) {
 			Logger.step("Local branch is ahead of remote, pushing changes now")
-			Git.pushBranch(branch: currentBranchName)
+			try Git.Push.perform(remote: remote, branch: currentBranch)
 		}
 
 		Logger.step("Deriving repo shorthand from remote configuration")
-		guard let repoShorthand = Git.getRepositoryShorthand().flatMap(Repository.Shorthand.init(rawValue:)) else {
-			throw Error.missingGitRemote
-		}
+		let repositoryShorthand = try remote.repositoryShorthand()
 
 		// Fetch or prompt for JIRA and GitHub credentials
 		Logger.step("Reading configuration")
@@ -55,7 +63,6 @@ class BurghCommand: Command {
 
 		let labelAPI = Label.API(accessToken: configuration.githubAccessToken)
 		let milestoneAPI = Milestone.API(accessToken: configuration.githubAccessToken)
-		let repoAPI = Repository.API(accessToken: configuration.githubAccessToken)
 		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
 
 		// Set up PR properties to be assigned
@@ -67,24 +74,19 @@ class BurghCommand: Command {
 
 		// Set PR base and target branches
 		if let baseBranchValue = baseBranch.value {
-			guard let baseBranch = Git.remoteBranch(containing: baseBranchValue) else {
+			let allRemoteBranches = try Branch.getAll(from: .remote(remote))
+			guard let baseBranch = allRemoteBranches.first(where: { $0.name.contains(baseBranchValue) }) else {
 				throw Error.invalidBaseBranch(baseBranchValue)
 			}
 			Logger.step("Using base branch '\(baseBranch)'")
-			pullRequestBaseBranch = baseBranch
+			pullRequestBaseBranch = baseBranch.name
 		} else {
-			Logger.step("Fetching repo default branch for '\(repoShorthand)'")
-			let defaultBranch = try repoAPI.getRepository(with: repoShorthand).defaultBranch
 			Logger.step("Deriving base branch by commit proximity")
-			if let baseBranch = Git.closestBranch(to: currentBranchName, priorityBranch: defaultBranch) {
-				Logger.step("Using base branch '\(baseBranch)'")
-				pullRequestBaseBranch = baseBranch
-			} else {
-				Logger.step("Using repo default branch '\(defaultBranch)'")
-				pullRequestBaseBranch = defaultBranch
-			}
+			let baseBranch = try currentBranch.parent(for: remote)
+			Logger.step("Using base branch '\(baseBranch.name)'")
+			pullRequestBaseBranch = baseBranch.name
 		}
-		pullRequestTargetBranch = currentBranchName
+		pullRequestTargetBranch = currentBranch.name
 
 		Logger.step("Fetching ticket info for '\(ticketKey)'")
 		let ticket = try ticketAPI.getTicket(with: ticketKey)
@@ -93,8 +95,8 @@ class BurghCommand: Command {
 		pullRequestTitle = "[\(ticket.key)] \(ticket.fields.summary)"
 		Logger.step("Title set to '\(pullRequestTitle)'")
 
-		Logger.step("Fetching repo labels for '\(repoShorthand)'")
-		let labels = try labelAPI.getLabels(for: repoShorthand).map({ $0.name })
+		Logger.step("Fetching repo labels for '\(repositoryShorthand)'")
+		let labels = try labelAPI.getLabels(for: repositoryShorthand).map({ $0.name })
 
 		// Append dependency label if base branch is another ticket
 		if pullRequestBaseBranch.isTicketBranch {
@@ -112,34 +114,25 @@ class BurghCommand: Command {
 			}
 		}
 
+		Logger.step("Diffing base and target for label derivation")
+		let diffs = try [Diff](baseBranch: Branch(name: pullRequestBaseBranch, source: .remote(remote)), targetBranch: currentBranch)
+
 		// Append UI tests label
-		let shouldAttachUITestLabel = Git.diffIncludesFilename(
-			baseBranch: pullRequestBaseBranch,
-			targetBranch: pullRequestTargetBranch,
-			containing: "UITests"
-		)
+		let shouldAttachUITestLabel = diffs.contains(where: { $0.addedFilePath.contains("UITests") })
 		if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
 			Logger.step("Setting UI tests label")
 			pullRequestLabels.append(uiTestsLabel)
 		}
 
 		// Append unit tests label
-		let shouldAttachUnitTestLabel = Git.diffIncludesFile(
-			baseBranch: pullRequestBaseBranch,
-			targetBranch: pullRequestTargetBranch,
-			withContent: ": XCTestCase {"
-		)
+		let shouldAttachUnitTestLabel = try diffs.contains(where: { try String(contentsOfFile: $0.addedFilePath).contains(": XCTestCase {") })
 		if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
 			Logger.step("Setting unit tests label")
 			pullRequestLabels.append(unitTestsLabel)
 		}
 
 		// Append feature toggle label
-		let shouldAttachFeatureToggleLabel = Git.diffIncludesFile(
-			baseBranch: pullRequestBaseBranch,
-			targetBranch: pullRequestTargetBranch,
-			withContent: "enum Feature:"
-		)
+		let shouldAttachFeatureToggleLabel = try diffs.contains(where: { try String(contentsOfFile: $0.addedFilePath).contains("enum Feature:") })
 		if shouldAttachFeatureToggleLabel, let featureToggleLabel = labels.fuzzyMatch(word: "feature toggle") {
 			Logger.step("Setting feature toggle label")
 			pullRequestLabels.append(featureToggleLabel)
@@ -158,8 +151,8 @@ class BurghCommand: Command {
 			let rawMilestone = ticket.fields.fixVersions.first?.name,
 			!rawMilestone.isEmpty
 		{
-			Logger.step("Fetching repo milestones for '\(repoShorthand)'")
-			let milestones = try milestoneAPI.getMilestones(for: repoShorthand).map({ $0.title })
+			Logger.step("Fetching repo milestones for '\(repositoryShorthand)'")
+			let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map({ $0.title })
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestMilestone = milestone
@@ -168,7 +161,7 @@ class BurghCommand: Command {
 
 		Logger.step("Opening PR page")
 		let pullRequest = PullRequest(
-			repositoryShorthand: repoShorthand,
+			repositoryShorthand: repositoryShorthand,
 			baseBranch: pullRequestBaseBranch,
 			targetBranch: pullRequestTargetBranch,
 			title: pullRequestTitle,
