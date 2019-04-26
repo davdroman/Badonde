@@ -13,6 +13,7 @@ final class CommitInteractorMock: CommitInteractor {
 	}
 
 	var returnCommitCountZero = false
+	var multipleCommitCountFixture: FixtureLoadable?
 
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String {
 		guard !returnCommitCountZero else {
@@ -25,7 +26,8 @@ final class CommitInteractorMock: CommitInteractor {
 		case 1:
 			return try Fixture.commitCountSingle.load(as: String.self)
 		default:
-			return try Fixture.commitCountMultiple.load(as: String.self)
+			let fixture = multipleCommitCountFixture ?? Fixture.commitCountMultiple
+			return try fixture.load(as: String.self)
 		}
 	}
 }
