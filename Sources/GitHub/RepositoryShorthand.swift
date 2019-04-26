@@ -66,3 +66,18 @@ extension Repository.Shorthand: Codable {
 		try container.encode(rawValue)
 	}
 }
+
+extension Repository.Shorthand {
+	public enum Error {
+		case parsing
+	}
+}
+
+extension Repository.Shorthand.Error: Swift.Error {
+	public var localizedDescription: String {
+		switch self {
+		case .parsing:
+			return "Shorthand does not match required pattern for parsing"
+		}
+	}
+}
