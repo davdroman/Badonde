@@ -71,4 +71,41 @@ extension Branch {
 
 		return try Commit.count(baseBranch: remoteBranch, targetBranch: self, interactor: interactor) > 0
 	}
+
+	public func parent(for remote: Remote, branchInteractor: BranchInteractor? = nil, commitInteractor: CommitInteractor? = nil, remoteInteractor: RemoteInteractor? = nil) throws -> Branch {
+		let branchInteractor = branchInteractor ?? SwiftCLI()
+		let commitInteractor = commitInteractor ?? SwiftCLI()
+		let remoteInteractor = remoteInteractor ?? SwiftCLI()
+
+		let defaultBranch = try remote.defaultBranch(interactor: remoteInteractor)
+
+		let allRemoteBranches = try Branch.getAll(from: .remote(remote), interactor: branchInteractor)
+
+		let commitsAndBranches = try Commit.count(
+			baseBranches: allRemoteBranches,
+			targetBranch: self,
+			after: Date(timeIntervalSinceNow: -2592000), // 1 month ago
+			interactor: commitInteractor
+		)
+
+		let branchesWithLowestEqualCommitCount = commitsAndBranches
+			.filter { $0.1 > 0 }
+			.sorted { $0.1 < $1.1 }
+			.reduce([(Branch, Int)]()) { (result, branchAndCommits) -> [(Branch, Int)] in
+				guard let lastBranchAndCommits = result.last, lastBranchAndCommits.1 != branchAndCommits.1 else {
+					return result + [branchAndCommits]
+				}
+				return result
+			}
+			.map { $0.0 }
+
+		guard
+			!branchesWithLowestEqualCommitCount.contains(defaultBranch),
+			let parentBranch = branchesWithLowestEqualCommitCount.first
+		else {
+			return defaultBranch
+		}
+
+		return parentBranch
+	}
 }

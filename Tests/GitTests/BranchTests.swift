@@ -205,3 +205,51 @@ extension BranchTests {
 		XCTAssertFalse(isAhead)
 	}
 }
+
+extension BranchTests {
+	enum Fixture: String, FixtureLoadable {
+		var sourceFilePath: String { return #file }
+		var fixtureFileExtension: String { return "txt" }
+
+		case commitCountMultiple = "commit_count_multiple"
+		case commitCountMultipleEqual = "commit_count_multiple_equal"
+	}
+
+	func testBranchParent() throws {
+		let branchInteractor = BranchInteractorMock()
+		let commitInteractor = CommitInteractorMock()
+		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultiple
+		let remoteInteractor = RemoteInteractorMock()
+
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let branch = try Branch(name: "target-branch", source: .local)
+		let parentBranch = try branch.parent(
+			for: remote,
+			branchInteractor: branchInteractor,
+			commitInteractor: commitInteractor,
+			remoteInteractor: remoteInteractor
+		)
+
+		XCTAssertEqual(parentBranch.name, "swift-5")
+		XCTAssertEqual(parentBranch.source, .remote(remote))
+	}
+
+	func testBranchParent_fallsBackToDefaultBranch() throws {
+		let branchInteractor = BranchInteractorMock()
+		let commitInteractor = CommitInteractorMock()
+		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultipleEqual
+		let remoteInteractor = RemoteInteractorMock()
+
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let branch = try Branch(name: "target-branch", source: .local)
+		let parentBranch = try branch.parent(
+			for: remote,
+			branchInteractor: branchInteractor,
+			commitInteractor: commitInteractor,
+			remoteInteractor: remoteInteractor
+		)
+
+		XCTAssertEqual(parentBranch.name, "develop")
+		XCTAssertEqual(parentBranch.source, .remote(remote))
+	}
+}
