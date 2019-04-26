@@ -1,0 +1,5 @@
+ssh_origin/HEAD -> ssh_origin/develop
+ssh_origin/develop
+ssh_origin/master
+ssh_origin/standalone-git-module
+ssh_origin/swift-5

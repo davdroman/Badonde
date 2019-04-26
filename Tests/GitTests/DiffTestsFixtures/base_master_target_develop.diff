@@ -1,0 +1,37 @@
+diff --git a/GitDiffSwift/Models/GitDiffLine.swift b/GitDiffSwift/Models/GitDiffLine.swift
+new file mode 100644
+index 0000000..c6c7eb0
+--- /dev/null
++++ b/GitDiffSwift/Models/GitDiffLine.swift
+@@ -0,0 +1,31 @@
++//
++//  GitDiffLine.swift
++//  GitDiffSwift
++//
++//  Created by Steven Deutsch on 4/1/18.
++//  Copyright © 2018 GitDiffSwift. All rights reserved.
++//
++
++import Foundation
++
++public enum LineType: String, Codable {
++    case unchanged
++    case addition
++    case deletion
++}
++
++public struct GitDiffLine: Codable {
++
++    public var type: String
++
++    public var text: String
++
++    public var oldLine: Int?
++
++    public var newLine: Int?
++
++    internal var description: String {
++        return text
++    }
++
++}
