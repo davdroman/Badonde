@@ -30,7 +30,7 @@ class BurghCommand: Command {
 		// TODO: use config's remote or default to origin
 		// https://github.com/davdroman/Badonde/issues/58
 		guard let remote = try Remote.getAll().first(where: { $0.name == Constant.defaultRemoteName }) else {
-			throw Error.gitRemoteMissing
+			throw Error.gitRemoteMissing(Constant.defaultRemoteName)
 		}
 
 		let currentBranch = try Branch.current()
