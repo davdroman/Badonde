@@ -12,7 +12,7 @@ class AppifyCommand: Command {
 
 		Logger.step("Checking for existing configuration")
 		let configurationStore = ConfigurationStore()
-		let configuration = try BurghCommand().getOrPromptConfiguration(for: configurationStore) // FIXME: refactor me
+		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
 		Logger.step("Searching for latest .app template available")
 		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
