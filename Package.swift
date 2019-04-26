@@ -53,7 +53,7 @@ let package = Package(
 		),
 		.target(
 			name: "GitHub",
-			dependencies: ["Sugar"]
+			dependencies: ["Git", "Sugar"]
 		),
 		.testTarget(
 			name: "GitTests",
