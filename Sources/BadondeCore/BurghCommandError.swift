@@ -2,7 +2,7 @@ import Foundation
 
 extension BurghCommand {
 	enum Error {
-		case gitRemoteMissing
+		case gitRemoteMissing(String)
 		case invalidBaseBranch(String)
 		case invalidBranchFormat(String)
 		case noTicketKey
@@ -13,8 +13,8 @@ extension BurghCommand {
 extension BurghCommand.Error: Swift.Error {
 	var localizedDescription: String {
 		switch self {
-		case .gitRemoteMissing:
-			return "Git remote named 'origin' is missing, please add it with `git remote add origin {git_url}`"
+		case .gitRemoteMissing(let remoteName):
+			return "Git remote '\(remoteName)' is missing, please add it with `git remote add \(remoteName) [GIT_URL]`"
 		case .invalidBaseBranch(let branch):
 			return "No remote branch found matching specified term '\(branch)'"
 		case .invalidBranchFormat(let branch):
