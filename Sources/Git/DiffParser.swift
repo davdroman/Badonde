@@ -31,11 +31,11 @@ extension Diff {
 			for line in rawDiffContent.components(separatedBy: "\n") {
 				// Skip headers
 				guard !line.starts(with: "+++ ") else {
-					addedFile = String(line.dropFirst(4))
+					addedFile = String(line.dropFirst(4)).trimmingCharacters(in: .whitespaces)
 					continue
 				}
 				guard !line.starts(with: "--- ") else {
-					removedFile = String(line.dropFirst(4))
+					removedFile = String(line.dropFirst(4)).trimmingCharacters(in: .whitespaces)
 					continue
 				}
 

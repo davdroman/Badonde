@@ -38,8 +38,8 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFile, "a/.swiftlint.yml")
-		XCTAssertEqual(diff?.addedFile, "b/.swiftlint.yml")
+		XCTAssertEqual(diff?.removedFilePath, "a/.swiftlint.yml")
+		XCTAssertEqual(diff?.addedFilePath, "b/.swiftlint.yml")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -61,8 +61,8 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFile, "/dev/null")
-		XCTAssertEqual(diff?.addedFile, "b/GitDiffSwift/Models/GitDiffLine.swift")
+		XCTAssertEqual(diff?.removedFilePath, "/dev/null")
+		XCTAssertEqual(diff?.addedFilePath, "b/GitDiffSwift/Models/GitDiffLine.swift")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -84,8 +84,8 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFile, "a/Sources/Layout/MessageCellLayoutContext.swift")
-		XCTAssertEqual(diff?.addedFile, "b/Sources/Protocols/MediaItem.swift")
+		XCTAssertEqual(diff?.removedFilePath, "a/Sources/Layout/MessageCellLayoutContext.swift")
+		XCTAssertEqual(diff?.addedFilePath, "b/Sources/Protocols/MediaItem.swift")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -107,8 +107,8 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFile, "a/Sources/Layout/MessagesCollectionViewFlowLayout+Avatar.swift")
-		XCTAssertEqual(diff?.addedFile, "/dev/null")
+		XCTAssertEqual(diff?.removedFilePath, "a/Sources/Layout/MessagesCollectionViewFlowLayout+Avatar.swift")
+		XCTAssertEqual(diff?.addedFilePath, "/dev/null")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -132,8 +132,8 @@ final class DiffTests: XCTestCase {
 		// MARK: diffA
 
 		let diffA = diffs.first
-		XCTAssertEqual(diffA?.removedFile, "a/Cartfile.resolved")
-		XCTAssertEqual(diffA?.addedFile, "b/Cartfile.resolved")
+		XCTAssertEqual(diffA?.removedFilePath, "a/Cartfile.resolved")
+		XCTAssertEqual(diffA?.addedFilePath, "b/Cartfile.resolved")
 
 		XCTAssertEqual(diffA?.hunks.count, 1)
 
@@ -150,8 +150,8 @@ final class DiffTests: XCTestCase {
 		// MARK: diffB
 
 		let diffB = diffs.dropFirst().first
-		XCTAssertEqual(diffB?.removedFile, "/dev/null")
-		XCTAssertEqual(diffB?.addedFile, "b/Moya.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist")
+		XCTAssertEqual(diffB?.removedFilePath, "/dev/null")
+		XCTAssertEqual(diffB?.addedFilePath, "b/Moya.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist")
 
 		XCTAssertEqual(diffB?.hunks.count, 1)
 
@@ -168,8 +168,8 @@ final class DiffTests: XCTestCase {
 		// MARK: diffC
 
 		let diffC = diffs.dropFirst(2).first
-		XCTAssertEqual(diffC?.removedFile, "a/Package.resolved")
-		XCTAssertEqual(diffC?.addedFile, "b/Package.resolved")
+		XCTAssertEqual(diffC?.removedFilePath, "a/Package.resolved")
+		XCTAssertEqual(diffC?.addedFilePath, "b/Package.resolved")
 
 		XCTAssertEqual(diffC?.hunks.count, 4)
 
