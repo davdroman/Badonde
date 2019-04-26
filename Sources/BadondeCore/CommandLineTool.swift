@@ -11,6 +11,8 @@ public final class CommandLineTool {
 
 	public init() {}
 
+	public let startDate = Date()
+
 	public func run(with arguments: [String]? = nil) {
 		let cli = CLI(
 			name: Constant.name,
@@ -18,17 +20,27 @@ public final class CommandLineTool {
 			description: Constant.description,
 			commands: [
 				AppifyCommand(),
-				BurghCommand(),
+				BurghCommand(startDate: startDate),
 				ClearCommand(),
 				SetFirebaseAuthCommand()
 			]
 		)
+
 		let exitStatus: Int32
 		if let arguments = arguments {
 			exitStatus = cli.go(with: arguments)
 		} else {
 			exitStatus = cli.go()
 		}
+
+		#if DEBUG
+		let elapsedTime = Date().timeIntervalSince(startDate)
+		let numberFormatter = NumberFormatter()
+		numberFormatter.maximumFractionDigits = 2
+		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
+		print("Badonde execution took \(prettyElapsedTime)s")
+		#endif
+
 		exit(exitStatus)
 	}
 }
