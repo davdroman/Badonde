@@ -48,7 +48,7 @@ extension SwiftCLI: CommitInteractor {
 
 extension SwiftCLI: DiffInteractor {
 	func diff(baseBranch: String, targetBranch: String) throws -> String {
-		return try capture(bash: "git diff \(baseBranch)...\(targetBranch)").stdout
+		return try capture(bash: "git diff --no-prefix \(baseBranch)...\(targetBranch)").stdout
 	}
 }
 
