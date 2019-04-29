@@ -10,7 +10,6 @@ let package = Package(
 	],
 	products: [
 		.executable(name: "badonde", targets: ["Badonde"]),
-		.executable(name: "burgh", targets: ["Burgh"])
 	],
 	dependencies: [
 		.package(
@@ -42,10 +41,6 @@ let package = Package(
 				"Jira",
 				"Sugar"
 			]
-		),
-		.target(
-			name: "Burgh",
-			dependencies: ["BadondeCore"]
 		),
 		.target(
 			name: "Git",
