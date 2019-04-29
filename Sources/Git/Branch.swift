@@ -78,13 +78,24 @@ extension Branch {
 		let remoteInteractor = remoteInteractor ?? SwiftCLI()
 
 		let defaultBranch = try remote.defaultBranch(interactor: remoteInteractor)
-
 		let allRemoteBranches = try Branch.getAll(from: .remote(remote), interactor: branchInteractor)
 
+		let recentDate = Date(timeIntervalSinceNow: -2592000) // 1 month ago
+
+		let latestRecentCommitHashes = try Commit.latestHashes(
+			branches: allRemoteBranches,
+			after: recentDate,
+			interactor: commitInteractor
+		)
+
+		let recentRemoteBranches = allRemoteBranches.enumerated()
+			.filter { !latestRecentCommitHashes[$0.offset].isEmpty }
+			.map { $0.element }
+
 		let commitsAndBranches = try Commit.count(
-			baseBranches: allRemoteBranches,
+			baseBranches: recentRemoteBranches,
 			targetBranch: self,
-			after: Date(timeIntervalSinceNow: -2592000), // 1 month ago
+			after: recentDate,
 			interactor: commitInteractor
 		)
 
