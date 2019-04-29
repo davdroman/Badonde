@@ -207,12 +207,15 @@ extension BranchTests {
 
 		case commitCountMultiple = "commit_count_multiple"
 		case commitCountMultipleEqual = "commit_count_multiple_equal"
+
+		case latestCommitHashes = "latest_commit_hashes"
 	}
 
 	func testBranchParent() throws {
 		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultiple
+		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
 		let remoteInteractor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
@@ -232,6 +235,7 @@ extension BranchTests {
 		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultipleEqual
+		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
 		let remoteInteractor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
