@@ -10,10 +10,13 @@ final class CommitInteractorMock: CommitInteractor {
 		case commitCountZero = "commit_count_zero"
 		case commitCountSingle = "commit_count_single"
 		case commitCountMultiple = "commit_count_multiple"
+
+		case latestCommitHashes = "latest_commit_hashes"
 	}
 
 	var returnCommitCountZero = false
 	var multipleCommitCountFixture: FixtureLoadable?
+	var latestCommitHashesFixture: FixtureLoadable?
 
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String {
 		guard !returnCommitCountZero else {
@@ -29,6 +32,11 @@ final class CommitInteractorMock: CommitInteractor {
 			let fixture = multipleCommitCountFixture ?? Fixture.commitCountMultiple
 			return try fixture.load(as: String.self)
 		}
+	}
+
+	func latestHashes(branches: [String], after date: Date?) throws -> String {
+		let fixture = latestCommitHashesFixture ?? Fixture.latestCommitHashes
+		return try fixture.load(as: String.self)
 	}
 }
 
@@ -80,5 +88,29 @@ final class CommitTests: XCTestCase {
 		let (branchC, countC) = counts[2]
 		XCTAssertEqual(branchC, baseBranches[2])
 		XCTAssertEqual(countC, 543)
+	}
+
+	func testLatestCommitHashes() throws {
+		let interactor = CommitInteractorMock()
+		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
+		let branches = [
+			try Branch(name: "base-branch-a", source: .remote(remote)),
+			try Branch(name: "base-branch-b", source: .remote(remote)),
+			try Branch(name: "base-branch-c", source: .remote(remote))
+		]
+		let hashes = try Commit.latestHashes(branches: branches, after: nil, interactor: interactor)
+
+		XCTAssertEqual(hashes.count, 16)
+
+		let hashesOnly = hashes.filter { !$0.isEmpty }
+
+		let hashA = hashesOnly.first
+		XCTAssertEqual(hashA, "7bf65bd")
+
+		let hashB = hashesOnly.dropFirst().first
+		XCTAssertEqual(hashB, "a61997b")
+
+		let hashC = hashesOnly.dropFirst(2).first
+		XCTAssertEqual(hashC, "77d3631")
 	}
 }

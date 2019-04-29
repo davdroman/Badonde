@@ -38,6 +38,14 @@ extension SwiftCLI: CommitInteractor {
 		let command = baseBranches.map { "git rev-list --count\(afterParameter) \($0)..\(targetBranch)" }.joined(separator: ";")
 		return try capture(bash: command).stdout
 	}
+
+	func latestHashes(branches: [String], after date: Date?) throws -> String {
+		let afterParameter = date.map { " --after=\"\(ISO8601DateFormatter().string(from: $0))\"" } ?? ""
+		let command = branches
+			.map { "git log -1 --pretty=format:'%h'\(afterParameter) -s \($0) | grep . || echo 'no_commit'" }
+			.joined(separator: ";")
+		return try capture(bash: command).stdout.replacingOccurrences(of: "no_commit", with: "")
+	}
 }
 
 extension SwiftCLI: DiffInteractor {

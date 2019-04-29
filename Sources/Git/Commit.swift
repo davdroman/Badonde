@@ -2,6 +2,7 @@ import Foundation
 
 public protocol CommitInteractor {
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String
+	func latestHashes(branches: [String], after date: Date?) throws -> String
 }
 
 public enum Commit { }
@@ -28,5 +29,11 @@ extension Commit {
 				}
 				return (baseBranches[$0.offset], count)
 			}
+	}
+
+	public static func latestHashes(branches: [Branch], after date: Date?, interactor: CommitInteractor? = nil) throws -> [String] {
+		let interactor = interactor ?? SwiftCLI()
+		return try interactor.latestHashes(branches: branches.map { $0.fullName }, after: date)
+			.components(separatedBy: "\n")
 	}
 }
