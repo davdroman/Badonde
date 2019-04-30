@@ -1,6 +1,6 @@
 import Foundation
 
-struct Configuration: Codable {
+struct _Configuration: Codable {
 	var jiraEmail: String
 	var jiraApiToken: String
 	var githubAccessToken: String
@@ -17,15 +17,15 @@ final class ConfigurationStore {
 	private static let configurationFilePath = ConfigurationStore.folderPath.appendingPathComponent("config.json")
 	private static let additionalConfigurationFilePath = ConfigurationStore.folderPath.appendingPathComponent("add_config.json")
 
-	private(set) var configuration: Configuration?
+	private(set) var configuration: _Configuration?
 	private(set) var additionalConfiguration: AdditionalConfiguration?
 
 	init() {
-		configuration = try? Configuration.read(from: ConfigurationStore.configurationFilePath)
+		configuration = try? _Configuration.read(from: ConfigurationStore.configurationFilePath)
 		additionalConfiguration = try? AdditionalConfiguration.read(from: ConfigurationStore.additionalConfigurationFilePath)
 	}
 
-	func setConfiguration(_ configuration: Configuration) throws {
+	func setConfiguration(_ configuration: _Configuration) throws {
 		try createConfigurationFolderIfNeeded()
 		try configuration.write(to: ConfigurationStore.configurationFilePath)
 		self.configuration = configuration
