@@ -11,7 +11,7 @@ extension Diff {
 		/// - Group 5: The change delta, either "+", "-" or " ".
 		/// - Group 6: The line itself.
 		let regex = try! NSRegularExpression(
-			pattern: "^(?:(?:@@ -(\\d+),?(\\d+)? \\+(\\d+),?(\\d+)? @@)|([-+\\s])(.*))",
+			pattern: #"^(?:(?:@@ -(\d+),?(\d+)? \+(\d+),?(\d+)? @@)|([-+\s])(.*))"#,
 			options: []
 		)
 
