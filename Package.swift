@@ -12,24 +12,12 @@ let package = Package(
 		.executable(name: "badonde", targets: ["Badonde"]),
 	],
 	dependencies: [
-		.package(
-			url: "https://github.com/DavdRoman/SwiftCLI",
-			.branch("master")
-		),
-		.package(
-			url: "https://github.com/DavdRoman/SwiftyStringScore",
-			.branch("master")
-		),
-		.package(
-			url: "https://github.com/DavdRoman/CLISpinner",
-			.branch("master")
-		)
+		.package(url: "https://github.com/DavdRoman/CLISpinner", .branch("master")),
+		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
+		.package(url: "https://github.com/DavdRoman/SwiftCLI", .branch("master")),
 	],
 	targets: [
-		.target(
-			name: "Badonde",
-			dependencies: ["BadondeCore"]
-		),
+		.target(name: "Badonde", dependencies: ["BadondeCore"]),
 		.target(
 			name: "BadondeCore",
 			dependencies: [
@@ -39,35 +27,17 @@ let package = Package(
 				"Git",
 				"GitHub",
 				"Jira",
-				"Sugar"
+				"Sugar",
 			]
 		),
-		.target(
-			name: "Git",
-			dependencies: ["SwiftCLI"]
-		),
-		.target(
-			name: "GitHub",
-			dependencies: ["Git", "Sugar"]
-		),
-		.testTarget(
-			name: "GitTests",
-			dependencies: ["Git", "TestSugar"]
-		),
-		.testTarget(
-			name: "GitHubTests",
-			dependencies: ["GitHub"]
-		),
-		.target(
-			name: "TestSugar"
-		),
-		.target(
-			name: "Jira",
-			dependencies: ["Sugar"]
-		),
-		.target(
-			name: "Sugar"
-		)
+		.target(name: "Git", dependencies: ["SwiftCLI"]),
+		.target(name: "GitHub", dependencies: ["Git", "Sugar"]),
+		.target(name: "Jira", dependencies: ["Sugar"]),
+		.target(name: "Sugar"),
+		.target(name: "TestSugar"),
+
+		.testTarget(name: "GitTests", dependencies: ["Git", "TestSugar"]),
+		.testTarget(name: "GitHubTests", dependencies: ["GitHub"]),
 	]
 )
 
