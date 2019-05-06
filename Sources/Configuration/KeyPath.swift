@@ -36,3 +36,20 @@ extension Configuration.KeyPath: Hashable, Equatable {
 		return lhs.rawValue == rhs.rawValue
 	}
 }
+
+extension Configuration.KeyPath {
+	private var keys: [String] {
+		return rawValue.components(separatedBy: ".")
+	}
+
+	private func isPartial(of keyPath: Configuration.KeyPath) -> Bool {
+		guard self != keyPath else {
+			return false
+		}
+		return zip(keys, keyPath.keys).allSatisfy { $0 == $1 }
+	}
+
+	func isCompatible(in keyPaths: [Configuration.KeyPath]) -> Bool {
+		return !keyPaths.contains(where: { self.isPartial(of: $0) })
+	}
+}
