@@ -26,3 +26,13 @@ extension Configuration {
 		}
 	}
 }
+
+extension Configuration.KeyPath: Hashable, Equatable {
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(rawValue)
+	}
+
+	public static func == (lhs: Configuration.KeyPath, rhs: Configuration.KeyPath) -> Bool {
+		return lhs.rawValue == rhs.rawValue
+	}
+}
