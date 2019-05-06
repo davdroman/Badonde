@@ -3,10 +3,6 @@ import Sugar
 
 extension Configuration {
 	public struct KeyPath: RawRepresentable, ExpressibleByStringLiteral {
-		public var keys: [String] {
-			return rawValue.components(separatedBy: ".")
-		}
-
 		public let rawValue: String
 		public let description: String?
 

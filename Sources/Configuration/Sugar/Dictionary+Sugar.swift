@@ -19,9 +19,9 @@ extension Dictionary where Key == String {
 	}
 
 	func unflatten() -> [String: Any] {
-		var resultDict = NSMutableDictionary()
+		let resultDict = NSMutableDictionary()
 		for (key, value) in self {
-			var parts = key.components(separatedBy: ".")
+			let parts = key.components(separatedBy: ".")
 			var d = resultDict
 			for part in parts.dropLast() {
 				if d[part] == nil {
