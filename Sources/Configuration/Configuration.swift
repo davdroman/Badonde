@@ -1,6 +1,7 @@
 import Foundation
 
 public final class Configuration {
+	let url: URL
 	let fileInteractor: JSONFileInteractor
 	var rawObject: [String: Any]
 	var keyPathedObject: [String: Any] {
@@ -19,6 +20,7 @@ public final class Configuration {
 	}
 
 	init(contentsOf url: URL, fileInteractor: JSONFileInteractor) throws {
+		self.url = url
 		self.fileInteractor = fileInteractor
 		self.rawObject = try fileInteractor.read(from: url)
 	}
@@ -52,7 +54,24 @@ public final class Configuration {
 	}
 
 	public func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
-		// TODO: me
+		switch T.self {
+		case is Bool.Type, is Double.Type, is Int.Type, is String.Type:
+			break
+		default:
+			throw Error.invalidValueType(T.self)
+		}
+
+		let existingKeyPaths = keyPathedObject.keys.compactMap { KeyPath(rawValue: $0) }
+		let allocatedKeyPaths = existingKeyPaths + supportedKeyPaths
+		let isKeyPathCompatible = keyPath.isCompatible(in: allocatedKeyPaths)
+
+		guard isKeyPathCompatible else {
+			throw Error.incompatibleKeyPath(keyPath)
+		}
+
+		keyPathedObject[keyPath.rawValue] = value
+
+		try fileInteractor.write(rawObject, to: url)
 	}
 
 	public func getRawValue(forKeyPath keyPath: KeyPath) -> String? {
