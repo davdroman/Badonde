@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
 	name: "Badonde",
 	platforms: [
-		.macOS(.v10_12)
+		.macOS(.v10_13)
 	],
 	products: [
 		.executable(name: "badonde", targets: ["Badonde"]),
