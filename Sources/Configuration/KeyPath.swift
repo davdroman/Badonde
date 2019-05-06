@@ -1,0 +1,32 @@
+import Foundation
+import Sugar
+
+extension Configuration {
+	public struct KeyPath: RawRepresentable, ExpressibleByStringLiteral {
+		public var keys: [String] {
+			return rawValue.components(separatedBy: ".")
+		}
+
+		public let rawValue: String
+		public let description: String?
+
+		public init?(rawValue: String, description: String?) {
+			guard rawValue.matchesRegex(#"^(\s*[\d\w]+([.]?[\d\w]+)+\s*)+$"#) else {
+				return nil
+			}
+			self.rawValue = rawValue
+			self.description = description
+		}
+
+		public init?(rawValue: String) {
+			self.init(rawValue: rawValue, description: nil)
+		}
+
+		public init(stringLiteral value: StaticString) {
+			guard let _self = type(of: self).init(rawValue: String(staticString: value)) else {
+				fatalError("Failed to initialize config keypath with string literal '\(value)'")
+			}
+			self = _self
+		}
+	}
+}
