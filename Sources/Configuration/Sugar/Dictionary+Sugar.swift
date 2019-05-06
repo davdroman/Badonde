@@ -33,8 +33,4 @@ extension Dictionary where Key == String {
 		}
 		return resultDict as! [String: Any]
 	}
-
-	func allKeyPaths() -> [Configuration.KeyPath] {
-		return Array(flatten().keys).compactMap(Configuration.KeyPath.init(rawValue:))
-	}
 }

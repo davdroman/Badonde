@@ -12,8 +12,8 @@ extension Data: URLContentInitializable {
 	}
 }
 
-extension Dictionary {
-	init(contentsOf url: URL) throws {
+extension Dictionary: URLContentInitializable {
+	public init(contentsOf url: URL) throws {
 		let data = try Data(contentsOf: url)
 		let object = try JSONSerialization.jsonObject(with: data, options: [])
 		guard let _self = object as? [Key: Value] else {
@@ -29,8 +29,8 @@ extension Dictionary {
 	}
 }
 
-extension Array {
-	init(contentsOf url: URL) throws {
+extension Array: URLContentInitializable {
+	public init(contentsOf url: URL) throws {
 		let data = try Data(contentsOf: url)
 		let object = try JSONSerialization.jsonObject(with: data, options: [])
 		guard let _self = object as? [Element] else {
