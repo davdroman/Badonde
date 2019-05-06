@@ -64,7 +64,7 @@ extension FixtureLoadable {
 }
 
 public extension FixtureLoadable where Self: RawRepresentable, Self.RawValue == String {
-	private var fixtureURL: URL {
+	var url: URL {
 		let sourceFileURL = URL(fileURLWithPath: sourceFilePath)
 		let fileNameWithoutExtension = sourceFileURL.lastPathComponent.prefix(while: { $0 != "." })
 		return URL(fileURLWithPath: sourceFilePath)
@@ -73,6 +73,6 @@ public extension FixtureLoadable where Self: RawRepresentable, Self.RawValue == 
 	}
 
 	func load<T: URLContentInitializable>(as type: T.Type) throws -> T {
-		return try T(contentsOf: fixtureURL)
+		return try T(contentsOf: url)
 	}
 }
