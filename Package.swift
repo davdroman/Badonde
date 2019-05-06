@@ -21,6 +21,7 @@ let package = Package(
 		.target(
 			name: "BadondeCore",
 			dependencies: [
+				"Configuration",
 				"SwiftCLI",
 				"SwiftyStringScore",
 				"CLISpinner",
@@ -30,12 +31,14 @@ let package = Package(
 				"Sugar",
 			]
 		),
+		.target(name: "Configuration", dependencies: ["Sugar"]),
 		.target(name: "Git", dependencies: ["SwiftCLI"]),
 		.target(name: "GitHub", dependencies: ["Git", "Sugar"]),
 		.target(name: "Jira", dependencies: ["Sugar"]),
 		.target(name: "Sugar"),
 		.target(name: "TestSugar"),
 
+		.testTarget(name: "ConfigurationTests", dependencies: ["Configuration", "TestSugar"]),
 		.testTarget(name: "GitTests", dependencies: ["Git", "TestSugar"]),
 		.testTarget(name: "GitHubTests", dependencies: ["GitHub"]),
 	]
