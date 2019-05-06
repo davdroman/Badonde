@@ -33,47 +33,47 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testInit_withEmptyFile() throws {
-		let config = try Configuration(contentsOf: Fixture.empty.url)
+		let config = try Configuration(contentsOf: Fixture.empty.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
 
 	func testInit_withEmptyArrayFile() throws {
-		let config = try Configuration(contentsOf: Fixture.emptyArray.url)
+		let config = try Configuration(contentsOf: Fixture.emptyArray.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
 
 	func testInit_withEmptyDictionaryFile() throws {
-		let config = try Configuration(contentsOf: Fixture.emptyDictionary.url)
+		let config = try Configuration(contentsOf: Fixture.emptyDictionary.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
 
 	func testInit_withArrayFile() throws {
-		let config = try Configuration(contentsOf: Fixture.array.url)
+		let config = try Configuration(contentsOf: Fixture.array.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
 
 	// MARK: getRawValue
 
 	func testGetRawValue_ofStringValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "name")
 		XCTAssertEqual(value, "David")
 	}
 
 	func testGetRawValue_ofIntValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "age")
 		XCTAssertEqual(value, "21")
 	}
 
 	func testGetRawValue_ofDoubleValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "weight")
 		XCTAssertEqual(value, "72.5")
 	}
 
 	func testGetRawValue_ofBoolValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
 		let valueA = config.getRawValue(forKeyPath: "likes_pepperoni_pizza")
 		XCTAssertEqual(valueA, "true")
@@ -83,13 +83,13 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetRawValue_ofArrayValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "favorite_movies")
 		XCTAssertNil(value)
 	}
 
 	func testGetRawValue_ofStringValue_withNestedKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
 		let valueA = config.getRawValue(forKeyPath: "bank_details")
 		XCTAssertNil(valueA)
@@ -102,13 +102,13 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetRawValue_ofNullType_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "iq")
 		XCTAssertNil(value)
 	}
 
 	func testGetRawValue_withMissingPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = config.getRawValue(forKeyPath: "likes_gazpacho")
 		XCTAssertNil(value)
 	}
@@ -116,25 +116,25 @@ final class ConfigurationTests: XCTestCase {
 	// MARK: getValue
 
 	func testGetValue_ofStringValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: String.self, forKeyPath: "name")
 		XCTAssertEqual(value, "David")
 	}
 
 	func testGetValue_ofIntValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: Int.self, forKeyPath: "age")
 		XCTAssertEqual(value, 21)
 	}
 
 	func testGetValue_ofDoubleValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: Double.self, forKeyPath: "weight")
 		XCTAssertEqual(value, 72.5)
 	}
 
 	func testGetValue_ofBoolValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
 		let valueA = try config.getValue(ofType: Bool.self, forKeyPath: "likes_pepperoni_pizza")
 		XCTAssertEqual(valueA, true)
@@ -144,13 +144,13 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofArrayValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: [String].self, forKeyPath: "favorite_movies")
 		XCTAssertNil(value)
 	}
 
 	func testGetValue_ofStringValue_withNestedKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
 		let valueA = try config.getValue(ofType: String.self, forKeyPath: "bank_details")
 		XCTAssertNil(valueA)
@@ -163,19 +163,19 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofNullType_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: Int.self, forKeyPath: "iq")
 		XCTAssertNil(value)
 	}
 
 	func testGetValue_withMissingPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: Bool.self, forKeyPath: "likes_gazpacho")
 		XCTAssertNil(value)
 	}
 
 	func testGetValue_ofInvalidBoolValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		XCTAssertThrowsError(try config.getValue(ofType: Bool.self, forKeyPath: "name")) { error in
 			switch error {
 			case let Configuration.Error.typeBridgingFailed(value, type):
@@ -188,7 +188,7 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofInvalidDoubleValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		XCTAssertThrowsError(try config.getValue(ofType: Double.self, forKeyPath: "name")) { error in
 			switch error {
 			case let Configuration.Error.typeBridgingFailed(value, type):
@@ -201,7 +201,7 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofInvalidIntValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		XCTAssertThrowsError(try config.getValue(ofType: Int.self, forKeyPath: "name")) { error in
 			switch error {
 			case let Configuration.Error.typeBridgingFailed(value, type):
@@ -214,7 +214,7 @@ final class ConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofInvalidBridgingType() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url)
+		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		XCTAssertThrowsError(try config.getValue(ofType: Date.self, forKeyPath: "name")) { error in
 			switch error {
 			case let Configuration.Error.invalidBridgingType(type):
@@ -232,7 +232,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue(5, forKeyPath: "social_security_number")
 		let value = try config.getValue(ofType: Int.self, forKeyPath: "social_security_number")
@@ -246,7 +246,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue("Jack", forKeyPath: "name")
 		let value = try config.getValue(ofType: String.self, forKeyPath: "name")
@@ -260,7 +260,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue(25, forKeyPath: "age")
 		let value = try config.getValue(ofType: Int.self, forKeyPath: "age")
@@ -274,7 +274,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue(72.5, forKeyPath: "weight")
 		let value = try config.getValue(ofType: Double.self, forKeyPath: "weight")
@@ -288,7 +288,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue(false, forKeyPath: "likes_pepperoni_pizza")
 		let value = try config.getValue(ofType: Bool.self, forKeyPath: "likes_pepperoni_pizza")
@@ -300,7 +300,7 @@ final class ConfigurationTests: XCTestCase {
 	func testSetValue_ofArrayValue_withPlainKey() throws {
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		XCTAssertThrowsError(
 			try config.setValue(["The Devil Wears Prada"], forKeyPath: "favorite_movies")
@@ -319,7 +319,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue("123456", forKeyPath: "bank_details.account_number")
 		let value = try config.getValue(ofType: String.self, forKeyPath: "bank_details.account_number")
@@ -333,7 +333,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue("123", forKeyPath: "bank_details.account")
 		let value = try config.getValue(ofType: String.self, forKeyPath: "bank_details.account")
@@ -345,7 +345,7 @@ final class ConfigurationTests: XCTestCase {
 	func testSetValue_ofStringValue_withParentOfNestedKey() throws {
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		XCTAssertThrowsError(
 			try config.setValue(3, forKeyPath: "bank_details")
@@ -366,7 +366,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setRawValue("Jack", forKeyPath: "name")
 		let value = try config.getValue(ofType: String.self, forKeyPath: "name")
@@ -380,7 +380,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setRawValue("25", forKeyPath: "age")
 		let value = try config.getValue(ofType: Int.self, forKeyPath: "age")
@@ -394,7 +394,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setValue("70.3", forKeyPath: "weight")
 		let value = try config.getValue(ofType: Double.self, forKeyPath: "weight")
@@ -409,7 +409,7 @@ final class ConfigurationTests: XCTestCase {
 
 		let fixture = Fixture.dictionary
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
-		let config = try Configuration(contentsOf: fixture.url, fileInteractor: interactor)
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		try config.setRawValue("false", forKeyPath: "likes_pepperoni_pizza")
 		let valueA = try config.getValue(ofType: Bool.self, forKeyPath: "likes_pepperoni_pizza")
