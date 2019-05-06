@@ -13,16 +13,17 @@ public final class Configuration {
 		}
 	}
 
-	public var supportedKeyPaths = [KeyPath]()
+	public let supportedKeyPaths: [KeyPath]
 
-	public convenience init(contentsOf url: URL) throws {
-		try self.init(contentsOf: url, fileInteractor: FileInteractor())
+	public convenience init(contentsOf url: URL, supportedKeyPaths: [KeyPath]) throws {
+		try self.init(contentsOf: url, supportedKeyPaths: supportedKeyPaths, fileInteractor: FileInteractor())
 	}
 
-	init(contentsOf url: URL, fileInteractor: JSONFileInteractor) throws {
+	init(contentsOf url: URL, supportedKeyPaths: [KeyPath], fileInteractor: JSONFileInteractor) throws {
 		self.url = url
 		self.fileInteractor = fileInteractor
 		self.rawObject = try fileInteractor.read(from: url)
+		self.supportedKeyPaths = supportedKeyPaths
 	}
 
 	public func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T? {
