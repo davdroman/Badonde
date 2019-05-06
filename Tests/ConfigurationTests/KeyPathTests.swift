@@ -75,4 +75,25 @@ final class KeyPathTests: XCTestCase {
 		let keypath: Configuration.KeyPath = "jira.email"
 		XCTAssertNotNil(keypath)
 	}
+
+	// MARK: Hashable conformance
+
+	func testKeyPathHashable() {
+		let keyPathA = Configuration.KeyPath(rawValue: "jira.email", description: "Jira email")!
+		let keyPathB = Configuration.KeyPath(rawValue: "jira.email")!
+		let keyPathC = Configuration.KeyPath(rawValue: "jira.accessToken")!
+		let set = Set([keyPathA, keyPathB, keyPathC])
+		XCTAssertEqual(set, [keyPathB, keyPathC])
+		XCTAssertEqual(set, [keyPathA, keyPathC])
+	}
+
+	// MARK: Equatable conformance
+
+	func testKeyPathEquatable() {
+		let keyPathA = Configuration.KeyPath(rawValue: "jira.email", description: "Jira email")!
+		let keyPathB = Configuration.KeyPath(rawValue: "jira.email")!
+		let keyPathC = Configuration.KeyPath(rawValue: "jira.accessToken")!
+		XCTAssertTrue(keyPathA == keyPathB)
+		XCTAssertFalse(keyPathA == keyPathC)
+	}
 }
