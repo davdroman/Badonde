@@ -69,13 +69,6 @@ final class KeyPathTests: XCTestCase {
 		XCTAssertNil(keypath)
 	}
 
-	// MARK: keys
-
-	func testKeyPathKeys() {
-		let keypath = Configuration.KeyPath(rawValue: "jira.email")
-		XCTAssertEqual(keypath?.keys, ["jira", "email"])
-	}
-
 	// MARK: string literal init
 
 	func testKeyPathStringLiteralInit() {
