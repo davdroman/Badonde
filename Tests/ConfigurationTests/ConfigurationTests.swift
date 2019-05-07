@@ -421,6 +421,53 @@ final class ConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+
+	// MARK: removeValue
+
+	func testRemoveValue_withPlainKey() throws {
+		let expectation = self.expectation(description: "File is written after setting value")
+
+		let fixture = Fixture.dictionary
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
+
+		try config.removeValue(forKeyPath: .likesPineapplePizza)
+		let value = try config.getValue(ofType: Bool.self, forKeyPath: .likesPineapplePizza)
+		XCTAssertNil(value)
+
+		waitForExpectations(timeout: 1, handler: nil)
+	}
+
+	func testRemoveValue_withNestedKey() throws {
+		let expectation = self.expectation(description: "File is written after setting value")
+
+		let fixture = Fixture.dictionary
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
+
+		try config.removeValue(forKeyPath: .bankDetailsAccountNumber)
+		let value = try config.getValue(ofType: Bool.self, forKeyPath: .bankDetailsAccountNumber)
+		XCTAssertNil(value)
+
+		waitForExpectations(timeout: 1, handler: nil)
+	}
+
+	func testRemoveValue_withParentOfNestedKey() throws {
+		let fixture = Fixture.dictionary
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
+		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
+
+		XCTAssertThrowsError(
+			try config.removeValue(forKeyPath: .bankDetails)
+		) { error in
+			switch error {
+			case let Configuration.Error.incompatibleKeyPath(keyPath):
+				XCTAssertEqual(keyPath.rawValue, "bank_details")
+			default:
+				XCTFail()
+			}
+		}
+	}
 }
 
 extension Configuration.KeyPath {

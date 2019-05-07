@@ -12,6 +12,10 @@ public final class Configuration {
 			rawObject = newValue.unflatten()
 		}
 	}
+	var allocatedKeyPaths: [KeyPath] {
+		let existingKeyPaths = keyPathedObject.keys.compactMap { KeyPath(rawValue: $0) }
+		return existingKeyPaths + supportedKeyPaths
+	}
 
 	public let supportedKeyPaths: [KeyPath]
 
@@ -62,11 +66,7 @@ public final class Configuration {
 			throw Error.invalidValueType(T.self)
 		}
 
-		let existingKeyPaths = keyPathedObject.keys.compactMap { KeyPath(rawValue: $0) }
-		let allocatedKeyPaths = existingKeyPaths + supportedKeyPaths
-		let isKeyPathCompatible = keyPath.isCompatible(in: allocatedKeyPaths)
-
-		guard isKeyPathCompatible else {
+		guard keyPath.isCompatible(in: allocatedKeyPaths) else {
 			throw Error.incompatibleKeyPath(keyPath)
 		}
 
@@ -102,5 +102,15 @@ public final class Configuration {
 		} else {
 			try setValue(value, forKeyPath: keyPath)
 		}
+	}
+
+	public func removeValue(forKeyPath keyPath: KeyPath) throws {
+		guard keyPath.isCompatible(in: allocatedKeyPaths) else {
+			throw Error.incompatibleKeyPath(keyPath)
+		}
+
+		keyPathedObject[keyPath.rawValue] = nil
+
+		try fileInteractor.write(rawObject, to: url)
 	}
 }
