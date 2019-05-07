@@ -1,6 +1,14 @@
 import Foundation
 
-public final class Configuration {
+public protocol KeyValueInteractive {
+	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T?
+	func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws
+	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String?
+	func setRawValue(_ value: String, forKeyPath keyPath: KeyPath) throws
+	func removeValue(forKeyPath keyPath: KeyPath) throws
+}
+
+public class Configuration: KeyValueInteractive {
 	let url: URL
 	let fileInteractor: JSONFileInteractor
 	var rawObject: [String: Any]
@@ -31,7 +39,7 @@ public final class Configuration {
 	}
 
 	public func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T? {
-		guard let rawValue = getRawValue(forKeyPath: keyPath) else {
+		guard let rawValue = try getRawValue(forKeyPath: keyPath) else {
 			return nil
 		}
 
@@ -75,7 +83,7 @@ public final class Configuration {
 		try fileInteractor.write(rawObject, to: url)
 	}
 
-	public func getRawValue(forKeyPath keyPath: KeyPath) -> String? {
+	public func getRawValue(forKeyPath keyPath: KeyPath) throws -> String? {
 		guard let value = keyPathedObject[keyPath.rawValue] else {
 			return nil
 		}
