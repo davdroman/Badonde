@@ -2,6 +2,15 @@ import Foundation
 import Configuration
 
 extension Configuration {
+	static let supportedKeyPaths: [KeyPath] = [
+		.jiraEmail,
+		.jiraAccessToken,
+		.githubAccessToken,
+		.gitRemote,
+		.firebaseProjectId,
+		.firebaseSecretToken,
+	]
+
 	enum Scope {
 		case local
 		case global
@@ -17,17 +26,7 @@ extension Configuration {
 	}
 
 	convenience init(scope: Scope) throws {
-		try self.init(
-			contentsOf: scope.url,
-			supportedKeyPaths: [
-				.jiraEmail,
-				.jiraAccessToken,
-				.githubAccessToken,
-				.gitRemote,
-				.firebaseProjectId,
-				.firebaseSecretToken,
-			]
-		)
+		try self.init(contentsOf: scope.url, supportedKeyPaths: Configuration.supportedKeyPaths)
 	}
 }
 

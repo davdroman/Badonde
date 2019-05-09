@@ -5,6 +5,18 @@ import Configuration
 class ConfigCommand: Command {
 	let name = "config"
 	let shortDescription = "Get and set project or global options"
+	lazy var longDescription: String = {
+		let formattedKeyPaths = Configuration.supportedKeyPaths
+			.map { "  " + [$0.rawValue, $0.description].compactMap({ $0 }).joined(separator: " - ") }
+			.joined(separator: "\n")
+		return """
+		Get and set project or global options.
+
+		Keys:
+
+		\(formattedKeyPaths)
+		"""
+	}()
 
 	let global = Flag(
 		"--global",
