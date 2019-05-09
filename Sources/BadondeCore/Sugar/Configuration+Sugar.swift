@@ -31,37 +31,39 @@ extension Configuration {
 	}
 }
 
-final class MultiscopeConfiguration: KeyValueInteractive {
-	let localConfiguration: KeyValueInteractive
-	let globalConfiguration: KeyValueInteractive
+final class DynamicConfiguration: KeyValueInteractive {
+	private let configurations: [KeyValueInteractive]
 
-	init() throws {
-		localConfiguration = try Configuration(scope: .local)
-		globalConfiguration = try Configuration(scope: .global)
+	init(prioritizedScopes: [Configuration.Scope]) throws {
+		self.configurations = try prioritizedScopes.map { try Configuration(scope: $0) }
 	}
 
 	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T? {
-		let localValue = try localConfiguration.getValue(ofType: T.self, forKeyPath: keyPath)
-		let globalValue = try globalConfiguration.getValue(ofType: T.self, forKeyPath: keyPath)
-		return globalValue ?? localValue
+		return try configurations
+			.lazy
+			.reversed()
+			.compactMap { try $0.getValue(ofType: type, forKeyPath: keyPath) }
+			.first
 	}
 
 	func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
-		try localConfiguration.setValue(value, forKeyPath: keyPath)
+		try configurations.first?.setValue(value, forKeyPath: keyPath)
 	}
 
 	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String? {
-		let localValue = try localConfiguration.getRawValue(forKeyPath: keyPath)
-		let globalValue = try globalConfiguration.getRawValue(forKeyPath: keyPath)
-		return globalValue ?? localValue
+		return try configurations
+			.lazy
+			.reversed()
+			.compactMap { try $0.getRawValue(forKeyPath: keyPath) }
+			.first
 	}
 
 	func setRawValue(_ value: String, forKeyPath keyPath: KeyPath) throws {
-		try localConfiguration.setRawValue(value, forKeyPath: keyPath)
+		try configurations.first?.setRawValue(value, forKeyPath: keyPath)
 	}
 
 	func removeValue(forKeyPath keyPath: KeyPath) throws {
-		try localConfiguration.removeValue(forKeyPath: keyPath)
+		try configurations.first?.removeValue(forKeyPath: keyPath)
 	}
 }
 

@@ -87,7 +87,7 @@ class ConfigCommand: Command {
 		case (false, true):
 			return try Configuration(scope: .global)
 		case (false, false):
-			return try MultiscopeConfiguration()
+			return try DynamicConfiguration(prioritizedScopes: [.local, .global])
 		case (true, true):
 			fatalError("More than one config scope option was specified")
 		}
