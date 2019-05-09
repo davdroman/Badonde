@@ -36,10 +36,12 @@ public final class CommandLineTool {
 
 		#if DEBUG
 		let elapsedTime = Date().timeIntervalSince(startDate)
-		let numberFormatter = NumberFormatter()
-		numberFormatter.maximumFractionDigits = 2
-		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
-		print("Badonde execution took \(prettyElapsedTime)s")
+		if elapsedTime > 1 {
+			let numberFormatter = NumberFormatter()
+			numberFormatter.maximumFractionDigits = 2
+			let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
+			print("Badonde execution took \(prettyElapsedTime)s")
+		}
 		#endif
 
 		exit(exitStatus)
