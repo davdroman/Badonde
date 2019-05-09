@@ -56,60 +56,60 @@ final class ConfigurationTests: XCTestCase {
 
 	func testGetRawValue_ofStringValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: .name)
+		let value = try config.getRawValue(forKeyPath: .name)
 		XCTAssertEqual(value, "David")
 	}
 
 	func testGetRawValue_ofIntValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: .age)
+		let value = try config.getRawValue(forKeyPath: .age)
 		XCTAssertEqual(value, "21")
 	}
 
 	func testGetRawValue_ofDoubleValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: .weight)
+		let value = try config.getRawValue(forKeyPath: .weight)
 		XCTAssertEqual(value, "72.5")
 	}
 
 	func testGetRawValue_ofBoolValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
-		let valueA = config.getRawValue(forKeyPath: .likesPepperoniPizza)
+		let valueA = try config.getRawValue(forKeyPath: .likesPepperoniPizza)
 		XCTAssertEqual(valueA, "true")
 
-		let valueB = config.getRawValue(forKeyPath: .likesPineapplePizza)
+		let valueB = try config.getRawValue(forKeyPath: .likesPineapplePizza)
 		XCTAssertEqual(valueB, "false")
 	}
 
 	func testGetRawValue_ofArrayValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: .favoriteMovies)
+		let value = try config.getRawValue(forKeyPath: .favoriteMovies)
 		XCTAssertNil(value)
 	}
 
 	func testGetRawValue_ofStringValue_withNestedKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
-		let valueA = config.getRawValue(forKeyPath: .bankDetails)
+		let valueA = try config.getRawValue(forKeyPath: .bankDetails)
 		XCTAssertNil(valueA)
 
-		let valueB = config.getRawValue(forKeyPath: .bankDetailsAccountNumber)
+		let valueB = try config.getRawValue(forKeyPath: .bankDetailsAccountNumber)
 		XCTAssertEqual(valueB, "69696969")
 
-		let valueC = config.getRawValue(forKeyPath: .bankDetailsSortCode)
+		let valueC = try config.getRawValue(forKeyPath: .bankDetailsSortCode)
 		XCTAssertEqual(valueC, "69-69-69")
 	}
 
 	func testGetRawValue_ofNullType_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: "iq")
+		let value = try config.getRawValue(forKeyPath: "iq")
 		XCTAssertNil(value)
 	}
 
 	func testGetRawValue_withMissingPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = config.getRawValue(forKeyPath: .likesGazpacho)
+		let value = try config.getRawValue(forKeyPath: .likesGazpacho)
 		XCTAssertNil(value)
 	}
 
@@ -470,20 +470,20 @@ final class ConfigurationTests: XCTestCase {
 	}
 }
 
-extension Configuration.KeyPath {
-	static let name: Configuration.KeyPath = "name"
-	static let age: Configuration.KeyPath = "age"
-	static let weight: Configuration.KeyPath = "weight"
+extension KeyPath {
+	static let name: KeyPath = "name"
+	static let age: KeyPath = "age"
+	static let weight: KeyPath = "weight"
 
-	static let likesPepperoniPizza: Configuration.KeyPath = "likes_pepperoni_pizza"
-	static let likesPineapplePizza: Configuration.KeyPath = "likes_pineapple_pizza"
-	static let favoriteMovies: Configuration.KeyPath = "favorite_movies"
+	static let likesPepperoniPizza: KeyPath = "likes_pepperoni_pizza"
+	static let likesPineapplePizza: KeyPath = "likes_pineapple_pizza"
+	static let favoriteMovies: KeyPath = "favorite_movies"
 
-	static let bankDetails: Configuration.KeyPath = "bank_details"
-	static let bankDetailsAccount: Configuration.KeyPath = "bank_details.account"
-	static let bankDetailsAccountNumber: Configuration.KeyPath = "bank_details.account_number"
-	static let bankDetailsSortCode: Configuration.KeyPath = "bank_details.sort_code"
+	static let bankDetails: KeyPath = "bank_details"
+	static let bankDetailsAccount: KeyPath = "bank_details.account"
+	static let bankDetailsAccountNumber: KeyPath = "bank_details.account_number"
+	static let bankDetailsSortCode: KeyPath = "bank_details.sort_code"
 
-	static let likesGazpacho: Configuration.KeyPath = "likes_gazpacho"
-	static let socialSecurityNumber: Configuration.KeyPath = "social_security_number"
+	static let likesGazpacho: KeyPath = "likes_gazpacho"
+	static let socialSecurityNumber: KeyPath = "social_security_number"
 }
