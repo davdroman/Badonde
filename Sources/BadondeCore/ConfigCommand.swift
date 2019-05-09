@@ -41,8 +41,8 @@ class ConfigCommand: Command {
 		]
 	}
 
-	let key = Parameter()
-	let value = OptionalParameter()
+	let key = Parameter(completion: .none)
+	let value = OptionalParameter(completion: .none)
 
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
