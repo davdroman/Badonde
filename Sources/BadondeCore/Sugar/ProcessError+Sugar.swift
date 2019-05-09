@@ -71,6 +71,12 @@ extension BurghCommand.Error: ProcessError {
 	}
 }
 
+extension ConfigCommand.Error: ProcessError {
+	var message: String? {
+		return localizedDescription.prettify()
+	}
+}
+
 extension PullRequest.AnalyticsReporter.Error: ProcessError {
 	var message: String? {
 		return localizedDescription.prettify()

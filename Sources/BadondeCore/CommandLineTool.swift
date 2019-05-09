@@ -22,6 +22,7 @@ public final class CommandLineTool {
 				AppifyCommand(),
 				BurghCommand(startDate: startDate),
 				ClearCommand(),
+				ConfigCommand(),
 				SetFirebaseAuthCommand()
 			]
 		)
