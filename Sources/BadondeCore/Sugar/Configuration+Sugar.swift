@@ -40,7 +40,6 @@ final class DynamicConfiguration: KeyValueInteractive {
 	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T? {
 		return try configurations
 			.lazy
-			.reversed()
 			.compactMap { try $0.getValue(ofType: type, forKeyPath: keyPath) }
 			.first
 	}
@@ -52,7 +51,6 @@ final class DynamicConfiguration: KeyValueInteractive {
 	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String? {
 		return try configurations
 			.lazy
-			.reversed()
 			.compactMap { try $0.getRawValue(forKeyPath: keyPath) }
 			.first
 	}
