@@ -1,6 +1,8 @@
 import Foundation
 import SwiftCLI
 import Configuration
+import Git
+import Sugar
 
 class ConfigCommand: Command {
 	let name = "config"
@@ -95,11 +97,13 @@ class ConfigCommand: Command {
 	private func configuration(forLocalValue localValue: Bool, globalValue: Bool) throws -> KeyValueInteractive {
 		switch (localValue, globalValue) {
 		case (true, false):
-			return try Configuration(scope: .local)
+			let repository = try Repository()
+			return try Configuration(scope: .local(repository.topLevelPath))
 		case (false, true):
 			return try Configuration(scope: .global)
 		case (false, false):
-			return try DynamicConfiguration(prioritizedScopes: [.local, .global])
+			let localScope = (try? Repository().topLevelPath).map { Configuration.Scope.local($0) }
+			return try DynamicConfiguration(prioritizedScopes: [localScope, .global].compacted())
 		case (true, true):
 			fatalError("More than one config scope option was specified")
 		}
