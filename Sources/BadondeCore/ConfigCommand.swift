@@ -67,6 +67,7 @@ class ConfigCommand: Command {
 			throw Error.incompatibleKey(key.value)
 		}
 
+		let keyPathIsSupported = Configuration.supportedKeyPaths.contains(keyPath)
 		let configuration = try self.configuration(forLocalValue: local.value, globalValue: global.value)
 
 		switch (get.value, set.value, unset.value) {
@@ -75,15 +76,26 @@ class ConfigCommand: Command {
 				stdout <<< rawValue
 			}
 		case (false, true, false): // set
+			Logger.step("Setting...")
 			guard let value = value.value else {
 				throw Error.valueMissing(forKey: key.value)
 			}
 			try configuration.setRawValue(value, forKeyPath: keyPath)
+			if !keyPathIsSupported {
+				Logger.succeed()
+				Logger.info("Value '\(value)' was set for '\(keyPath.rawValue)', however this key is not used by Badonde")
+			}
 		case (false, false, true): // unset
+			Logger.step("Unsetting...")
 			try configuration.removeValue(forKeyPath: keyPath)
 		case (false, false, false): // none (dynamic)
 			if let value = value.value {
+				Logger.step("Setting...")
 				try configuration.setRawValue(value, forKeyPath: keyPath)
+				if !keyPathIsSupported {
+					Logger.succeed()
+					Logger.info("Value '\(value)' was set for '\(keyPath.rawValue)', however this key is not used by Badonde")
+				}
 			} else if let value = try configuration.getRawValue(forKeyPath: keyPath) {
 				stdout <<< value
 			}
