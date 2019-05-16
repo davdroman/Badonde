@@ -1,4 +1,6 @@
 import Foundation
+import Configuration
+import Git
 
 struct LegacyConfiguration: Codable {
 	var jiraEmail: String
@@ -40,6 +42,40 @@ final class LegacyConfigurationStore {
 		try createConfigurationFolderIfNeeded()
 		try configuration.write(to: LegacyConfigurationStore.additionalConfigurationFilePath)
 		self.additionalConfiguration = configuration
+	}
+
+	class func migrateIfNeeded() throws {
+		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
+
+		let store = LegacyConfigurationStore()
+		let migrationNeeded = store.configuration != nil || store.additionalConfiguration != nil
+
+		guard migrationNeeded else {
+			return
+		}
+
+		Logger.step("Legacy configuration detected, migrating...")
+
+		let projectPath = try Repository().topLevelPath
+		let configuration = try Configuration(scope: .local(projectPath))
+
+		if let legacyConfiguration = store.configuration {
+			try configuration.setValue(legacyConfiguration.githubAccessToken, forKeyPath: .githubAccessToken)
+			try configuration.setValue(legacyConfiguration.jiraEmail, forKeyPath: .jiraEmail)
+			try configuration.setValue(legacyConfiguration.jiraApiToken, forKeyPath: .jiraApiToken)
+		}
+
+		if let firebaseProjectId = store.additionalConfiguration?.firebaseProjectId {
+			try configuration.setValue(firebaseProjectId, forKeyPath: .firebaseProjectId)
+		}
+
+		if let firebaseSecretToken = store.additionalConfiguration?.firebaseSecretToken {
+			try configuration.setValue(firebaseSecretToken, forKeyPath: .firebaseSecretToken)
+		}
+
+		try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
+
+		Logger.finish()
 	}
 
 	private func createConfigurationFolderIfNeeded() throws {
