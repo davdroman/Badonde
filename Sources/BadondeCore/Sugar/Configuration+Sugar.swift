@@ -18,7 +18,7 @@ extension Configuration {
 
 	static let supportedKeyPaths: [KeyPath] = [
 		.jiraEmail,
-		.jiraAccessToken,
+		.jiraApiToken,
 		.githubAccessToken,
 		.gitRemote,
 		.firebaseProjectId,
@@ -41,8 +41,8 @@ extension KeyPath {
 		rawValue: "jira.email",
 		description: "The email to use when connecting to JIRA"
 	)!
-	public static let jiraAccessToken = KeyPath(
-		rawValue: "jira.accessToken",
+	public static let jiraApiToken = KeyPath(
+		rawValue: "jira.apiToken",
 		description: "The API access token to use when connecting to JIRA"
 	)!
 	public static let githubAccessToken = KeyPath(
