@@ -1,5 +1,7 @@
 import Foundation
 import SwiftCLI
+import Git
+import Configuration
 
 class SetFirebaseAuthCommand: Command {
 	let name = "set-firebase-auth"
@@ -30,11 +32,10 @@ class SetFirebaseAuthCommand: Command {
 		Logger.warn(deprecationNotice + "\n")
 
 		Logger.step("Setting Firebase configuration")
-		let store = LegacyConfigurationStore()
-		var additionalConfiguration = store.additionalConfiguration ?? LegacyAdditionalConfiguration()
-		additionalConfiguration.firebaseProjectId = projectId.value
-		additionalConfiguration.firebaseSecretToken = secretToken.value
-		try store.setAdditionalConfiguration(additionalConfiguration)
+		let projectPath = try Repository().topLevelPath
+		let configuration = try Configuration(scope: .local(projectPath))
+		try configuration.setValue(projectId.value, forKeyPath: .firebaseProjectId)
+		try configuration.setValue(secretToken.value, forKeyPath: .firebaseSecretToken)
 
 		Logger.finish()
 	}
