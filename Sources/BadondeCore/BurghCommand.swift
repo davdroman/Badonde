@@ -28,6 +28,9 @@ class BurghCommand: Command {
 		Logger.step("Reading configuration")
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
+		let jiraEmail = try getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration)
+		let jiraApiToken = try getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration)
 
 		let allRemotes = try Remote.getAll()
 		let remote: Remote
@@ -65,11 +68,6 @@ class BurghCommand: Command {
 
 		Logger.step("Deriving repo shorthand from remote")
 		let repositoryShorthand = try remote.repositoryShorthand()
-
-		// Fetch or prompt for JIRA and GitHub credentials
-		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
-		let jiraEmail = try getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration)
-		let jiraApiToken = try getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration)
 
 		let labelAPI = Label.API(accessToken: githubAccessToken)
 		let milestoneAPI = Milestone.API(accessToken: githubAccessToken)
