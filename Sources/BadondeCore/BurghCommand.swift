@@ -59,7 +59,7 @@ class BurghCommand: Command {
 
 		// Fetch or prompt for JIRA and GitHub credentials
 		Logger.step("Reading configuration")
-		let configurationStore = ConfigurationStore()
+		let configurationStore = LegacyConfigurationStore()
 		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
 		let labelAPI = Label.API(accessToken: configuration.githubAccessToken)

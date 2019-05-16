@@ -29,7 +29,7 @@ class ClearCommand: Command {
 		Logger.warn(deprecationNotice + "\n")
 
 		Logger.step("Removing existing configuration")
-		let store = ConfigurationStore()
+		let store = LegacyConfigurationStore()
 		guard store.configuration != nil else {
 			Logger.info("No existing configuration found")
 			return

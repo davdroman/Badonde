@@ -21,8 +21,8 @@ extension Command {
 }
 
 extension Command {
-	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> _Configuration {
-		let configuration: _Configuration
+	func getOrPromptConfiguration(for store: LegacyConfigurationStore) throws -> LegacyConfiguration {
+		let configuration: LegacyConfiguration
 
 		if let config = store.configuration {
 			configuration = config
@@ -55,7 +55,7 @@ extension Command {
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			configuration = _Configuration(
+			configuration = LegacyConfiguration(
 				jiraEmail: jiraEmailInput,
 				jiraApiToken: jiraApiTokenInput,
 				githubAccessToken: githubAccessTokenInput

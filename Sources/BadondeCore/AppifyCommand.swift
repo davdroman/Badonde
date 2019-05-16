@@ -11,7 +11,7 @@ class AppifyCommand: Command {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
 		Logger.step("Checking for existing configuration")
-		let configurationStore = ConfigurationStore()
+		let configurationStore = LegacyConfigurationStore()
 		let configuration = try getOrPromptConfiguration(for: configurationStore)
 
 		Logger.step("Searching for latest .app template available")
