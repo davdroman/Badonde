@@ -1,5 +1,6 @@
 import Foundation
 import SwiftCLI
+import Configuration
 
 private enum CommandConstant {
 	#if !DEBUG
@@ -21,13 +22,13 @@ extension Command {
 }
 
 extension Command {
-	func getOrPromptConfiguration(for store: ConfigurationStore) throws -> Configuration {
-		let configuration: Configuration
+	func getOrPromptRawValue(forKeyPath keyPath: KeyPath, in configuration: KeyValueInteractive) throws -> String {
+		if let value = try configuration.getRawValue(forKeyPath: keyPath) {
+			return value
+		}
 
-		if let config = store.configuration {
-			configuration = config
-		} else {
-			Logger.info("Configuration not found, credentials required")
+		switch keyPath {
+		case .jiraEmail:
 			let jiraEmailInput = Input.readLine(
 				prompt: "Enter JIRA email address:",
 				secure: false,
@@ -35,6 +36,9 @@ extension Command {
 					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
 				}
 			)
+			try configuration.setRawValue(jiraEmailInput, forKeyPath: keyPath)
+			return jiraEmailInput
+		case .jiraApiToken:
 			#if !DEBUG
 			openURL(.jiraApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
 			#endif
@@ -45,24 +49,23 @@ extension Command {
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
+			try configuration.setRawValue(jiraApiTokenInput, forKeyPath: keyPath)
+			return jiraApiTokenInput
+		case .githubAccessToken:
 			#if !DEBUG
 			openURL(.githubApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
 			#endif
 			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token (generated at '\(URL.githubApiTokenUrl)':",
+				prompt: "Enter GitHub API token with 'repo' scope (generated at '\(URL.githubApiTokenUrl)':",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			configuration = Configuration(
-				jiraEmail: jiraEmailInput,
-				jiraApiToken: jiraApiTokenInput,
-				githubAccessToken: githubAccessTokenInput
-			)
-			try store.setConfiguration(configuration)
+			try configuration.setRawValue(githubAccessTokenInput, forKeyPath: keyPath)
+			return githubAccessTokenInput
+		default:
+			fatalError("KeyPath not supported for prompting")
 		}
-
-		return configuration
 	}
 }

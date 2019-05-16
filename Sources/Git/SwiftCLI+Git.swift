@@ -59,3 +59,9 @@ extension SwiftCLI: PushInteractor {
 		return try run(bash: "git push \(remote) \(branch)")
 	}
 }
+
+extension SwiftCLI: RepositoryInteractor {
+	func getTopLevelPath(from path: String) throws -> String {
+		return try capture(bash: "git -C \(path) rev-parse --show-toplevel").stdout
+	}
+}

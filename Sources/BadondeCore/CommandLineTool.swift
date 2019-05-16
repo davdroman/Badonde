@@ -11,9 +11,11 @@ public final class CommandLineTool {
 
 	public init() {}
 
-	public let startDate = Date()
-
 	public func run(with arguments: [String]? = nil) {
+		_ = try? LegacyConfigurationStore.migrateIfNeeded()
+
+		let startDate = Date()
+
 		let cli = CLI(
 			name: Constant.name,
 			version: Constant.version,
@@ -22,6 +24,7 @@ public final class CommandLineTool {
 				AppifyCommand(),
 				BurghCommand(startDate: startDate),
 				ClearCommand(),
+				ConfigCommand(),
 				SetFirebaseAuthCommand()
 			]
 		)
@@ -35,10 +38,12 @@ public final class CommandLineTool {
 
 		#if DEBUG
 		let elapsedTime = Date().timeIntervalSince(startDate)
-		let numberFormatter = NumberFormatter()
-		numberFormatter.maximumFractionDigits = 2
-		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
-		print("Badonde execution took \(prettyElapsedTime)s")
+		if elapsedTime > 1 {
+			let numberFormatter = NumberFormatter()
+			numberFormatter.maximumFractionDigits = 2
+			let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
+			print("Badonde execution took \(prettyElapsedTime)s")
+		}
 		#endif
 
 		exit(exitStatus)

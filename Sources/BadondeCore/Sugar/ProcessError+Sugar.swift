@@ -1,5 +1,6 @@
 import Foundation
 import SwiftCLI
+import Configuration
 import Git
 import GitHub
 import Jira
@@ -16,6 +17,12 @@ extension ProcessError {
 }
 
 // Explicit declaration needed given Swift's static nature.
+
+extension Configuration.Error: ProcessError {
+	public var message: String? {
+		return localizedDescription.prettify()
+	}
+}
 
 extension Git.Branch.Error: ProcessError {
 	public var message: String? {
@@ -66,6 +73,12 @@ extension AppifyCommand.Error: ProcessError {
 }
 
 extension BurghCommand.Error: ProcessError {
+	var message: String? {
+		return localizedDescription.prettify()
+	}
+}
+
+extension ConfigCommand.Error: ProcessError {
 	var message: String? {
 		return localizedDescription.prettify()
 	}

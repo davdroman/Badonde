@@ -2,6 +2,8 @@ import Foundation
 import SwiftCLI
 import GitHub
 import OSAKit
+import Git
+import Configuration
 
 class AppifyCommand: Command {
 	let name = "appify"
@@ -10,12 +12,12 @@ class AppifyCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		Logger.step("Checking for existing configuration")
-		let configurationStore = ConfigurationStore()
-		let configuration = try getOrPromptConfiguration(for: configurationStore)
+		Logger.step("Reading configuration")
+		let projectPath = try Repository().topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
 
 		Logger.step("Searching for latest .app template available")
-		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
+		let releaseAPI = Release.API(accessToken: try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration))
 		let currentVersion = CommandLineTool.Constant.version
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy

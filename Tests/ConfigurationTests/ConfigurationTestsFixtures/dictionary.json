@@ -1,0 +1,21 @@
+{
+	"name": "David",
+	"email": "d@vidroman.dev",
+	"age": 21,
+	"height": 180,
+	"weight": 72.5,
+	"likes_pepperoni_pizza": true,
+	"likes_pineapple_pizza": false,
+	"favorite_movies": [
+		"Avengers: Endgame",
+		"The Matrix",
+		"Fight Club",
+		"The Dark Knight",
+		"Bohemian Rhapsody"
+	],
+	"bank_details": {
+		"account_number": "69696969",
+		"sort_code": "69-69-69"
+	},
+	"iq": null
+}
