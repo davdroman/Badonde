@@ -20,6 +20,7 @@ extension Configuration {
 		.jiraEmail,
 		.jiraApiToken,
 		.githubAccessToken,
+		.gitAutopush,
 		.gitRemote,
 		.firebaseProjectId,
 		.firebaseSecretToken,
@@ -48,6 +49,10 @@ extension KeyPath {
 	public static let githubAccessToken = KeyPath(
 		rawValue: "github.accessToken",
 		description: "The API access token to use when connecting to GitHub"
+	)!
+	public static let gitAutopush = KeyPath(
+		rawValue: "git.autopush",
+		description: "Push changes automatically if branch is ahead of remote (true/false)"
 	)!
 	public static let gitRemote = KeyPath(
 		rawValue: "git.remote",
