@@ -12,7 +12,7 @@ public final class CommandLineTool {
 	public init() {}
 
 	public func run(with arguments: [String]? = nil) {
-		// TODO: migrate old config if needed
+		_ = try? LegacyConfigurationStore.migrateIfNeeded()
 
 		let startDate = Date()
 
