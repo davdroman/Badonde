@@ -15,6 +15,12 @@ public final class Logger {
 		spinner = nil
 	}
 
+	public class func warn(_ description: String) {
+		spinner = Spinner(pattern: .dots, text: description, color: .lightCyan, shouldHideCursor: false)
+		spinner?.warn(text: description)
+		spinner = nil
+	}
+
 	public class func fail() {
 		spinner?.fail()
 		spinner = nil
