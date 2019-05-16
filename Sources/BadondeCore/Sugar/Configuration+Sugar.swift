@@ -2,15 +2,6 @@ import Foundation
 import Configuration
 
 extension Configuration {
-	static let supportedKeyPaths: [KeyPath] = [
-		.jiraEmail,
-		.jiraAccessToken,
-		.githubAccessToken,
-		.gitRemote,
-		.firebaseProjectId,
-		.firebaseSecretToken,
-	]
-
 	enum Scope {
 		case local(URL)
 		case global
@@ -25,42 +16,23 @@ extension Configuration {
 		}
 	}
 
+	static let supportedKeyPaths: [KeyPath] = [
+		.jiraEmail,
+		.jiraAccessToken,
+		.githubAccessToken,
+		.gitRemote,
+		.firebaseProjectId,
+		.firebaseSecretToken,
+	]
+
 	convenience init(scope: Scope) throws {
 		try self.init(contentsOf: scope.url, supportedKeyPaths: Configuration.supportedKeyPaths)
 	}
 }
 
-final class DynamicConfiguration: KeyValueInteractive {
-	private let configurations: [KeyValueInteractive]
-
-	init(prioritizedScopes: [Configuration.Scope]) throws {
-		self.configurations = try prioritizedScopes.map { try Configuration(scope: $0) }
-	}
-
-	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T? {
-		return try configurations
-			.lazy
-			.compactMap { try $0.getValue(ofType: type, forKeyPath: keyPath) }
-			.first
-	}
-
-	func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
-		try configurations.first?.setValue(value, forKeyPath: keyPath)
-	}
-
-	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String? {
-		return try configurations
-			.lazy
-			.compactMap { try $0.getRawValue(forKeyPath: keyPath) }
-			.first
-	}
-
-	func setRawValue(_ value: String, forKeyPath keyPath: KeyPath) throws {
-		try configurations.first?.setRawValue(value, forKeyPath: keyPath)
-	}
-
-	func removeValue(forKeyPath keyPath: KeyPath) throws {
-		try configurations.first?.removeValue(forKeyPath: keyPath)
+extension DynamicConfiguration {
+	convenience init(prioritizedScopes: [Configuration.Scope]) throws {
+		try self.init(prioritizedConfigurations: prioritizedScopes.map(Configuration.init(scope:)))
 	}
 }
 
