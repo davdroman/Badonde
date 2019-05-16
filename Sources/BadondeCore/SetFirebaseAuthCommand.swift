@@ -30,8 +30,8 @@ class SetFirebaseAuthCommand: Command {
 		Logger.warn(deprecationNotice + "\n")
 
 		Logger.step("Setting Firebase configuration")
-		let store = ConfigurationStore()
-		var additionalConfiguration = store.additionalConfiguration ?? AdditionalConfiguration()
+		let store = LegacyConfigurationStore()
+		var additionalConfiguration = store.additionalConfiguration ?? LegacyAdditionalConfiguration()
 		additionalConfiguration.firebaseProjectId = projectId.value
 		additionalConfiguration.firebaseSecretToken = secretToken.value
 		try store.setAdditionalConfiguration(additionalConfiguration)
