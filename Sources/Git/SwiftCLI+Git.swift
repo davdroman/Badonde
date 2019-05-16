@@ -56,7 +56,7 @@ extension SwiftCLI: DiffInteractor {
 
 extension SwiftCLI: PushInteractor {
 	func perform(remote: String, branch: String) throws {
-		return try run(bash: "git push \(remote) \(branch)")
+		_ = try capture(bash: "git push \(remote) \(branch)")
 	}
 }
 
