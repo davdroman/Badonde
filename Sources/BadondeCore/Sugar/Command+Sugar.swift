@@ -10,7 +10,7 @@ private enum CommandConstant {
 
 extension Command {
 	func openURL(_ url: URL) throws {
-		try run(bash: "open \"\(url)\"")
+		_ = try capture(bash: "open \"\(url)\"")
 	}
 
 	func openURL(_ url: URL, delay: TimeInterval) {
