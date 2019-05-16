@@ -11,9 +11,11 @@ public final class CommandLineTool {
 
 	public init() {}
 
-	public let startDate = Date()
-
 	public func run(with arguments: [String]? = nil) {
+		// TODO: migrate old config if needed
+
+		let startDate = Date()
+
 		let cli = CLI(
 			name: Constant.name,
 			version: Constant.version,
