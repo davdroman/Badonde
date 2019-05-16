@@ -36,6 +36,10 @@ extension KeyPath: Hashable, Equatable {
 }
 
 extension KeyPath {
+	func isCompatible(in keyPaths: [KeyPath]) -> Bool {
+		return !keyPaths.contains(where: { self.isPartial(of: $0) })
+	}
+
 	private var keys: [String] {
 		return rawValue.components(separatedBy: ".")
 	}
@@ -45,9 +49,5 @@ extension KeyPath {
 			return false
 		}
 		return zip(keys, keyPath.keys).allSatisfy { $0 == $1 }
-	}
-
-	func isCompatible(in keyPaths: [KeyPath]) -> Bool {
-		return !keyPaths.contains(where: { self.isPartial(of: $0) })
 	}
 }
