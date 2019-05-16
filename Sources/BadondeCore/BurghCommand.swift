@@ -12,10 +12,6 @@ extension URL {
 
 class BurghCommand: Command {
 
-	enum Constant {
-		static let defaultRemoteName = "origin"
-	}
-
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
@@ -33,10 +29,18 @@ class BurghCommand: Command {
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
 
-		// TODO: use config's remote or default to origin
-		// https://github.com/davdroman/Badonde/issues/58
-		guard let remote = try Remote.getAll().first(where: { $0.name == Constant.defaultRemoteName }) else {
-			throw Error.gitRemoteMissing(Constant.defaultRemoteName)
+		let allRemotes = try Remote.getAll()
+		let remote: Remote
+		if let remoteName = try configuration.getValue(ofType: String.self, forKeyPath: .gitRemote) {
+			guard let selectedRemote = allRemotes.first(where: { $0.name == remoteName }) else {
+				throw Error.gitRemoteMissing(remoteName)
+			}
+			remote = selectedRemote
+		} else {
+			guard let selectedRemote = allRemotes.first else {
+				throw Error.noGitRemotes
+			}
+			remote = selectedRemote
 		}
 
 		let currentBranch = try Branch.current()
