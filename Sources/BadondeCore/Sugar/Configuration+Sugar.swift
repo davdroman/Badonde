@@ -40,15 +40,15 @@ extension DynamicConfiguration {
 extension KeyPath {
 	public static let jiraEmail = KeyPath(
 		rawValue: "jira.email",
-		description: "The email to use when connecting to JIRA"
+		description: "Email to use when connecting to JIRA"
 	)!
 	public static let jiraApiToken = KeyPath(
 		rawValue: "jira.apiToken",
-		description: "The API access token to use when connecting to JIRA"
+		description: "API access token to use when connecting to JIRA"
 	)!
 	public static let githubAccessToken = KeyPath(
 		rawValue: "github.accessToken",
-		description: "The API access token to use when connecting to GitHub"
+		description: "API access token to use when connecting to GitHub"
 	)!
 	public static let gitAutopush = KeyPath(
 		rawValue: "git.autopush",
@@ -56,14 +56,14 @@ extension KeyPath {
 	)!
 	public static let gitRemote = KeyPath(
 		rawValue: "git.remote",
-		description: "The Git remote to derive information off"
+		description: "Git remote to derive information off"
 	)!
 	public static let firebaseProjectId = KeyPath(
 		rawValue: "firebase.projectId",
-		description: "The Firebase Realtime DB's project id for analytics reporting"
+		description: "Firebase Realtime DB's project id for analytics reporting"
 	)!
 	public static let firebaseSecretToken = KeyPath(
 		rawValue: "firebase.secretToken",
-		description: "The Firebase Realtime DB's secret token for analytics reporting"
+		description: "Firebase Realtime DB's secret token for analytics reporting"
 	)!
 }
