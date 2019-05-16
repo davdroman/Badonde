@@ -61,8 +61,6 @@ class ConfigCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		// TODO: migrate old config if needed
-
 		guard let keyPath = KeyPath(rawValue: key.value) else {
 			throw Error.incompatibleKey(key.value)
 		}
