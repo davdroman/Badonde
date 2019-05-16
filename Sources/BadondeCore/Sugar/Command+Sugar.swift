@@ -27,6 +27,8 @@ extension Command {
 			return value
 		}
 
+		Logger.info("Credentials required")
+
 		switch keyPath {
 		case .jiraEmail:
 			let jiraEmailInput = Input.readLine(

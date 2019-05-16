@@ -15,9 +15,10 @@ class AppifyCommand: Command {
 		Logger.step("Reading configuration")
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
 
 		Logger.step("Searching for latest .app template available")
-		let releaseAPI = Release.API(accessToken: try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration))
+		let releaseAPI = Release.API(accessToken: githubAccessToken)
 		let currentVersion = CommandLineTool.Constant.version
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
