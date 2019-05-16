@@ -3,6 +3,7 @@ import SwiftCLI
 import GitHub
 import Git
 import Jira
+import Configuration
 
 extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
@@ -10,10 +11,6 @@ extension URL {
 }
 
 class BurghCommand: Command {
-
-	enum Constant {
-		static let defaultRemoteName = "origin"
-	}
 
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
@@ -28,10 +25,22 @@ class BurghCommand: Command {
 	func execute() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		// TODO: use config's remote or default to origin
-		// https://github.com/davdroman/Badonde/issues/58
-		guard let remote = try Remote.getAll().first(where: { $0.name == Constant.defaultRemoteName }) else {
-			throw Error.gitRemoteMissing(Constant.defaultRemoteName)
+		Logger.step("Reading configuration")
+		let projectPath = try Repository().topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+
+		let allRemotes = try Remote.getAll()
+		let remote: Remote
+		if let remoteName = try configuration.getValue(ofType: String.self, forKeyPath: .gitRemote) {
+			guard let selectedRemote = allRemotes.first(where: { $0.name == remoteName }) else {
+				throw Error.gitRemoteMissing(remoteName)
+			}
+			remote = selectedRemote
+		} else {
+			guard let selectedRemote = allRemotes.first else {
+				throw Error.noGitRemotes
+			}
+			remote = selectedRemote
 		}
 
 		let currentBranch = try Branch.current()
@@ -54,17 +63,17 @@ class BurghCommand: Command {
 			try Git.Push.perform(remote: remote, branch: currentBranch)
 		}
 
-		Logger.step("Deriving repo shorthand from remote configuration")
+		Logger.step("Deriving repo shorthand from remote")
 		let repositoryShorthand = try remote.repositoryShorthand()
 
 		// Fetch or prompt for JIRA and GitHub credentials
-		Logger.step("Reading configuration")
-		let configurationStore = ConfigurationStore()
-		let configuration = try getOrPromptConfiguration(for: configurationStore)
+		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
+		let jiraEmail = try getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration)
+		let jiraApiToken = try getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration)
 
-		let labelAPI = Label.API(accessToken: configuration.githubAccessToken)
-		let milestoneAPI = Milestone.API(accessToken: configuration.githubAccessToken)
-		let ticketAPI = Ticket.API(email: configuration.jiraEmail, apiToken: configuration.jiraApiToken)
+		let labelAPI = Label.API(accessToken: githubAccessToken)
+		let milestoneAPI = Milestone.API(accessToken: githubAccessToken)
+		let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
 
 		// Set up PR properties to be assigned
 		let pullRequestBaseBranch: String
@@ -175,8 +184,8 @@ class BurghCommand: Command {
 		#if !DEBUG
 		Logger.step("Reporting analytics data")
 		if
-			let firebaseProjectId = configurationStore.additionalConfiguration?.firebaseProjectId,
-			let firebaseSecretToken = configurationStore.additionalConfiguration?.firebaseSecretToken
+			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
+			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
 		{
 			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 			try reporter.report(pullRequest.analyticsData(startDate: startDate))
