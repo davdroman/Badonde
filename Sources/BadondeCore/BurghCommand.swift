@@ -57,13 +57,15 @@ class BurghCommand: Command {
 			throw Error.noTicketKey
 		}
 
-		// TODO: tweak depending on "git.autopush" config value.
-		// If disabled, show an info step letting the user know
-		// the branch needs pushing.
-		// https://github.com/davdroman/Badonde/issues/57
 		if try currentBranch.isAhead(of: remote) {
-			Logger.step("Local branch is ahead of remote, pushing changes now")
-			try Git.Push.perform(remote: remote, branch: currentBranch)
+			let isGitAutopushEnabled = try configuration.getValue(ofType: Bool.self, forKeyPath: .gitAutopush) == true
+			if isGitAutopushEnabled {
+				Logger.step("Local branch is ahead of remote, pushing changes now")
+				try Git.Push.perform(remote: remote, branch: currentBranch)
+			} else {
+				Logger.succeed()
+				Logger.info("Local branch is ahead of remote, please push your changes")
+			}
 		}
 
 		Logger.step("Deriving repo shorthand from remote")
