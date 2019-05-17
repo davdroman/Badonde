@@ -1,9 +1,10 @@
 import Foundation
+import protocol SwiftCLI.ProcessError
 
 extension Error {
 	func analyticsData() -> ErrorAnalyticsReporter.Data {
 		return ErrorAnalyticsReporter.Data(
-			description: localizedDescription
+			description: (self as? ProcessError)?.message ?? localizedDescription
 		)
 	}
 }
