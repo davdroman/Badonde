@@ -39,7 +39,13 @@ public final class CommandLineTool {
 		}
 
 		if let error = cli.thrownError {
-			_ = try? reportError(error)
+			do {
+				try reportError(error)
+			} catch let error as ProcessError {
+				print(error.message ?? error.localizedDescription)
+			} catch let error {
+				print(error.localizedDescription)
+			}
 		}
 
 		#if DEBUG
