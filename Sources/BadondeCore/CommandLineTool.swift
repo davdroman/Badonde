@@ -38,6 +38,7 @@ public final class CommandLineTool {
 			exitStatus = cli.go()
 		}
 
+		#if !DEBUG
 		if let error = cli.thrownError {
 			do {
 				try reportError(error)
@@ -47,6 +48,7 @@ public final class CommandLineTool {
 				print(error.localizedDescription)
 			}
 		}
+		#endif
 
 		#if DEBUG
 		logElapsedTime(withStartDate: startDate)
