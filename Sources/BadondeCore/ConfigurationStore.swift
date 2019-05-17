@@ -48,9 +48,8 @@ final class LegacyConfigurationStore {
 	class func migrateIfNeeded() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
-		// Append .badonde to .gitignore if not appended.
-		// Remove along with whole class when `badonde init`
-		// is implemented.
+		// Append .badonde to .gitignore if not present.
+		// Remove along with whole class when `badonde init` is implemented.
 		// https://github.com/davdroman/Badonde/pull/79
 		let projectPath = try Repository().topLevelPath
 		let gitignorePath = projectPath.appendingPathComponent(".gitignore")
