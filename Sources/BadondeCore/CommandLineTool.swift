@@ -79,11 +79,14 @@ public final class CommandLineTool {
 
 	private func logElapsedTime(withStartDate startDate: Date) {
 		let elapsedTime = Date().timeIntervalSince(startDate)
-		if elapsedTime > 1 {
-			let numberFormatter = NumberFormatter()
-			numberFormatter.maximumFractionDigits = 2
-			let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
-			print("Badonde execution took \(prettyElapsedTime)s")
+
+		guard elapsedTime > 1 else {
+			return
 		}
+
+		let numberFormatter = NumberFormatter()
+		numberFormatter.maximumFractionDigits = 2
+		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
+		print("Badonde execution took \(prettyElapsedTime)s")
 	}
 }
