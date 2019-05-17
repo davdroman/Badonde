@@ -1,5 +1,7 @@
 import Foundation
 import SwiftCLI
+import Configuration
+import Git
 
 public final class CommandLineTool {
 
@@ -36,7 +38,39 @@ public final class CommandLineTool {
 			exitStatus = cli.go()
 		}
 
+		if let error = cli.thrownError {
+			Logger.step("Reporting error")
+			do {
+				try reportError(error)
+				Logger.succeed()
+			} catch {
+				Logger.fail()
+			}
+		}
+
 		#if DEBUG
+		logElapsedTime(withStartDate: startDate)
+		#endif
+
+		exit(exitStatus)
+	}
+
+	private func reportError(_ error: Error) throws {
+		let projectPath = try Repository().topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+
+		guard
+			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
+			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
+		else {
+			return
+		}
+
+		let reporter = ErrorAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+		try reporter.report(error.analyticsData())
+	}
+
+	private func logElapsedTime(withStartDate startDate: Date) {
 		let elapsedTime = Date().timeIntervalSince(startDate)
 		if elapsedTime > 1 {
 			let numberFormatter = NumberFormatter()
@@ -44,8 +78,5 @@ public final class CommandLineTool {
 			let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
 			print("Badonde execution took \(prettyElapsedTime)s")
 		}
-		#endif
-
-		exit(exitStatus)
 	}
 }
