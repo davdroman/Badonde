@@ -39,13 +39,7 @@ public final class CommandLineTool {
 		}
 
 		if let error = cli.thrownError {
-			Logger.step("Reporting error")
-			do {
-				try reportError(error)
-				Logger.succeed()
-			} catch {
-				Logger.fail()
-			}
+			_ = try? reportError(error)
 		}
 
 		#if DEBUG
@@ -56,6 +50,8 @@ public final class CommandLineTool {
 	}
 
 	private func reportError(_ error: Error) throws {
+		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
+
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
 
@@ -66,8 +62,11 @@ public final class CommandLineTool {
 			return
 		}
 
+		Logger.step("Reporting error")
 		let reporter = ErrorAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 		try reporter.report(error.analyticsData())
+
+		Logger.finish()
 	}
 
 	private func logElapsedTime(withStartDate startDate: Date) {
