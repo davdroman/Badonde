@@ -1,6 +1,7 @@
 import Foundation
 import Configuration
 import Git
+import SwiftCLI
 
 struct LegacyConfiguration: Codable {
 	var jiraEmail: String
@@ -47,6 +48,17 @@ final class LegacyConfigurationStore {
 	class func migrateIfNeeded() throws {
 		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
 
+		// Append .badonde to .gitignore if not present.
+		// Remove along with whole class when `badonde init` is implemented.
+		// https://github.com/davdroman/Badonde/pull/79
+		let projectPath = try Repository().topLevelPath
+		let gitignorePath = projectPath.appendingPathComponent(".gitignore")
+		let gitignoreContents = try String(contentsOf: gitignorePath)
+		if !gitignoreContents.contains(".badonde") {
+			_ = try capture(bash: "echo >> \(gitignorePath.path)")
+			_ = try capture(bash: "echo '.badonde' >> \(gitignorePath.path)")
+		}
+
 		let store = LegacyConfigurationStore()
 		let migrationNeeded = store.configuration != nil || store.additionalConfiguration != nil
 
@@ -56,7 +68,6 @@ final class LegacyConfigurationStore {
 
 		Logger.step("Legacy configuration detected, migrating...")
 
-		let projectPath = try Repository().topLevelPath
 		let configuration = try Configuration(scope: .local(projectPath))
 
 		if let legacyConfiguration = store.configuration {
