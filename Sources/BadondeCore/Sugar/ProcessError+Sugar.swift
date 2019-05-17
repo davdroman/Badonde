@@ -90,6 +90,12 @@ extension PullRequest.AnalyticsReporter.Error: ProcessError {
 	}
 }
 
+extension ErrorAnalyticsReporter.Error: ProcessError {
+	public var message: String? {
+		return localizedDescription.prettify()
+	}
+}
+
 private extension String {
 	func prettify() -> String {
 		return components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
