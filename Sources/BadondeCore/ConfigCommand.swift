@@ -59,8 +59,6 @@ class ConfigCommand: Command {
 	let value = OptionalParameter(completion: .none)
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		guard let keyPath = KeyPath(rawValue: key.value) else {
 			throw Error.incompatibleKey(key.value)
 		}
@@ -98,8 +96,6 @@ class ConfigCommand: Command {
 		default:
 			fatalError("More than one config action option was specified")
 		}
-
-		Logger.succeed()
 	}
 
 	private func configuration(forLocalValue localValue: Bool, globalValue: Bool) throws -> KeyValueInteractive {

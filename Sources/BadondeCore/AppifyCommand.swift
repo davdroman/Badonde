@@ -10,8 +10,6 @@ class AppifyCommand: Command {
 	let shortDescription = "Generates a Badonde.app for your specific project"
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		Logger.step("Reading configuration")
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
@@ -84,7 +82,5 @@ class AppifyCommand: Command {
 		Logger.info("Shortcut was set up but you might need to close currently active applications for it to work")
 
 		_ = try capture(bash: "open -R \(appPath)")
-
-		Logger.succeed()
 	}
 }

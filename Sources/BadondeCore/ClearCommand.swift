@@ -26,8 +26,6 @@ class ClearCommand: Command {
 	}()
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		Logger.warn(deprecationNotice + "\n")
 
 		Logger.step("Removing existing configuration")
@@ -36,7 +34,5 @@ class ClearCommand: Command {
 		try configuration.removeValue(forKeyPath: .jiraEmail)
 		try configuration.removeValue(forKeyPath: .jiraApiToken)
 		try configuration.removeValue(forKeyPath: .githubAccessToken)
-
-		Logger.succeed()
 	}
 }
