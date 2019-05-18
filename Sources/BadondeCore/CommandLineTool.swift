@@ -14,6 +14,12 @@ public final class CommandLineTool {
 	public init() {}
 
 	public func run(with arguments: [String]? = nil) {
+		// Intercept CTRL+C exit sequence
+		signal(SIGINT) { _ in
+			Logger.finish()
+			exit(EXIT_SUCCESS)
+		}
+
 		_ = try? LegacyConfigurationStore.migrateIfNeeded()
 
 		let startDate = Date()
@@ -30,12 +36,6 @@ public final class CommandLineTool {
 				SetFirebaseAuthCommand()
 			]
 		)
-
-		// Intercept CTRL+C exit sequence
-		signal(SIGINT) { _ in
-			Logger.finish()
-			exit(EXIT_SUCCESS)
-		}
 
 		cli.errorMessageFormatter = { $0.prettifiedErrorMessage }
 
