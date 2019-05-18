@@ -2,7 +2,7 @@ import Foundation
 import CLISpinner
 
 public final class Logger {
-	private static let spinner = Spinner(pattern: .dots, color: .lightCyan, shouldHideCursor: false)
+	private static let spinner = Spinner(pattern: .dots, color: .lightCyan)
 	private static var isStepping = false
 
 	public class func step(_ description: String) {
@@ -18,17 +18,17 @@ public final class Logger {
 	public class func info(_ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
 			spinner.succeed()
-			isStepping = false
 		}
 		spinner.info(text: description)
+		isStepping = false
 	}
 
 	public class func warn(_ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
 			spinner.succeed()
-			isStepping = false
 		}
 		spinner.warn(text: description)
+		isStepping = false
 	}
 
 	public class func fail() {
@@ -43,5 +43,9 @@ public final class Logger {
 			spinner.succeed()
 			isStepping = false
 		}
+	}
+
+	public class func finish() {
+		spinner.unhideCursor()
 	}
 }

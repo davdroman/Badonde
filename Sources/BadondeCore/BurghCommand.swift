@@ -23,8 +23,6 @@ class BurghCommand: Command {
 	}
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		Logger.step("Reading configuration")
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
@@ -190,7 +188,5 @@ class BurghCommand: Command {
 			try reporter.report(pullRequest.analyticsData(startDate: startDate))
 		}
 		#endif
-
-		Logger.succeed()
 	}
 }

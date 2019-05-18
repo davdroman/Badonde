@@ -31,6 +31,16 @@ public final class CommandLineTool {
 			]
 		)
 
+		// Intercept CTRL+C exit sequence
+		signal(SIGINT) { _ in
+			Logger.finish()
+			exit(EXIT_SUCCESS)
+		}
+
+		cli.didThrowErrorClosure = { _ in
+			Logger.fail()
+		}
+
 		let exitStatus: Int32
 		if let arguments = arguments {
 			exitStatus = cli.go(with: arguments)
@@ -38,28 +48,32 @@ public final class CommandLineTool {
 			exitStatus = cli.go()
 		}
 
-		#if !DEBUG
 		if let error = cli.thrownError {
+			#if !DEBUG
 			do {
 				try reportError(error)
+				Logger.succeed()
 			} catch let error as ProcessError {
+				Logger.fail()
 				print(error.message ?? error.localizedDescription)
 			} catch let error {
+				Logger.fail()
 				print(error.localizedDescription)
 			}
+			#endif
+		} else {
+			Logger.succeed()
+
+			#if DEBUG
+			logElapsedTime(withStartDate: startDate)
+			#endif
 		}
-		#endif
 
-		#if DEBUG
-		logElapsedTime(withStartDate: startDate)
-		#endif
-
+		Logger.finish()
 		exit(exitStatus)
 	}
 
 	private func reportError(_ error: Error) throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
 
@@ -73,8 +87,6 @@ public final class CommandLineTool {
 		Logger.step("Reporting error")
 		let reporter = ErrorAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 		try reporter.report(error.analyticsData())
-
-		Logger.succeed()
 	}
 
 	private func logElapsedTime(withStartDate startDate: Date) {
