@@ -27,7 +27,7 @@ extension Command {
 			return value
 		}
 
-		Logger.info("Credentials required")
+		Logger.info("Credentials required", succeedPrevious: false)
 
 		switch keyPath {
 		case .jiraEmail:
@@ -45,7 +45,7 @@ extension Command {
 			openURL(.jiraApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
-				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)':",
+				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)'):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
@@ -58,7 +58,7 @@ extension Command {
 			openURL(.githubApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
 			#endif
 			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token with 'repo' scope (generated at '\(URL.githubApiTokenUrl)':",
+				prompt: "Enter GitHub API token with 'repo' scope (generated at '\(URL.githubApiTokenUrl)'):",
 				secure: true,
 				errorResponse: { input, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
