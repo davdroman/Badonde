@@ -11,8 +11,8 @@ extension BurghCommand {
 	}
 }
 
-extension BurghCommand.Error: Swift.Error {
-	var localizedDescription: String {
+extension BurghCommand.Error: LocalizedError {
+	var errorDescription: String? {
 		switch self {
 		case .gitRemoteMissing(let remoteName):
 			return "Git remote '\(remoteName)' is missing, please add it with `git remote add \(remoteName) [GIT_URL]`"

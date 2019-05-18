@@ -37,6 +37,8 @@ public final class CommandLineTool {
 			exit(EXIT_SUCCESS)
 		}
 
+		cli.errorMessageFormatter = { $0.components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n") }
+
 		cli.didThrowErrorClosure = { _ in
 			Logger.fail()
 		}

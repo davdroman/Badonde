@@ -7,8 +7,8 @@ extension Commit {
 	}
 }
 
-extension Commit.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Commit.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case .missingProperty:
 			return "Could not find required properties for commit in initialization"

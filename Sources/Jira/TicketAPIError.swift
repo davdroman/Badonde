@@ -7,8 +7,8 @@ extension Ticket.API {
 	}
 }
 
-extension Ticket.API.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Ticket.API.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case .authorizationEncodingError:
 			return "JIRA authorization token encoding failed"
