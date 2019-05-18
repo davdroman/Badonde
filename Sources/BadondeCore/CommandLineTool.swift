@@ -53,7 +53,7 @@ public final class CommandLineTool {
 		if let error = cli.thrownError {
 			#if !DEBUG
 			do {
-				try reportError(error)
+				try reportError(error, startDate: startDate)
 				Logger.succeed()
 			} catch let error {
 				Logger.fail()
@@ -72,7 +72,7 @@ public final class CommandLineTool {
 		exit(exitStatus)
 	}
 
-	private func reportError(_ error: Error) throws {
+	private func reportError(_ error: Error, startDate: Date) throws {
 		let projectPath = try Repository().topLevelPath
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
 
@@ -85,7 +85,7 @@ public final class CommandLineTool {
 
 		Logger.step("Reporting error")
 		let reporter = ErrorAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-		try reporter.report(error.analyticsData())
+		try reporter.report(error.analyticsData(startDate: startDate))
 	}
 
 	private func logElapsedTime(withStartDate startDate: Date) {
