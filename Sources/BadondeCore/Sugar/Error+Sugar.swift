@@ -1,10 +1,12 @@
 import Foundation
-import protocol SwiftCLI.ProcessError
 
 extension Error {
-	func analyticsData() -> ErrorAnalyticsReporter.Data {
+	func analyticsData(startDate: Date) -> ErrorAnalyticsReporter.Data {
 		return ErrorAnalyticsReporter.Data(
-			description: (self as? ProcessError)?.message ?? localizedDescription
+			description: localizedDescription,
+			elapsedTime: Date().timeIntervalSince(startDate),
+			timestamp: startDate,
+			version: CommandLineTool.Constant.version
 		)
 	}
 }
@@ -12,6 +14,9 @@ extension Error {
 final class ErrorAnalyticsReporter {
 	struct Data: Codable {
 		var description: String
+		var elapsedTime: TimeInterval
+		var timestamp: Date
+		var version: String
 	}
 
 	private let firebaseProjectId: String
