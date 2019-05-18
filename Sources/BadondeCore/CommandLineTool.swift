@@ -14,6 +14,12 @@ public final class CommandLineTool {
 	public init() {}
 
 	public func run(with arguments: [String]? = nil) {
+		// Intercept CTRL+C exit sequence
+		signal(SIGINT) { _ in
+			Logger.finish()
+			exit(EXIT_SUCCESS)
+		}
+
 		_ = try? LegacyConfigurationStore.migrateIfNeeded()
 
 		let startDate = Date()
@@ -31,11 +37,7 @@ public final class CommandLineTool {
 			]
 		)
 
-		// Intercept CTRL+C exit sequence
-		signal(SIGINT) { _ in
-			Logger.finish()
-			exit(EXIT_SUCCESS)
-		}
+		cli.errorMessageFormatter = { $0.prettifiedErrorMessage }
 
 		cli.didThrowErrorClosure = { _ in
 			Logger.fail()
@@ -53,12 +55,9 @@ public final class CommandLineTool {
 			do {
 				try reportError(error)
 				Logger.succeed()
-			} catch let error as ProcessError {
-				Logger.fail()
-				print(error.message ?? error.localizedDescription)
 			} catch let error {
 				Logger.fail()
-				print(error.localizedDescription)
+				print(error.localizedDescription.prettifiedErrorMessage)
 			}
 			#endif
 		} else {
@@ -100,5 +99,11 @@ public final class CommandLineTool {
 		numberFormatter.maximumFractionDigits = 2
 		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
 		print("Badonde execution took \(prettyElapsedTime)s")
+	}
+}
+
+private extension String {
+	var prettifiedErrorMessage: String {
+		return components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
