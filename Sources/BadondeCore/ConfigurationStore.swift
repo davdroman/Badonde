@@ -86,7 +86,7 @@ final class LegacyConfigurationStore {
 
 		try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
 
-		Logger.finish()
+		Logger.succeed()
 	}
 
 	private func createConfigurationFolderIfNeeded() throws {

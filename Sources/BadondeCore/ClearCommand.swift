@@ -37,6 +37,6 @@ class ClearCommand: Command {
 		try configuration.removeValue(forKeyPath: .jiraApiToken)
 		try configuration.removeValue(forKeyPath: .githubAccessToken)
 
-		Logger.finish()
+		Logger.succeed()
 	}
 }
