@@ -52,8 +52,8 @@ extension ErrorAnalyticsReporter {
 	}
 }
 
-extension ErrorAnalyticsReporter.Error: Swift.Error {
-	var localizedDescription: String {
+extension ErrorAnalyticsReporter.Error: LocalizedError {
+	var errorDescription: String? {
 		switch self {
 		case .http(let statusCode):
 			return "Firebase API call failed with HTTP status code \(statusCode)"

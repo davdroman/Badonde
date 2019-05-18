@@ -7,8 +7,8 @@ extension AppifyCommand {
 	}
 }
 
-extension AppifyCommand.Error: Swift.Error {
-	var localizedDescription: String {
+extension AppifyCommand.Error: LocalizedError {
+	var errorDescription: String? {
 		switch self {
 		case .noAppTemplateAvailable:
 			return "No .app templates available on GitHub, please contact d@vidroman.dev"

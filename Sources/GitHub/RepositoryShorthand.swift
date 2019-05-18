@@ -73,8 +73,8 @@ extension Repository.Shorthand {
 	}
 }
 
-extension Repository.Shorthand.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Repository.Shorthand.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case .parsing:
 			return "Shorthand does not match required pattern for parsing"

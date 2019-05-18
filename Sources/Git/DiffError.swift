@@ -7,8 +7,8 @@ extension Diff {
 	}
 }
 
-extension Diff.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Diff.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case .filePathsNotFound:
 			return "Could not find +++ &/or --- files"

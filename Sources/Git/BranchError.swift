@@ -6,8 +6,8 @@ extension Branch {
 	}
 }
 
-extension Branch.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Branch.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case .nameContainsInvalidCharacters:
 			return "Name contains invalid characters"

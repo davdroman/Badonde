@@ -7,8 +7,8 @@ extension ConfigCommand {
 	}
 }
 
-extension ConfigCommand.Error: Swift.Error {
-	var localizedDescription: String {
+extension ConfigCommand.Error: LocalizedError {
+	var errorDescription: String? {
 		switch self {
 		case let .incompatibleKey(key):
 			return "'\(key)' cannot not be used as a key"

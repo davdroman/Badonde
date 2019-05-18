@@ -9,8 +9,8 @@ extension Configuration {
 	}
 }
 
-extension Configuration.Error: Swift.Error {
-	public var localizedDescription: String {
+extension Configuration.Error: LocalizedError {
+	public var errorDescription: String? {
 		switch self {
 		case let .typeBridgingFailed(value, type):
 			return "Value '\(value)' could not be bridged to type '\(type)'"
