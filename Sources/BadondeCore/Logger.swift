@@ -8,9 +8,11 @@ public final class Logger {
 	public class func step(_ description: String) {
 		if isStepping {
 			spinner.succeed()
+			spinner.text = description
+		} else {
+			spinner._text = description
 		}
 		spinner.pattern = Pattern(from: Pattern.dots.symbols.map { $0.applyingColor(.lightCyan) })
-		spinner.text = description
 		spinner.start()
 		isStepping = true
 	}
