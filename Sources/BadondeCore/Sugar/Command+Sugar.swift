@@ -2,11 +2,16 @@ import Foundation
 import SwiftCLI
 import Configuration
 
-private enum CommandConstant {
-	#if !DEBUG
-	static let urlOpeningDelay: TimeInterval = 1.5
-	#endif
+private extension URL {
+	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
+	static let githubApiTokenUrl = URL(string: "https://github.com/settings/tokens")!
 }
+
+#if !DEBUG
+private enum CommandConstant {
+	static let urlOpeningDelay: TimeInterval = 1.5
+}
+#endif
 
 extension Command {
 	func openURL(_ url: URL) throws {
