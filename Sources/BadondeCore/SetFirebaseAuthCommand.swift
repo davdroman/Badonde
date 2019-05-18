@@ -37,6 +37,6 @@ class SetFirebaseAuthCommand: Command {
 		try configuration.setValue(projectId.value, forKeyPath: .firebaseProjectId)
 		try configuration.setValue(secretToken.value, forKeyPath: .firebaseSecretToken)
 
-		Logger.finish()
+		Logger.succeed()
 	}
 }

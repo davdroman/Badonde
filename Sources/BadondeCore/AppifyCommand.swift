@@ -65,7 +65,6 @@ class AppifyCommand: Command {
 		do {
 			_ = try capture(bash: "open '/System/Library/CoreServices/Script Menu.app'")
 		} catch {
-			Logger.succeed()
 			Logger.info("App was added to the Script Menu, to show go to Script Editor.app -> Preferences -> Show Script menu in menu bar")
 		}
 
@@ -82,11 +81,10 @@ class AppifyCommand: Command {
 		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
 		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
 		_ = try capture(bash: "defaults read pbs")
-		Logger.succeed()
 		Logger.info("Shortcut was set up but you might need to close currently active applications for it to work")
 
 		_ = try capture(bash: "open -R \(appPath)")
 
-		Logger.finish()
+		Logger.succeed()
 	}
 }

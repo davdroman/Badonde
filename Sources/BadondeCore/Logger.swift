@@ -2,36 +2,46 @@ import Foundation
 import CLISpinner
 
 public final class Logger {
-	private static var spinner: Spinner?
+	private static let spinner = Spinner(pattern: .dots, color: .lightCyan, shouldHideCursor: false)
+	private static var isStepping = false
 
 	public class func step(_ description: String) {
-		spinner?.succeed()
-		spinner = Spinner(pattern: .dots, text: description, color: .lightCyan, shouldHideCursor: false)
-		spinner?.start()
+		if isStepping {
+			spinner.succeed()
+		}
+		spinner.pattern = Pattern(from: Pattern.dots.symbols.map { $0.applyingColor(.lightCyan) })
+		spinner.text = description
+		spinner.start()
+		isStepping = true
 	}
 
-	public class func info(_ description: String) {
-		spinner?.info(text: description)
-		spinner = nil
+	public class func info(_ description: String, succeedPrevious: Bool = true) {
+		if isStepping, succeedPrevious {
+			spinner.succeed()
+			isStepping = false
+		}
+		spinner.info(text: description)
 	}
 
-	public class func warn(_ description: String) {
-		spinner = Spinner(pattern: .dots, text: description, color: .lightCyan, shouldHideCursor: false)
-		spinner?.warn(text: description)
-		spinner = nil
+	public class func warn(_ description: String, succeedPrevious: Bool = true) {
+		if isStepping, succeedPrevious {
+			spinner.succeed()
+			isStepping = false
+		}
+		spinner.warn(text: description)
 	}
 
 	public class func fail() {
-		spinner?.fail()
-		spinner = nil
+		if isStepping {
+			spinner.fail()
+			isStepping = false
+		}
 	}
 
 	public class func succeed() {
-		spinner?.succeed()
-	}
-
-	public class func finish() {
-		spinner?.succeed()
-		spinner = nil
+		if isStepping {
+			spinner.succeed()
+			isStepping = false
+		}
 	}
 }

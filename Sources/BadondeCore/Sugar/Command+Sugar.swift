@@ -27,7 +27,7 @@ extension Command {
 			return value
 		}
 
-		Logger.info("Credentials required")
+		Logger.info("Credentials required", succeedPrevious: false)
 
 		switch keyPath {
 		case .jiraEmail:

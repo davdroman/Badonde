@@ -63,7 +63,6 @@ class BurghCommand: Command {
 				Logger.step("Local branch is ahead of remote, pushing changes now")
 				try Git.Push.perform(remote: remote, branch: currentBranch)
 			} else {
-				Logger.succeed()
 				Logger.info("Local branch is ahead of remote, please push your changes")
 			}
 		}
@@ -192,6 +191,6 @@ class BurghCommand: Command {
 		}
 		#endif
 
-		Logger.finish()
+		Logger.succeed()
 	}
 }

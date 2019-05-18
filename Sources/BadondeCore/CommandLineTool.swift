@@ -74,7 +74,7 @@ public final class CommandLineTool {
 		let reporter = ErrorAnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 		try reporter.report(error.analyticsData())
 
-		Logger.finish()
+		Logger.succeed()
 	}
 
 	private func logElapsedTime(withStartDate startDate: Date) {
