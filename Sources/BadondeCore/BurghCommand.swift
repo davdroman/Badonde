@@ -5,11 +5,6 @@ import Git
 import Jira
 import Configuration
 
-extension URL {
-	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
-	static let githubApiTokenUrl = URL(string: "https://github.com/settings/tokens")!
-}
-
 class BurghCommand: Command {
 
 	let name = "burgh"
