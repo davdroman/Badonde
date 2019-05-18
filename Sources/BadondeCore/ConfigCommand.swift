@@ -59,8 +59,6 @@ class ConfigCommand: Command {
 	let value = OptionalParameter(completion: .none)
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		guard let keyPath = KeyPath(rawValue: key.value) else {
 			throw Error.incompatibleKey(key.value)
 		}
@@ -80,7 +78,6 @@ class ConfigCommand: Command {
 			}
 			try configuration.setRawValue(value, forKeyPath: keyPath)
 			if !keyPathIsSupported {
-				Logger.succeed()
 				Logger.info("Value '\(value)' was set for '\(keyPath.rawValue)', however this key is not used by Badonde")
 			}
 		case (false, false, true): // unset
@@ -91,7 +88,6 @@ class ConfigCommand: Command {
 				Logger.step("Setting...")
 				try configuration.setRawValue(value, forKeyPath: keyPath)
 				if !keyPathIsSupported {
-					Logger.succeed()
 					Logger.info("Value '\(value)' was set for '\(keyPath.rawValue)', however this key is not used by Badonde")
 				}
 			} else if let value = try configuration.getRawValue(forKeyPath: keyPath) {
@@ -100,8 +96,6 @@ class ConfigCommand: Command {
 		default:
 			fatalError("More than one config action option was specified")
 		}
-
-		Logger.finish()
 	}
 
 	private func configuration(forLocalValue localValue: Bool, globalValue: Bool) throws -> KeyValueInteractive {

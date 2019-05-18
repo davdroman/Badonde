@@ -27,8 +27,6 @@ class SetFirebaseAuthCommand: Command {
 	let secretToken = Parameter()
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
 		Logger.warn(deprecationNotice + "\n")
 
 		Logger.step("Setting Firebase configuration")
@@ -36,7 +34,5 @@ class SetFirebaseAuthCommand: Command {
 		let configuration = try Configuration(scope: .local(projectPath))
 		try configuration.setValue(projectId.value, forKeyPath: .firebaseProjectId)
 		try configuration.setValue(secretToken.value, forKeyPath: .firebaseSecretToken)
-
-		Logger.finish()
 	}
 }
