@@ -2,6 +2,10 @@ os:
   - osx
 language: objective-c
 osx_image: xcode10.2
+cache:
+  directories:
+    - .build
+    - ~/.danger-swift
 addons:
   homebrew:
     packages:
