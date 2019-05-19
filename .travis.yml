@@ -5,6 +5,7 @@ osx_image: xcode10.2
 before_install:
   - npm install -g danger
 script:
+  - swift build
   - swift run danger-swift ci
   - swift test
   - make
