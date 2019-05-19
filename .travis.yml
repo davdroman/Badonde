@@ -2,6 +2,10 @@ os:
   - osx
 language: objective-c
 osx_image: xcode10.2
+addons:
+  homebrew:
+    packages:
+      - swiftlint
 install:
   - npm install -g danger
   - swift build
