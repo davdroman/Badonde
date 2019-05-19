@@ -1,0 +1,60 @@
+# rule identifiers to exclude from running.
+disabled_rules:
+  - file_length
+  - line_length
+  - function_body_length
+  - identifier_name
+  - type_body_length
+  - force_cast
+  - force_try
+  - cyclomatic_complexity
+  - function_parameter_count
+  - force_unwrapping
+  - todo
+  - operator_whitespace
+  - type_name
+  - large_tuple
+  - trailing_comma
+  - shorthand_operator
+  - opening_brace
+  - generic_type_name
+
+# rules required to opt-in that are not by default.
+opt_in_rules:
+  - empty_count
+
+# paths to ignore during linting. Takes precedence over `included`.
+excluded:
+  - .build
+
+# rules that should be deemed as errors.
+closing_brace: error
+colon:
+  severity: error
+comma: error
+control_statement: error
+leading_whitespace: error
+legacy_cggeometry_functions: error
+legacy_constant: error
+legacy_constructor: error
+nesting:
+  type_level:
+    warning: 3
+operator_whitespace: error
+return_arrow_whitespace: error
+statement_position:
+  severity: error
+trailing_newline: error
+trailing_semicolon: error
+
+# rules that should be deemed as warnings.
+empty_count: warning
+
+# custom rules
+custom_rules:
+  # prevent `//my comment`
+  space_after_comment:
+    name: "Space after comment delimiter"
+    message: "Always add a whitespace character after a comment delimiter, i.e. `// my comment`"
+    regex: '((?:^|[^:\v]?+)\/\/\/?+[\S])'
+    severity: warning
