@@ -15,8 +15,11 @@ let package = Package(
 		.package(url: "https://github.com/DavdRoman/CLISpinner", .branch("master")),
 		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
 		.package(url: "https://github.com/DavdRoman/SwiftCLI", .branch("master")),
+		.package(url: "https://github.com/danger/swift.git", from: "1.0.0"),
 	],
 	targets: [
+		.target(name: "BadondeDanger", dependencies: ["Danger"]),
+
 		.target(name: "Badonde", dependencies: ["BadondeCore"]),
 		.target(
 			name: "BadondeCore",
