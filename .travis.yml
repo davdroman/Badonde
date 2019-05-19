@@ -2,10 +2,10 @@ os:
   - osx
 language: objective-c
 osx_image: xcode10.2
-before_install:
+install:
   - npm install -g danger
-script:
   - swift build
+script:
   - swift run danger-swift ci
   - swift test
   - make
