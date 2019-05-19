@@ -1,10 +1,10 @@
 import Foundation
 import SwiftCLI
+import GitHub
 import Configuration
 
 private extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
-	static let githubApiTokenUrl = URL(string: "https://github.com/settings/tokens")!
 }
 
 #if !DEBUG
@@ -59,18 +59,33 @@ extension Command {
 			try configuration.setRawValue(jiraApiTokenInput, forKeyPath: keyPath)
 			return jiraApiTokenInput
 		case .githubAccessToken:
-			#if !DEBUG
-			openURL(.githubApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
-			#endif
-			let githubAccessTokenInput = Input.readLine(
-				prompt: "Enter GitHub API token with 'repo' scope (generated at '\(URL.githubApiTokenUrl)'):",
-				secure: true,
+			let usernameInput = Input.readLine(
+				prompt: "Enter GitHub username:",
+				secure: false,
 				errorResponse: { input, invalidInputReason in
-					self.stderr <<< "Invalid token; \(invalidInputReason)"
+					self.stderr <<< "Invalid username; \(invalidInputReason)"
 				}
 			)
-			try configuration.setRawValue(githubAccessTokenInput, forKeyPath: keyPath)
-			return githubAccessTokenInput
+			let passwordInput = Input.readLine(
+				prompt: "Enter GitHub password (never stored):",
+				secure: true,
+				errorResponse: { input, invalidInputReason in
+					self.stderr <<< "Invalid password; \(invalidInputReason)"
+				}
+			)
+			let authorizationTokenName = "Badonde for " + [NSUserName(), Host.current().localizedName].compacted().joined(separator: "@")
+			let authorizationAPI = Authorization.API(username: usernameInput, password: passwordInput)
+			let authorization = try authorizationAPI.createAuthorization(scopes: [.repo], note: authorizationTokenName, oneTimePassword:
+				Input.readLine(
+					prompt: "Enter GitHub two-factor authentication code:",
+					secure: false,
+					errorResponse: { input, invalidInputReason in
+						self.stderr <<< "Invalid two-factor authentication code; \(invalidInputReason)"
+					}
+				)
+			)
+			try configuration.setRawValue(authorization.token, forKeyPath: keyPath)
+			return authorization.token
 		default:
 			fatalError("KeyPath not supported for prompting")
 		}
