@@ -8,13 +8,13 @@ cache:
     - ~/.danger-swift
 addons:
   homebrew:
+    taps:
+      - danger/tap
     packages:
+      - danger-swift
       - swiftlint
-install:
-  - npm install -g danger@7.x
-  - swift build
 script:
-  - swift run danger-swift ci
+  - danger-swift ci
   - swift test
   - make
 branches:
