@@ -217,7 +217,7 @@ final class DiffTests: XCTestCase {
 	func testInit_hunkHeaderMissing() throws {
 		let diffFileContent = try Fixture.hunkHeaderMissing.load(as: String.self)
 
-		XCTAssertThrowsError(try [Diff](rawDiffContent: diffFileContent)) { error in
+		XCTAssertThrowsError(try Diff(rawDiffContent: diffFileContent)) { error in
 			switch error {
 			case Diff.Error.hunkHeaderMissing:
 				break
@@ -230,7 +230,7 @@ final class DiffTests: XCTestCase {
 	func testInit_addedFileMissing() throws {
 		let diffFileContent = try Fixture.addedFileMissing.load(as: String.self)
 
-		XCTAssertThrowsError(try [Diff](rawDiffContent: diffFileContent)) { error in
+		XCTAssertThrowsError(try Diff(rawDiffContent: diffFileContent)) { error in
 			switch error {
 			case Diff.Error.filePathsNotFound:
 				break
