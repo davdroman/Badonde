@@ -8,9 +8,11 @@ cache:
     - ~/.danger-swift
 addons:
   homebrew:
+    taps:
+      - danger/tap
     packages:
+      - danger-swift
       - swiftlint
-      - danger/tap/danger-swift
 script:
   - danger-swift ci
   - swift test
