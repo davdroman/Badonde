@@ -91,10 +91,10 @@ extension Diff.Hunk {
 
 extension Array where Element == Diff {
 	public init(rawDiffContent: String) throws {
-		self = try rawDiffContent
+		self = rawDiffContent
 			.components(separatedBy: "diff --git ")
 			.filter { !$0.isEmpty }
-			.map { try Diff(rawDiffContent: $0) }
+			.compactMap { try? Diff(rawDiffContent: $0) }
 	}
 }
 
