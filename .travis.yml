@@ -10,11 +10,11 @@ addons:
   homebrew:
     packages:
       - swiftlint
+      - danger/tap/danger-swift
 install:
   - npm install -g danger@7.x
-  - swift build
 script:
-  - swift run danger-swift ci
+  - danger-swift ci
   - swift test
   - make
 branches:
