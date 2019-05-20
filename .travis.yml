@@ -11,7 +11,7 @@ addons:
     packages:
       - swiftlint
 install:
-  - npm install -g danger
+  - npm install -g danger@7.x
   - swift build
 script:
   - swift run danger-swift ci
