@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/Swift-4.2-orange.svg" alt="Swift version 4.2"/>
+	<img src="https://img.shields.io/badge/Swift-5.0-orange.svg" alt="Swift version 5"/>
 	<a href="https://travis-ci.org/davdroman/Badonde/branches">
 	    <img src="https://img.shields.io/travis/davdroman/Badonde/develop.svg" alt="Travis status" />
 	</a>
@@ -31,5 +31,5 @@ mint install davdroman/Badonde
 ```sh
 git clone --single-branch --branch master https://github.com/davdroman/Badonde.git
 cd Badonde
-make
+make install
 ```

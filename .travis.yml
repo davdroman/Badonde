@@ -1,9 +1,22 @@
 os:
   - osx
 language: objective-c
-osx_image: xcode10.1
+osx_image: xcode10.2
+cache:
+  directories:
+    - .build
+    - ~/.danger-swift
+addons:
+  homebrew:
+    taps:
+      - danger/tap
+    packages:
+      - danger-swift
+      - swiftlint
 script:
+  - danger-swift ci
   - swift test
+  - make
 branches:
   only:
     - master
