@@ -11,8 +11,6 @@ addons:
     packages:
       - swiftlint
       - danger/tap/danger-swift
-install:
-  - npm install -g danger@7.x
 script:
   - danger-swift ci
   - swift test
