@@ -2,20 +2,21 @@ import Foundation
 import SwiftCLI
 import GitHub
 import OSAKit
+import Git
+import Configuration
 
 class AppifyCommand: Command {
 	let name = "appify"
 	let shortDescription = "Generates a Badonde.app for your specific project"
 
 	func execute() throws {
-		defer { Logger.fail() } // defers failure call if `Logger.finish()` isn't called at the end, which means an error was thrown along the way
-
-		Logger.step("Checking for existing configuration")
-		let configurationStore = ConfigurationStore()
-		let configuration = try BurghCommand().getOrPromptConfiguration(for: configurationStore) // FIXME: refactor me
+		Logger.step("Reading configuration")
+		let projectPath = try Repository().topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
 
 		Logger.step("Searching for latest .app template available")
-		let releaseAPI = Release.API(accessToken: configuration.githubAccessToken)
+		let releaseAPI = Release.API(accessToken: githubAccessToken)
 		let currentVersion = CommandLineTool.Constant.version
 		let possibleLatestReleaseAsset = try releaseAPI.getReleases(for: "davdroman/Badonde")
 			.lazy
@@ -36,10 +37,10 @@ class AppifyCommand: Command {
 		let applescriptFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/Resources/Scripts/main.scpt")
 
 		Logger.step("Downloading .app template")
-		try run(bash: "rm -rf \(zipPath)")
-		try run(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
-		try run(bash: "rm -rf \(folderPath)")
-		try run(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
+		_ = try capture(bash: "rm -rf \(zipPath)")
+		_ = try capture(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
+		_ = try capture(bash: "rm -rf \(folderPath)")
+		_ = try capture(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
 
 		Logger.step("Setting up Badonde.app for your current project folder")
 		let currentDirectory = try capture(bash: "pwd").stdout
@@ -53,15 +54,15 @@ class AppifyCommand: Command {
 
 		Logger.step("Installing Badonde.app")
 		let appPath = "/Applications/\(appName)"
-		try run(bash: "rm -rf \(appPath)")
-		try run(bash: "cp -rf \(tmpAppPath) \(appPath)")
+		_ = try capture(bash: "rm -rf \(appPath)")
+		_ = try capture(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
 		Logger.step("Adding app to Script Menu")
-		try run(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
+		_ = try capture(bash: "mkdir -p ~/Library/Scripts")
+		_ = try capture(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
 		do {
-			try run(bash: "open '/System/Library/CoreServices/Script Menu.app' &> /dev/null")
+			_ = try capture(bash: "open '/System/Library/CoreServices/Script Menu.app'")
 		} catch {
-			Logger.succeed()
 			Logger.info("App was added to the Script Menu, to show go to Script Editor.app -> Preferences -> Show Script menu in menu bar")
 		}
 
@@ -69,20 +70,35 @@ class AppifyCommand: Command {
 		let serviceName = "Run Badonde"
 		let serviceFilename = "Run\\ Badonde.workflow"
 		let servicePath = "~/Library/Services/\(serviceFilename)"
-		try run(bash: "rm -rf \(servicePath)")
+		_ = try capture(bash: "rm -rf \(servicePath)")
 		let tmpServicePath = "\(folderPath)/\(serviceFilename)"
-		try run(bash: "cp -rf \(tmpServicePath) \(servicePath)")
-		try run(bash: "/System/Library/CoreServices/pbs -flush")
+		_ = try capture(bash: "cp -rf \(tmpServicePath) \(servicePath)")
+		_ = try capture(bash: "/System/Library/CoreServices/pbs -flush")
 
 		Logger.step("Setting up shortcut CMD+ALT+CTRL+B")
 		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
 		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
-		try run(bash: "defaults read pbs > /dev/null")
-		Logger.succeed()
+		_ = try capture(bash: "defaults read pbs")
 		Logger.info("Shortcut was set up but you might need to close currently active applications for it to work")
 
-		try run(bash: "open -R \(appPath)")
+		_ = try capture(bash: "open -R \(appPath)")
+	}
+}
 
-		Logger.finish()
+extension AppifyCommand {
+	enum Error {
+		case noAppTemplateAvailable
+		case appCompilationFailed
+	}
+}
+
+extension AppifyCommand.Error: LocalizedError {
+	var errorDescription: String? {
+		switch self {
+		case .noAppTemplateAvailable:
+			return "No .app templates available on GitHub, please contact d@vidroman.dev"
+		case .appCompilationFailed:
+			return "AppleScript app compilation failed"
+		}
 	}
 }

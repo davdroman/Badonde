@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/DavdRoman/CLISpinner",
         "state": {
           "branch": "master",
-          "revision": "b15eacb7dfac0e6305f106795177a363552ee940",
+          "revision": "773e04c9c1df4bf2d9a52a6a0d3511d11a1a8f59",
           "version": null
         }
       },
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {
           "branch": null,
-          "revision": "797a68d0a642609424b08f11eb56974a54d5f6e2",
-          "version": "3.1.4"
+          "revision": "9c52c1952e9b2305d4507cf473392ac2d7c9b155",
+          "version": "3.1.5"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/DavdRoman/SwiftCLI",
         "state": {
           "branch": "master",
-          "revision": "72d5aea762651b468691385f6ce9cb8c648a580d",
+          "revision": "fc3d8415c4c4d98db4c60b22e9457413ee8de01a",
           "version": null
         }
       },

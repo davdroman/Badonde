@@ -28,51 +28,38 @@ open class API {
 		request.setValue("token \(accessToken)", forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-		let response = session.synchronousDataTask(with: request)
-
-		if let error = response.error {
-			throw error
-		}
-
-		guard let httpResponse = response.response as? HTTPURLResponse, let jsonData = response.data else {
-			fatalError("Impossible!") // TODO: fix through use of Result in Swift 5 🤩 https://github.com/apple/swift-evolution/blob/master/proposals/0235-add-result.md
-		}
+		let resultValue = try session.synchronousDataTask(with: request).get()
+		let statusCode = (resultValue.response as? HTTPURLResponse)?.statusCode ?? 200
 
 		let jsonDecoder = JSONDecoder()
-		// TODO: change deployment target to 10.12 when upgrading to Swift 5
-		// https://github.com/apple/swift-evolution/blob/master/proposals/0236-package-manager-platform-deployment-settings.md
-		if #available(OSX 10.12, *) {
-			jsonDecoder.dateDecodingStrategy = .iso8601
-		} else {
-			let formatter = DateFormatter()
-			formatter.calendar = Calendar(identifier: .iso8601)
-			formatter.locale = Locale(identifier: "en_US_POSIX")
-			formatter.timeZone = TimeZone(secondsFromGMT: 0)
+		jsonDecoder.dateDecodingStrategy = .iso8601
 
-			jsonDecoder.dateDecodingStrategy = .custom { decoder -> Date in
-				let container = try decoder.singleValueContainer()
-				let dateStr = try container.decode(String.self)
-
-				formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-				if let date = formatter.date(from: dateStr) {
-					return date
-				}
-				formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
-				if let date = formatter.date(from: dateStr) {
-					return date
-				}
-				throw DecodingError.dataCorruptedError(
-					in: container,
-					debugDescription: "Invalid ISO-8601 format on value \(dateStr)"
-				)
-			}
-		}
-
-		switch httpResponse.statusCode {
+		switch statusCode {
 		case 400...599:
-			throw try jsonDecoder.decode(Error.self, from: jsonData)
+			throw try jsonDecoder.decode(Error.self, from: resultValue.data)
 		default:
-			return try jsonDecoder.decode(EndpointModel.self, from: jsonData)
+			return try jsonDecoder.decode(EndpointModel.self, from: resultValue.data)
 		}
+	}
+}
+
+extension API {
+	public struct Error {
+		var message: String
+		var documentationUrl: String?
+	}
+}
+
+extension API.Error: Codable {
+	enum CodingKeys: String, CodingKey {
+		case message
+		case documentationUrl = "documentation_url"
+	}
+}
+
+extension API.Error: LocalizedError {
+	public var errorDescription: String? {
+		let reference = documentationUrl.map { " - refer to \($0)" } ?? ""
+		return ["GitHub API call failed with error:", "\(message)" + reference].joined(separator: "\n")
 	}
 }

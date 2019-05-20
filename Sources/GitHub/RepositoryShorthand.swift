@@ -9,7 +9,7 @@ extension Repository {
 
 extension Repository.Shorthand: Equatable, RawRepresentable {
 	private enum Constant {
-		static let componentRegex = "^[a-zA-Z\\d](?:[a-zA-Z\\d]|-(?=[a-zA-Z\\d])){0,38}$"
+		static let componentRegex = #"^[a-zA-Z\d](?:[a-zA-Z\d]|-(?=[a-zA-Z\d])){0,38}$"#
 	}
 
 	public var rawValue: String {
@@ -64,5 +64,20 @@ extension Repository.Shorthand: Codable {
 	public func encode(to encoder: Encoder) throws {
 		var container = encoder.singleValueContainer()
 		try container.encode(rawValue)
+	}
+}
+
+extension Repository.Shorthand {
+	public enum Error {
+		case parsing
+	}
+}
+
+extension Repository.Shorthand.Error: LocalizedError {
+	public var errorDescription: String? {
+		switch self {
+		case .parsing:
+			return "Shorthand does not match required pattern for parsing"
+		}
 	}
 }
