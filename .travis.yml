@@ -4,6 +4,12 @@ language: objective-c
 osx_image: xcode10.2
 cache:
   directories:
+    - /usr/local/bin/swiftlint
+    - /usr/local/Cellar/swiftlint
+    - /usr/local/bin/danger-swift
+    - /usr/local/Cellar/danger-swift
+    - /usr/local/bin/danger
+    - /usr/local/Cellar/danger-js
     - .build
     - ~/.danger-swift
 addons:
