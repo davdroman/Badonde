@@ -52,7 +52,7 @@ extension Command {
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)'):",
 				secure: true,
-				errorResponse: { input, invalidInputReason in
+				errorResponse: { _, invalidInputReason in
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
@@ -62,14 +62,14 @@ extension Command {
 			let usernameInput = Input.readLine(
 				prompt: "Enter GitHub username:",
 				secure: false,
-				errorResponse: { input, invalidInputReason in
+				errorResponse: { _, invalidInputReason in
 					self.stderr <<< "Invalid username; \(invalidInputReason)"
 				}
 			)
 			let passwordInput = Input.readLine(
 				prompt: "Enter GitHub password (never stored):",
 				secure: true,
-				errorResponse: { input, invalidInputReason in
+				errorResponse: { _, invalidInputReason in
 					self.stderr <<< "Invalid password; \(invalidInputReason)"
 				}
 			)
@@ -79,7 +79,7 @@ extension Command {
 				Input.readLine(
 					prompt: "Enter GitHub two-factor authentication code:",
 					secure: false,
-					errorResponse: { input, invalidInputReason in
+					errorResponse: { _, invalidInputReason in
 						self.stderr <<< "Invalid two-factor authentication code; \(invalidInputReason)"
 					}
 				)
