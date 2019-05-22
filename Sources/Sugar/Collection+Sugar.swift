@@ -12,7 +12,7 @@ extension Collection {
 		return indices.contains(index) ? self[index] : nil
 	}
 
-	public func compacted<Wrapped>() -> [Wrapped] where Element == Optional<Wrapped> {
+	public func compacted<Wrapped>() -> [Wrapped] where Element == Wrapped? {
 		return compactMap { $0 }
 	}
 }
