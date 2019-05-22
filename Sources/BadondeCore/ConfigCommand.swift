@@ -131,4 +131,3 @@ extension ConfigCommand.Error: LocalizedError {
 		}
 	}
 }
-

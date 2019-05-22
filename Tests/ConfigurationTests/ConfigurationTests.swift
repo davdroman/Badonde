@@ -182,7 +182,7 @@ final class ConfigurationTests: XCTestCase {
 				XCTAssert(value == "David")
 				XCTAssert(type == Bool.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}
@@ -195,7 +195,7 @@ final class ConfigurationTests: XCTestCase {
 				XCTAssert(value == "David")
 				XCTAssert(type == Double.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}
@@ -208,7 +208,7 @@ final class ConfigurationTests: XCTestCase {
 				XCTAssert(value == "David")
 				XCTAssert(type == Int.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}
@@ -220,7 +220,7 @@ final class ConfigurationTests: XCTestCase {
 			case let Configuration.Error.invalidBridgingType(type):
 				XCTAssert(type == Date.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}
@@ -299,7 +299,7 @@ final class ConfigurationTests: XCTestCase {
 
 	func testSetValue_ofArrayValue_withPlainKey() throws {
 		let fixture = Fixture.dictionary
-		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail("Config should not be written to") }
 		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		XCTAssertThrowsError(
@@ -309,7 +309,7 @@ final class ConfigurationTests: XCTestCase {
 			case let Configuration.Error.invalidValueType(type):
 				XCTAssert(type == [String].self)
 			default:
-				XCTFail()
+				XCTFail("`setValue` threw the wrong error")
 			}
 		}
 	}
@@ -344,7 +344,7 @@ final class ConfigurationTests: XCTestCase {
 
 	func testSetValue_ofStringValue_withParentOfNestedKey() throws {
 		let fixture = Fixture.dictionary
-		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail("Config should not be written to") }
 		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		XCTAssertThrowsError(
@@ -354,7 +354,7 @@ final class ConfigurationTests: XCTestCase {
 			case let Configuration.Error.incompatibleKeyPath(keyPath):
 				XCTAssertEqual(keyPath.rawValue, "bank_details")
 			default:
-				XCTFail()
+				XCTFail("`setValue` threw the wrong error")
 			}
 		}
 	}
@@ -454,7 +454,7 @@ final class ConfigurationTests: XCTestCase {
 
 	func testRemoveValue_withParentOfNestedKey() throws {
 		let fixture = Fixture.dictionary
-		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail() }
+		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in XCTFail("Config should not be written to") }
 		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
 		XCTAssertThrowsError(
@@ -464,7 +464,7 @@ final class ConfigurationTests: XCTestCase {
 			case let Configuration.Error.incompatibleKeyPath(keyPath):
 				XCTAssertEqual(keyPath.rawValue, "bank_details")
 			default:
-				XCTFail()
+				XCTFail("`removeValue` threw the wrong error")
 			}
 		}
 	}

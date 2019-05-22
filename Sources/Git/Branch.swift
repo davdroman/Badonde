@@ -135,4 +135,3 @@ extension Branch.Error: LocalizedError {
 		}
 	}
 }
-
