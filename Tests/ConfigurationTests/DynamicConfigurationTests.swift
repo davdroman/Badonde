@@ -61,7 +61,7 @@ final class DynamicConfigurationTests: XCTestCase {
 				XCTAssertEqual(value, "maybe")
 				XCTAssert(type == Bool.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}

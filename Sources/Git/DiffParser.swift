@@ -39,7 +39,7 @@ extension Diff {
 					continue
 				}
 
-				if let match = self.regex.firstMatch(in: line, options: [], range: NSMakeRange(0, line.utf16.count)) {
+				if let match = self.regex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.utf16.count)) {
 					if
 						let oldLineStartString = match.group(1, in: line), let oldLineStart = Int(oldLineStartString),
 						let newLineStartString = match.group(3, in: line), let newLineStart = Int(newLineStartString)
@@ -109,4 +109,3 @@ extension NSTextCheckingResult {
 		return nil
 	}
 }
-
