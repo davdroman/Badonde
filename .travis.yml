@@ -4,10 +4,10 @@ language: objective-c
 osx_image: xcode10.2
 cache:
   directories:
-    - .build
     - /usr/local/Homebrew
     - ~/Library/Caches/Homebrew
     - ~/.danger-swift
+    - .build
 addons:
   homebrew:
     taps:
