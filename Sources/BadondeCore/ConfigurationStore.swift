@@ -109,4 +109,3 @@ private extension Encodable {
 		try data.write(to: url)
 	}
 }
-
