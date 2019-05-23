@@ -76,9 +76,9 @@ extension Command {
 			let authorizationTokenName = "Badonde for " + [NSUserName(), Host.current().localizedName].compacted().joined(separator: "@")
 			let authorizationAPI = Authorization.API(username: usernameInput, password: passwordInput)
 			let authorization = try authorizationAPI.createAuthorization(
-                scopes: [.repo],
-                note: authorizationTokenName,
-                oneTimePassword: Input.readLine(
+				scopes: [.repo],
+				note: authorizationTokenName,
+				oneTimePassword: Input.readLine(
 					prompt: "Enter GitHub two-factor authentication code:",
 					secure: false,
 					errorResponse: { _, invalidInputReason in

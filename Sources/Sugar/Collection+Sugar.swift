@@ -12,7 +12,7 @@ extension Collection {
 		return compactMap { $0 }
 	}
 
-    public subscript (safe index: Index) -> Element? {
-        return indices.contains(index) ? self[index] : nil
-    }
+	public subscript (safe index: Index) -> Element? {
+		return indices.contains(index) ? self[index] : nil
+	}
 }

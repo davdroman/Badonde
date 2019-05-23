@@ -153,7 +153,7 @@ class BurghCommand: Command {
 			!rawMilestone.isEmpty
 		{
 			Logger.step("Fetching repo milestones for '\(repositoryShorthand)'")
-            let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map { $0.title }
+			let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map { $0.title }
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestMilestone = milestone

@@ -12,23 +12,23 @@ final class DynamicConfigurationTests: XCTestCase {
 }
 
 extension DynamicConfigurationTests {
-    func testGetRawValue_fromConfigA() throws {
-        let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-        let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
-        let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
+	func testGetRawValue_fromConfigA() throws {
+		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
-        let value = try dynamicConfig.getRawValue(forKeyPath: .name)
-        XCTAssertEqual(value, "David")
-    }
+		let value = try dynamicConfig.getRawValue(forKeyPath: .name)
+		XCTAssertEqual(value, "David")
+	}
 
-    func testGetRawValue_fromConfigB() throws {
-        let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-        let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
-        let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
+	func testGetRawValue_fromConfigB() throws {
+		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
-        let value = try dynamicConfig.getRawValue(forKeyPath: .age)
-        XCTAssertEqual(value, "21")
-    }
+		let value = try dynamicConfig.getRawValue(forKeyPath: .age)
+		XCTAssertEqual(value, "21")
+	}
 }
 
 extension DynamicConfigurationTests {
