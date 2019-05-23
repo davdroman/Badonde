@@ -26,20 +26,16 @@ public struct KeyPath: RawRepresentable, ExpressibleByStringLiteral {
 }
 
 extension KeyPath: Hashable, Equatable {
-	public func hash(into hasher: inout Hasher) {
-		hasher.combine(rawValue)
-	}
-
 	public static func == (lhs: KeyPath, rhs: KeyPath) -> Bool {
 		return lhs.rawValue == rhs.rawValue
+	}
+
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(rawValue)
 	}
 }
 
 extension KeyPath {
-	func isCompatible(in keyPaths: [KeyPath]) -> Bool {
-		return !keyPaths.contains(where: { self.isPartial(of: $0) })
-	}
-
 	private var keys: [String] {
 		return rawValue.components(separatedBy: ".")
 	}
@@ -49,5 +45,9 @@ extension KeyPath {
 			return false
 		}
 		return zip(keys, keyPath.keys).allSatisfy { $0 == $1 }
+	}
+
+	func isCompatible(in keyPaths: [KeyPath]) -> Bool {
+		return !keyPaths.contains { self.isPartial(of: $0) }
 	}
 }

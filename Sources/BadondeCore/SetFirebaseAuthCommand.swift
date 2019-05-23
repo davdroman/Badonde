@@ -7,7 +7,7 @@ class SetFirebaseAuthCommand: Command {
 	let name = "set-firebase-auth"
 	let shortDescription = "[DEPRECATED] Sets Firebase project id & database secret token for analytics reporting"
 	lazy var longDescription: String = {
-		return """
+		"""
 		Sets Firebase project id & database secret token for analytics reporting
 
 		\(self.deprecationNotice)

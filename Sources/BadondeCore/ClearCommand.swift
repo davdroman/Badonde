@@ -7,7 +7,7 @@ class ClearCommand: Command {
 	let name = "clear"
 	let shortDescription = "[DEPRECATED] Clears credentials"
 	lazy var longDescription: String = {
-		return """
+		"""
 		Clears credentials
 
 		\(self.deprecationNotice)

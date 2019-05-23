@@ -80,7 +80,7 @@ extension Branch {
 		let defaultBranch = try remote.defaultBranch(interactor: remoteInteractor)
 		let allRemoteBranches = try Branch.getAll(from: .remote(remote), interactor: branchInteractor)
 
-		let recentDate = Date(timeIntervalSinceNow: -2592000) // 1 month ago
+		let recentDate = Date(timeIntervalSinceNow: -2_592_000) // 1 month ago
 
 		let latestRecentCommitHashes = try Commit.latestHashes(
 			branches: allRemoteBranches,
@@ -102,7 +102,7 @@ extension Branch {
 		let branchesWithLowestEqualCommitCount = commitsAndBranches
 			.filter { $0.1 > 0 }
 			.sorted { $0.1 < $1.1 }
-			.reduce([(Branch, Int)]()) { (result, branchAndCommits) -> [(Branch, Int)] in
+			.reduce([(Branch, Int)]()) { result, branchAndCommits -> [(Branch, Int)] in
 				guard let lastBranchAndCommits = result.last, lastBranchAndCommits.1 != branchAndCommits.1 else {
 					return result + [branchAndCommits]
 				}

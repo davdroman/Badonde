@@ -9,9 +9,9 @@ final class DynamicConfigurationTests: XCTestCase {
 		case configA = "config_a"
 		case configB = "config_b"
 	}
+}
 
-	// MARK: getRawValue
-
+extension DynamicConfigurationTests {
 	func testGetRawValue_fromConfigA() throws {
 		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
 		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
@@ -29,9 +29,9 @@ final class DynamicConfigurationTests: XCTestCase {
 		let value = try dynamicConfig.getRawValue(forKeyPath: .age)
 		XCTAssertEqual(value, "21")
 	}
+}
 
-	// MARK: getValue
-
+extension DynamicConfigurationTests {
 	func testGetValue_fromConfigA() throws {
 		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
 		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
@@ -65,9 +65,9 @@ final class DynamicConfigurationTests: XCTestCase {
 			}
 		}
 	}
+}
 
-	// MARK: setValue
-
+extension DynamicConfigurationTests {
 	func testSetValue_toConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -87,9 +87,9 @@ final class DynamicConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: setRawValue
-
+extension DynamicConfigurationTests {
 	func testSetRawValue_toConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -109,9 +109,9 @@ final class DynamicConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: removeValue
-
+extension DynamicConfigurationTests {
 	func testRemoveValue_fromConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 

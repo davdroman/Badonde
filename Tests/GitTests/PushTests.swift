@@ -4,6 +4,7 @@ import TestSugar
 
 final class PushInteractorSpy: PushInteractor {
 	typealias RemoteAndBranch = (remote: String, branch: String)
+
 	var performSpy: ((RemoteAndBranch) -> Void)?
 
 	func perform(remote: String, branch: String) throws {

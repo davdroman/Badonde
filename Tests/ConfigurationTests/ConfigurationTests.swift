@@ -5,17 +5,18 @@ import TestSugar
 final class JSONFileInteractorSpy: JSONFileInteractor {
 	typealias WriteSpy = ([String: Any], URL) -> Void
 
+	var readFixture: FixtureLoadable
+	var writeSpy: WriteSpy
+
 	init(readFixture: FixtureLoadable, writeSpy: @escaping WriteSpy) {
 		self.readFixture = readFixture
 		self.writeSpy = writeSpy
 	}
 
-	var readFixture: FixtureLoadable
 	func read(from url: URL) throws -> [String: Any] {
 		return try readFixture.load(as: [String: Any].self)
 	}
 
-	var writeSpy: WriteSpy
 	func write(_ rawObject: [String: Any], to url: URL) throws {
 		writeSpy(rawObject, url)
 	}
@@ -51,9 +52,9 @@ final class ConfigurationTests: XCTestCase {
 		let config = try Configuration(contentsOf: Fixture.array.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
+}
 
-	// MARK: getRawValue
-
+extension ConfigurationTests {
 	func testGetRawValue_ofStringValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getRawValue(forKeyPath: .name)
@@ -112,9 +113,9 @@ final class ConfigurationTests: XCTestCase {
 		let value = try config.getRawValue(forKeyPath: .likesGazpacho)
 		XCTAssertNil(value)
 	}
+}
 
-	// MARK: getValue
-
+extension ConfigurationTests {
 	func testGetValue_ofStringValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: String.self, forKeyPath: .name)
@@ -224,9 +225,9 @@ final class ConfigurationTests: XCTestCase {
 			}
 		}
 	}
+}
 
-	// MARK: setValue
-
+extension ConfigurationTests {
 	func testSetValue_ofStringValue_withNewPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -358,9 +359,9 @@ final class ConfigurationTests: XCTestCase {
 			}
 		}
 	}
+}
 
-	// MARK: setRawValue
-
+extension ConfigurationTests {
 	func testSetRawValue_ofStringValue_withPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -421,9 +422,9 @@ final class ConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: removeValue
-
+extension ConfigurationTests {
 	func testRemoveValue_withPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 

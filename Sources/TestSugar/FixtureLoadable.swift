@@ -50,6 +50,7 @@ public protocol FixtureLoadable {
 	var sourceFilePath: String { get }
 	var fixtureFolderSuffix: String { get }
 	var fixtureFileExtension: String { get }
+
 	func load<T: URLContentInitializable>(as type: T.Type) throws -> T
 }
 
