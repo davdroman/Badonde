@@ -30,22 +30,22 @@ extension KeyPath: Hashable, Equatable {
 		return lhs.rawValue == rhs.rawValue
 	}
 
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(rawValue)
-    }
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(rawValue)
+	}
 }
 
 extension KeyPath {
-    private var keys: [String] {
-        return rawValue.components(separatedBy: ".")
-    }
+	private var keys: [String] {
+		return rawValue.components(separatedBy: ".")
+	}
 
-    private func isPartial(of keyPath: KeyPath) -> Bool {
-        guard self != keyPath else {
-            return false
-        }
-        return zip(keys, keyPath.keys).allSatisfy { $0 == $1 }
-    }
+	private func isPartial(of keyPath: KeyPath) -> Bool {
+		guard self != keyPath else {
+			return false
+		}
+		return zip(keys, keyPath.keys).allSatisfy { $0 == $1 }
+	}
 
 	func isCompatible(in keyPaths: [KeyPath]) -> Bool {
 		return !keyPaths.contains { self.isPartial(of: $0) }

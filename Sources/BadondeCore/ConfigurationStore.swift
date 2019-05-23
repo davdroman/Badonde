@@ -22,50 +22,50 @@ final class LegacyConfigurationStore {
 	private(set) var configuration: LegacyConfiguration?
 	private(set) var additionalConfiguration: LegacyAdditionalConfiguration?
 
-    init() {
-        configuration = try? LegacyConfiguration.read(from: LegacyConfigurationStore.configurationFilePath)
-        additionalConfiguration = try? LegacyAdditionalConfiguration.read(from: LegacyConfigurationStore.additionalConfigurationFilePath)
-    }
+	init() {
+		configuration = try? LegacyConfiguration.read(from: LegacyConfigurationStore.configurationFilePath)
+		additionalConfiguration = try? LegacyAdditionalConfiguration.read(from: LegacyConfigurationStore.additionalConfigurationFilePath)
+	}
 
-    class func migrateIfNeeded() throws {
-        // Append .badonde to .gitignore if not present.
-        // Remove along with whole class when `badonde init` is implemented.
-        // https://github.com/davdroman/Badonde/pull/79
-        let projectPath = try Repository().topLevelPath
-        let gitignorePath = projectPath.appendingPathComponent(".gitignore")
-        let gitignoreContents = try String(contentsOf: gitignorePath)
-        if !gitignoreContents.contains(".badonde") {
-            _ = try capture(bash: "echo >> \(gitignorePath.path)")
-            _ = try capture(bash: "echo '.badonde' >> \(gitignorePath.path)")
-        }
+	class func migrateIfNeeded() throws {
+		// Append .badonde to .gitignore if not present.
+		// Remove along with whole class when `badonde init` is implemented.
+		// https://github.com/davdroman/Badonde/pull/79
+		let projectPath = try Repository().topLevelPath
+		let gitignorePath = projectPath.appendingPathComponent(".gitignore")
+		let gitignoreContents = try String(contentsOf: gitignorePath)
+		if !gitignoreContents.contains(".badonde") {
+			_ = try capture(bash: "echo >> \(gitignorePath.path)")
+			_ = try capture(bash: "echo '.badonde' >> \(gitignorePath.path)")
+		}
 
-        let store = LegacyConfigurationStore()
-        let migrationNeeded = store.configuration != nil || store.additionalConfiguration != nil
+		let store = LegacyConfigurationStore()
+		let migrationNeeded = store.configuration != nil || store.additionalConfiguration != nil
 
-        guard migrationNeeded else {
-            return
-        }
+		guard migrationNeeded else {
+			return
+		}
 
-        Logger.step("Legacy configuration detected, migrating...")
+		Logger.step("Legacy configuration detected, migrating...")
 
-        let configuration = try Configuration(scope: .local(projectPath))
+		let configuration = try Configuration(scope: .local(projectPath))
 
-        if let legacyConfiguration = store.configuration {
-            try configuration.setValue(legacyConfiguration.githubAccessToken, forKeyPath: .githubAccessToken)
-            try configuration.setValue(legacyConfiguration.jiraEmail, forKeyPath: .jiraEmail)
-            try configuration.setValue(legacyConfiguration.jiraApiToken, forKeyPath: .jiraApiToken)
-        }
+		if let legacyConfiguration = store.configuration {
+			try configuration.setValue(legacyConfiguration.githubAccessToken, forKeyPath: .githubAccessToken)
+			try configuration.setValue(legacyConfiguration.jiraEmail, forKeyPath: .jiraEmail)
+			try configuration.setValue(legacyConfiguration.jiraApiToken, forKeyPath: .jiraApiToken)
+		}
 
-        if let firebaseProjectId = store.additionalConfiguration?.firebaseProjectId {
-            try configuration.setValue(firebaseProjectId, forKeyPath: .firebaseProjectId)
-        }
+		if let firebaseProjectId = store.additionalConfiguration?.firebaseProjectId {
+			try configuration.setValue(firebaseProjectId, forKeyPath: .firebaseProjectId)
+		}
 
-        if let firebaseSecretToken = store.additionalConfiguration?.firebaseSecretToken {
-            try configuration.setValue(firebaseSecretToken, forKeyPath: .firebaseSecretToken)
-        }
+		if let firebaseSecretToken = store.additionalConfiguration?.firebaseSecretToken {
+			try configuration.setValue(firebaseSecretToken, forKeyPath: .firebaseSecretToken)
+		}
 
-        try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
-    }
+		try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
+	}
 
 	func setConfiguration(_ configuration: LegacyConfiguration) throws {
 		try createConfigurationFolderIfNeeded()
@@ -109,3 +109,4 @@ private extension Encodable {
 		try data.write(to: url)
 	}
 }
+

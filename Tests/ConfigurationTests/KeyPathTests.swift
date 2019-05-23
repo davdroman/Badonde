@@ -76,7 +76,7 @@ extension KeyPathTests {
 }
 
 extension KeyPathTests {
-    func testKeyPathHashable() {
+	func testKeyPathHashable() {
 		let keyPathA = KeyPath(rawValue: "jira.email", description: "Jira email")!
 		let keyPathB = KeyPath(rawValue: "jira.email")!
 		let keyPathC = KeyPath(rawValue: "jira.accessToken")!

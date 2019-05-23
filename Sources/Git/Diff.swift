@@ -9,30 +9,30 @@ public struct Diff: Equatable, CustomStringConvertible {
 	public var removedFilePath: String
 	public var hunks: [Hunk]
 
-    public var description: String {
-        let header = """
-        --- \(removedFilePath)
-        +++ \(addedFilePath)
-        """
-        return hunks.reduce(into: header) {
-            $0 += "\n\($1.description)"
-        }
-    }
+	public var description: String {
+		let header = """
+		--- \(removedFilePath)
+		+++ \(addedFilePath)
+		"""
+		return hunks.reduce(into: header) {
+			$0 += "\n\($1.description)"
+		}
+	}
 
-    public init(rawDiffContent: String) throws {
-        let parsingResults = try Diff.Parser(rawDiffContent: rawDiffContent).parse()
-        self.init(
-            addedFile: parsingResults.addedFile,
-            removedFile: parsingResults.removedFile,
-            hunks: parsingResults.hunks
-        )
-    }
+	public init(rawDiffContent: String) throws {
+		let parsingResults = try Diff.Parser(rawDiffContent: rawDiffContent).parse()
+		self.init(
+			addedFile: parsingResults.addedFile,
+			removedFile: parsingResults.removedFile,
+			hunks: parsingResults.hunks
+		)
+	}
 
-    init(addedFile: String, removedFile: String, hunks: [Hunk]) {
-        self.addedFilePath = addedFile
-        self.removedFilePath = removedFile
-        self.hunks = hunks
-    }
+	init(addedFile: String, removedFile: String, hunks: [Hunk]) {
+		self.addedFilePath = addedFile
+		self.removedFilePath = removedFile
+		self.hunks = hunks
+	}
 }
 
 extension Diff {
