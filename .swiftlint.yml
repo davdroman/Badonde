@@ -17,7 +17,6 @@ disabled_rules:
 opt_in_rules:
   - empty_count
   - unneeded_parentheses_in_closure_argument
-  - unowned_variable_capture
   - unused_optional_binding
   - unused_private_declaration
   - unused_enumerated
