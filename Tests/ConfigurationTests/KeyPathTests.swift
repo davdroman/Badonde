@@ -2,8 +2,6 @@ import XCTest
 @testable import Configuration
 
 final class KeyPathTests: XCTestCase {
-	// MARK: Init
-
 	func testKeyPathInit_withEmptyPath() {
 		let keypath = KeyPath(rawValue: "")
 		XCTAssertNil(keypath)
@@ -68,17 +66,17 @@ final class KeyPathTests: XCTestCase {
 		let keypath = KeyPath(rawValue: "ji😎ra.email")
 		XCTAssertNil(keypath)
 	}
+}
 
-	// MARK: string literal init
-
+extension KeyPathTests {
 	func testKeyPathStringLiteralInit() {
 		let keypath: KeyPath = "jira.email"
 		XCTAssertNotNil(keypath)
 	}
+}
 
-	// MARK: Hashable conformance
-
-	func testKeyPathHashable() {
+extension KeyPathTests {
+    func testKeyPathHashable() {
 		let keyPathA = KeyPath(rawValue: "jira.email", description: "Jira email")!
 		let keyPathB = KeyPath(rawValue: "jira.email")!
 		let keyPathC = KeyPath(rawValue: "jira.accessToken")!
@@ -86,8 +84,6 @@ final class KeyPathTests: XCTestCase {
 		XCTAssertEqual(set, [keyPathB, keyPathC])
 		XCTAssertEqual(set, [keyPathA, keyPathC])
 	}
-
-	// MARK: Equatable conformance
 
 	func testKeyPathEquatable() {
 		let keyPathA = KeyPath(rawValue: "jira.email", description: "Jira email")!

@@ -9,13 +9,13 @@ public struct Release: Codable {
 		}
 	}
 
+    private enum CodingKeys: String, CodingKey {
+        case version = "tag_name"
+        case date = "published_at"
+        case assets
+    }
+
 	public var version: String
 	public var date: Date
 	public var assets: [Asset]
-
-	private enum CodingKeys: String, CodingKey {
-		case version = "tag_name"
-		case date = "published_at"
-		case assets
-	}
 }

@@ -6,7 +6,6 @@ import Jira
 import Configuration
 
 class BurghCommand: Command {
-
 	let name = "burgh"
 	let shortDescription = "Generates and opens PR page"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
@@ -98,7 +97,7 @@ class BurghCommand: Command {
 		Logger.step("Title set to '\(pullRequestTitle)'")
 
 		Logger.step("Fetching repo labels for '\(repositoryShorthand)'")
-		let labels = try labelAPI.getLabels(for: repositoryShorthand).map({ $0.name })
+		let labels = try labelAPI.getLabels(for: repositoryShorthand).map { $0.name }
 
 		// Append dependency label if base branch is another ticket
 		if pullRequestBaseBranch.isTicketBranch {
@@ -120,21 +119,21 @@ class BurghCommand: Command {
 		let diffs = try [Diff](baseBranch: Branch(name: pullRequestBaseBranch, source: .remote(remote)), targetBranch: currentBranch)
 
 		// Append UI tests label
-		let shouldAttachUITestLabel = diffs.contains(where: { $0.addedFilePath.contains("UITests") })
+		let shouldAttachUITestLabel = diffs.contains { $0.addedFilePath.contains("UITests") }
 		if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
 			Logger.step("Setting UI tests label")
 			pullRequestLabels.append(uiTestsLabel)
 		}
 
 		// Append unit tests label
-		let shouldAttachUnitTestLabel = try diffs.contains(where: { try String(contentsOfFile: $0.addedFilePath).contains(": XCTestCase {") })
+		let shouldAttachUnitTestLabel = try diffs.contains { try String(contentsOfFile: $0.addedFilePath).contains(": XCTestCase {") }
 		if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
 			Logger.step("Setting unit tests label")
 			pullRequestLabels.append(unitTestsLabel)
 		}
 
 		// Append feature toggle label
-		let shouldAttachFeatureToggleLabel = try diffs.contains(where: { try String(contentsOfFile: $0.addedFilePath).contains("enum Feature:") })
+		let shouldAttachFeatureToggleLabel = try diffs.contains { try String(contentsOfFile: $0.addedFilePath).contains("enum Feature:") }
 		if shouldAttachFeatureToggleLabel, let featureToggleLabel = labels.fuzzyMatch(word: "feature toggle") {
 			Logger.step("Setting feature toggle label")
 			pullRequestLabels.append(featureToggleLabel)
@@ -154,7 +153,7 @@ class BurghCommand: Command {
 			!rawMilestone.isEmpty
 		{
 			Logger.step("Fetching repo milestones for '\(repositoryShorthand)'")
-			let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map({ $0.title })
+            let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map { $0.title }
 			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
 				Logger.step("Setting milestone to '\(milestone)'")
 				pullRequestMilestone = milestone

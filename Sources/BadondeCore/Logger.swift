@@ -1,11 +1,11 @@
 import Foundation
 import CLISpinner
 
-public final class Logger {
+public enum Logger {
 	private static let spinner = Spinner(pattern: .dots, color: .lightCyan)
 	private static var isStepping = false
 
-	public class func step(_ description: String) {
+	public static func step(_ description: String) {
 		if isStepping {
 			spinner.succeed()
 			spinner.text = description
@@ -17,7 +17,7 @@ public final class Logger {
 		isStepping = true
 	}
 
-	public class func info(_ description: String, succeedPrevious: Bool = true) {
+	public static func info(_ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
 			spinner.succeed()
 		}
@@ -25,7 +25,7 @@ public final class Logger {
 		isStepping = false
 	}
 
-	public class func warn(_ description: String, succeedPrevious: Bool = true) {
+	public static func warn(_ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
 			spinner.succeed()
 		}
@@ -33,21 +33,21 @@ public final class Logger {
 		isStepping = false
 	}
 
-	public class func fail() {
+	public static func fail() {
 		if isStepping {
 			spinner.fail()
 			isStepping = false
 		}
 	}
 
-	public class func succeed() {
+	public static func succeed() {
 		if isStepping {
 			spinner.succeed()
 			isStepping = false
 		}
 	}
 
-	public class func finish() {
+	public static func finish() {
 		spinner.unhideCursor()
 	}
 }

@@ -5,17 +5,18 @@ import TestSugar
 final class JSONFileInteractorSpy: JSONFileInteractor {
 	typealias WriteSpy = ([String: Any], URL) -> Void
 
+    var readFixture: FixtureLoadable
+    var writeSpy: WriteSpy
+
 	init(readFixture: FixtureLoadable, writeSpy: @escaping WriteSpy) {
 		self.readFixture = readFixture
 		self.writeSpy = writeSpy
 	}
 
-	var readFixture: FixtureLoadable
 	func read(from url: URL) throws -> [String: Any] {
 		return try readFixture.load(as: [String: Any].self)
 	}
 
-	var writeSpy: WriteSpy
 	func write(_ rawObject: [String: Any], to url: URL) throws {
 		writeSpy(rawObject, url)
 	}
@@ -51,70 +52,70 @@ final class ConfigurationTests: XCTestCase {
 		let config = try Configuration(contentsOf: Fixture.array.url, supportedKeyPaths: [])
 		XCTAssertTrue(config.rawObject.isEmpty)
 	}
+}
 
-	// MARK: getRawValue
+extension ConfigurationTests {
+    func testGetRawValue_ofStringValue_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: .name)
+        XCTAssertEqual(value, "David")
+    }
 
-	func testGetRawValue_ofStringValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: .name)
-		XCTAssertEqual(value, "David")
-	}
+    func testGetRawValue_ofIntValue_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: .age)
+        XCTAssertEqual(value, "21")
+    }
 
-	func testGetRawValue_ofIntValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: .age)
-		XCTAssertEqual(value, "21")
-	}
+    func testGetRawValue_ofDoubleValue_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: .weight)
+        XCTAssertEqual(value, "72.5")
+    }
 
-	func testGetRawValue_ofDoubleValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: .weight)
-		XCTAssertEqual(value, "72.5")
-	}
+    func testGetRawValue_ofBoolValue_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
-	func testGetRawValue_ofBoolValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let valueA = try config.getRawValue(forKeyPath: .likesPepperoniPizza)
+        XCTAssertEqual(valueA, "true")
 
-		let valueA = try config.getRawValue(forKeyPath: .likesPepperoniPizza)
-		XCTAssertEqual(valueA, "true")
+        let valueB = try config.getRawValue(forKeyPath: .likesPineapplePizza)
+        XCTAssertEqual(valueB, "false")
+    }
 
-		let valueB = try config.getRawValue(forKeyPath: .likesPineapplePizza)
-		XCTAssertEqual(valueB, "false")
-	}
+    func testGetRawValue_ofArrayValue_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: .favoriteMovies)
+        XCTAssertNil(value)
+    }
 
-	func testGetRawValue_ofArrayValue_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: .favoriteMovies)
-		XCTAssertNil(value)
-	}
+    func testGetRawValue_ofStringValue_withNestedKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 
-	func testGetRawValue_ofStringValue_withNestedKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let valueA = try config.getRawValue(forKeyPath: .bankDetails)
+        XCTAssertNil(valueA)
 
-		let valueA = try config.getRawValue(forKeyPath: .bankDetails)
-		XCTAssertNil(valueA)
+        let valueB = try config.getRawValue(forKeyPath: .bankDetailsAccountNumber)
+        XCTAssertEqual(valueB, "69696969")
 
-		let valueB = try config.getRawValue(forKeyPath: .bankDetailsAccountNumber)
-		XCTAssertEqual(valueB, "69696969")
+        let valueC = try config.getRawValue(forKeyPath: .bankDetailsSortCode)
+        XCTAssertEqual(valueC, "69-69-69")
+    }
 
-		let valueC = try config.getRawValue(forKeyPath: .bankDetailsSortCode)
-		XCTAssertEqual(valueC, "69-69-69")
-	}
+    func testGetRawValue_ofNullType_withPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: "iq")
+        XCTAssertNil(value)
+    }
 
-	func testGetRawValue_ofNullType_withPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: "iq")
-		XCTAssertNil(value)
-	}
+    func testGetRawValue_withMissingPlainKey() throws {
+        let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
+        let value = try config.getRawValue(forKeyPath: .likesGazpacho)
+        XCTAssertNil(value)
+    }
+}
 
-	func testGetRawValue_withMissingPlainKey() throws {
-		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
-		let value = try config.getRawValue(forKeyPath: .likesGazpacho)
-		XCTAssertNil(value)
-	}
-
-	// MARK: getValue
-
+extension ConfigurationTests {
 	func testGetValue_ofStringValue_withPlainKey() throws {
 		let config = try Configuration(contentsOf: Fixture.dictionary.url, supportedKeyPaths: [])
 		let value = try config.getValue(ofType: String.self, forKeyPath: .name)
@@ -224,9 +225,9 @@ final class ConfigurationTests: XCTestCase {
 			}
 		}
 	}
+}
 
-	// MARK: setValue
-
+extension ConfigurationTests {
 	func testSetValue_ofStringValue_withNewPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -358,9 +359,9 @@ final class ConfigurationTests: XCTestCase {
 			}
 		}
 	}
+}
 
-	// MARK: setRawValue
-
+extension ConfigurationTests {
 	func testSetRawValue_ofStringValue_withPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
@@ -421,9 +422,9 @@ final class ConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: removeValue
-
+extension ConfigurationTests {
 	func testRemoveValue_withPlainKey() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
