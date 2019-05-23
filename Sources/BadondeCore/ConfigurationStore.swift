@@ -15,7 +15,6 @@ struct LegacyAdditionalConfiguration: Codable {
 }
 
 final class LegacyConfigurationStore {
-
 	private static let folderPath = URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true).appendingPathComponent(".badonde", isDirectory: true)
 	private static let configurationFilePath = LegacyConfigurationStore.folderPath.appendingPathComponent("config.json")
 	private static let additionalConfigurationFilePath = LegacyConfigurationStore.folderPath.appendingPathComponent("add_config.json")
@@ -26,23 +25,6 @@ final class LegacyConfigurationStore {
 	init() {
 		configuration = try? LegacyConfiguration.read(from: LegacyConfigurationStore.configurationFilePath)
 		additionalConfiguration = try? LegacyAdditionalConfiguration.read(from: LegacyConfigurationStore.additionalConfigurationFilePath)
-	}
-
-	func setConfiguration(_ configuration: LegacyConfiguration) throws {
-		try createConfigurationFolderIfNeeded()
-		try configuration.write(to: LegacyConfigurationStore.configurationFilePath)
-		self.configuration = configuration
-	}
-
-	func clearConfiguration() throws {
-		try FileManager.default.removeItem(at: LegacyConfigurationStore.configurationFilePath)
-		self.configuration = nil
-	}
-
-	func setAdditionalConfiguration(_ configuration: LegacyAdditionalConfiguration) throws {
-		try createConfigurationFolderIfNeeded()
-		try configuration.write(to: LegacyConfigurationStore.additionalConfigurationFilePath)
-		self.additionalConfiguration = configuration
 	}
 
 	class func migrateIfNeeded() throws {
@@ -83,6 +65,23 @@ final class LegacyConfigurationStore {
 		}
 
 		try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
+	}
+
+	func setConfiguration(_ configuration: LegacyConfiguration) throws {
+		try createConfigurationFolderIfNeeded()
+		try configuration.write(to: LegacyConfigurationStore.configurationFilePath)
+		self.configuration = configuration
+	}
+
+	func clearConfiguration() throws {
+		try FileManager.default.removeItem(at: LegacyConfigurationStore.configurationFilePath)
+		self.configuration = nil
+	}
+
+	func setAdditionalConfiguration(_ configuration: LegacyAdditionalConfiguration) throws {
+		try createConfigurationFolderIfNeeded()
+		try configuration.write(to: LegacyConfigurationStore.additionalConfigurationFilePath)
+		self.additionalConfiguration = configuration
 	}
 
 	private func createConfigurationFolderIfNeeded() throws {

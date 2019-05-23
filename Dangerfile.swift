@@ -2,7 +2,7 @@ import Danger
 
 let danger = Danger()
 
-SwiftLint.lint()
+SwiftLint.lint(inline: true, strict: true, lintAllFiles: true)
 
 (danger.git.modifiedFiles + danger.git.createdFiles)
 	.filter { $0.contains("Copyright") && $0.fileType == .swift }

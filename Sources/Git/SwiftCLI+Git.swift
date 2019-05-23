@@ -34,7 +34,7 @@ extension SwiftCLI: BranchInteractor {
 
 extension SwiftCLI: CommitInteractor {
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String {
-		let afterParameter = (date?.timeIntervalSince1970).map({ " --after=\"\(Int($0))\"" }) ?? ""
+		let afterParameter = (date?.timeIntervalSince1970).map { " --after=\"\(Int($0))\"" } ?? ""
 		let command = baseBranches.map { "git rev-list --count\(afterParameter) \($0)..\(targetBranch)" }.joined(separator: ";")
 		return try capture(bash: command).stdout
 	}
