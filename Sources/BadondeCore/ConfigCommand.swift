@@ -9,7 +9,7 @@ class ConfigCommand: Command {
 	let shortDescription = "Get and set project or global options"
 	lazy var longDescription: String = {
 		let formattedKeyPaths = Configuration.supportedKeyPaths
-			.map { "  " + [$0.rawValue, $0.description].compactMap({ $0 }).joined(separator: " - ") }
+			.map { "  " + [$0.rawValue, $0.description].compacted().joined(separator: " - ") }
 			.joined(separator: "\n")
 		return """
 		Get and set project or global options.
