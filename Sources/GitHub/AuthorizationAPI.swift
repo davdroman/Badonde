@@ -11,22 +11,18 @@ extension Authorization {
 			super.init(authorization: .basic(username: username, password: password))
 		}
 
-		struct CreateAuthorizationBody: Codable {
-			var scopes: [Scope]
-			var note: String
-		}
+		public func createAuthorization(scopes: [Scope], note: String, oneTimePassword: @autoclosure () -> String) throws -> GitHub.Authorization {
+			struct Body: Codable {
+				var scopes: [Scope]
+				var note: String
+			}
 
-		public func createAuthorization(
-			scopes: [Scope],
-			note: String,
-			oneTimePassword: @autoclosure () -> String
-		) throws -> GitHub.Authorization {
 			var currentNoteSuffixIndex = 1
 			var otpHeader: HTTPHeader?
 
 			while true {
 				let noteSuffix = currentNoteSuffixIndex > 1 ? " \(currentNoteSuffixIndex)" : ""
-				let body = CreateAuthorizationBody(scopes: scopes, note: note + noteSuffix)
+				let body = Body(scopes: scopes, note: note + noteSuffix)
 
 				do {
 					return try post(
