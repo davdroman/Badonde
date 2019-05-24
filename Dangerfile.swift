@@ -4,8 +4,14 @@ let danger = Danger()
 
 SwiftLint.lint(inline: true, strict: true, lintAllFiles: true)
 
-(danger.git.modifiedFiles + danger.git.createdFiles)
+let copyrightedFiles = (danger.git.modifiedFiles + danger.git.createdFiles)
+	.lazy
 	.filter { $0.fileType == .swift }
-	.map { (file: $0, contents: danger.utils.readFile($0)) }
-	.filter { $0.contents.contains("\n//  Created by") }
-	.forEach { fail(message: "Please remove this copyright header", file: $0.file, line: 0) }
+	.filter { danger.utils.readFile($0).contains("\n//  Created by") }
+
+if !copyrightedFiles.isEmpty {
+	let files = copyrightedFiles.map { "- " + $0 }
+	let messageComponents = ["Please remove the copyright headers in these files:"] + files
+	let message = messageComponents.joined(separator: "\n")
+	fail(message)
+}
