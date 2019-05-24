@@ -14,6 +14,8 @@ addons:
       - danger-swift
       - swiftlint
 script:
+  - brew update
+  - brew upgrade swiftlint
   - danger-swift ci
   - swift test
   - make
