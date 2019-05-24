@@ -3,7 +3,7 @@ import Foundation
 public class PullRequest: Codable {
 	public var repositoryShorthand: Repository.Shorthand
 	public var baseBranch: String
-	public var targetBranch: String
+	public var headBranch: String
 	public var title: String
 	public var labels: [String]
 	public var milestone: String?
@@ -11,14 +11,14 @@ public class PullRequest: Codable {
 	public init(
 		repositoryShorthand: Repository.Shorthand,
 		baseBranch: String,
-		targetBranch: String,
+		headBranch: String,
 		title: String,
 		labels: [String],
 		milestone: String?
 	) {
 		self.repositoryShorthand = repositoryShorthand
 		self.baseBranch = baseBranch
-		self.targetBranch = targetBranch
+		self.headBranch = headBranch
 		self.title = title
 		self.labels = labels
 		self.milestone = milestone
@@ -30,7 +30,7 @@ extension PullRequest {
 		return try URL(
 			scheme: "https",
 			host: "github.com",
-			path: "/\(repositoryShorthand)/compare/\(baseBranch)...\(targetBranch)",
+			path: "/\(repositoryShorthand)/compare/\(baseBranch)...\(headBranch)",
 			queryItems: [
 				URLQueryItem(name: CodingKeys.title.stringValue, mandatoryValue: title.nilIfEmpty),
 				URLQueryItem(name: CodingKeys.labels.stringValue, mandatoryValue: labels.nilIfEmpty?.joined(separator: ",")),

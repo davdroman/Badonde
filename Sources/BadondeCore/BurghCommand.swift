@@ -68,7 +68,7 @@ class BurghCommand: Command {
 
 		// Set up PR properties to be assigned
 		let pullRequestBaseBranch: String
-		let pullRequestTargetBranch: String
+		let pullRequestHeadBranch: String
 		let pullRequestTitle: String
 		var pullRequestLabels: [String] = []
 		var pullRequestMilestone: String?
@@ -87,7 +87,7 @@ class BurghCommand: Command {
 			Logger.step("Using base branch '\(baseBranch.name)'")
 			pullRequestBaseBranch = baseBranch.name
 		}
-		pullRequestTargetBranch = currentBranch.name
+		pullRequestHeadBranch = currentBranch.name
 
 		Logger.step("Fetching ticket info for '\(ticketKey)'")
 		let ticket = try ticketAPI.getTicket(with: ticketKey)
@@ -164,7 +164,7 @@ class BurghCommand: Command {
 		let pullRequest = PullRequest(
 			repositoryShorthand: repositoryShorthand,
 			baseBranch: pullRequestBaseBranch,
-			targetBranch: pullRequestTargetBranch,
+			headBranch: pullRequestHeadBranch,
 			title: pullRequestTitle,
 			labels: pullRequestLabels,
 			milestone: pullRequestMilestone
