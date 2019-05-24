@@ -17,6 +17,7 @@ disabled_rules:
 opt_in_rules:
   - empty_count
   - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
   - unused_optional_binding
   - unused_private_declaration
   - unused_enumerated
@@ -26,6 +27,7 @@ opt_in_rules:
   - vertical_whitespace_opening_braces
   - yoda_condition
   - unavailable_function
+  - type_contents_order
   - switch_case_on_newline
   - strict_fileprivate
   - static_operator
