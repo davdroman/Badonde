@@ -117,8 +117,8 @@ class BurghCommand: Command {
 
 		Logger.step("Diffing base and target for label derivation")
 		let diffs = try [Diff](baseBranch: Branch(name: pullRequestBaseBranch, source: .remote(remote)), targetBranch: currentBranch)
-
 		let addedFiles = diffs.compactMap { $0.addedFilePath }
+		
 		// Append UI tests label
 		let shouldAttachUITestLabel = addedFiles.contains { $0.contains("UITests") }
 		if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
