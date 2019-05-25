@@ -118,22 +118,23 @@ class BurghCommand: Command {
 		Logger.step("Diffing base and target for label derivation")
 		let diffs = try [Diff](baseBranch: Branch(name: pullRequestBaseBranch, source: .remote(remote)), targetBranch: currentBranch)
 
+		let addedFiles = diffs.compactMap { $0.addedFilePath }
 		// Append UI tests label
-		let shouldAttachUITestLabel = diffs.contains { $0.addedFilePath.contains("UITests") }
+		let shouldAttachUITestLabel = addedFiles.contains { $0.contains("UITests") }
 		if shouldAttachUITestLabel, let uiTestsLabel = labels.fuzzyMatch(word: "ui tests") {
 			Logger.step("Setting UI tests label")
 			pullRequestLabels.append(uiTestsLabel)
 		}
 
 		// Append unit tests label
-		let shouldAttachUnitTestLabel = try diffs.contains { try String(contentsOfFile: $0.addedFilePath).contains(": XCTestCase {") }
+		let shouldAttachUnitTestLabel = try addedFiles.contains { try String(contentsOfFile: $0).contains(": XCTestCase {") }
 		if shouldAttachUnitTestLabel, let unitTestsLabel = labels.fuzzyMatch(word: "unit tests") {
 			Logger.step("Setting unit tests label")
 			pullRequestLabels.append(unitTestsLabel)
 		}
 
 		// Append feature toggle label
-		let shouldAttachFeatureToggleLabel = try diffs.contains { try String(contentsOfFile: $0.addedFilePath).contains("enum Feature:") }
+		let shouldAttachFeatureToggleLabel = try addedFiles.contains { try String(contentsOfFile: $0).contains("enum Feature:") }
 		if shouldAttachFeatureToggleLabel, let featureToggleLabel = labels.fuzzyMatch(word: "feature toggle") {
 			Logger.step("Setting feature toggle label")
 			pullRequestLabels.append(featureToggleLabel)
