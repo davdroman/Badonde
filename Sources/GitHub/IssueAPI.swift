@@ -2,7 +2,7 @@ import Foundation
 
 extension Issue {
 	public final class API: GitHub.API {
-		init(accessToken: String) {
+		public init(accessToken: String) {
 			super.init(authorization: .token(accessToken))
 		}
 
