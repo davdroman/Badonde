@@ -5,14 +5,23 @@ public protocol DiffInteractor {
 }
 
 public struct Diff: Equatable, CustomStringConvertible {
-	public var addedFilePath: String
-	public var removedFilePath: String
+	public var addedFilePath: String? {
+		return rawAddedFilePath != "/dev/null" ? rawAddedFilePath : nil
+	}
+
+	public var removedFilePath: String? {
+		return rawRemovedFilePath != "/dev/null" ? rawRemovedFilePath : nil
+	}
+
+	var rawAddedFilePath: String
+	var rawRemovedFilePath: String
+
 	public var hunks: [Hunk]
 
 	public var description: String {
 		let header = """
-		--- \(removedFilePath)
-		+++ \(addedFilePath)
+		--- \(rawRemovedFilePath)
+		+++ \(rawAddedFilePath)
 		"""
 		return hunks.reduce(into: header) {
 			$0 += "\n\($1.description)"
@@ -29,8 +38,8 @@ public struct Diff: Equatable, CustomStringConvertible {
 	}
 
 	init(addedFile: String, removedFile: String, hunks: [Hunk]) {
-		self.addedFilePath = addedFile
-		self.removedFilePath = removedFile
+		self.rawAddedFilePath = addedFile
+		self.rawRemovedFilePath = removedFile
 		self.hunks = hunks
 	}
 }
