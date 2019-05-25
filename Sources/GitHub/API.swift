@@ -49,6 +49,8 @@ open class API {
 		request.httpMethod = method
 		request.setValue(try authorization.headerValue(), forHTTPHeaderField: "Authorization")
 		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+		request.addValue("application/vnd.github.shadow-cat-preview+json", forHTTPHeaderField: "Accept")
+		request.addValue("application/vnd.github.symmetra-preview+json", forHTTPHeaderField: "Accept")
 		headers.forEach { request.setValue($0.value, forHTTPHeaderField: $0.field) }
 		request.httpBody = body
 
