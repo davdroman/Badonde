@@ -117,8 +117,8 @@ extension API {
 		public var documentationURL: String?
 
 		public var errorDescription: String? {
-			let reference = documentationURL.map { "refer to \($0)" }
-			return [message, reference].compacted().joined(separator: " - ")
+			let reference = documentationURL.map { "Refer to \($0)" }
+			return [message, reference].compacted().joined(separator: "\n")
 		}
 	}
 }
@@ -136,10 +136,9 @@ extension API.Error: LocalizedError {
 		case .authorizationEncodingError:
 			return "GitHub authorization token encoding failed"
 		case let .http(response, githubError):
-			let githubErrorDescription = githubError?.errorDescription.map { "GitHub error: \($0)" }
 			return [
 				"GitHub API call failed with HTTP status code \(response.statusCode)",
-				githubErrorDescription
+				githubError?.errorDescription
 			].compacted().joined(separator: "\n")
 		}
 	}

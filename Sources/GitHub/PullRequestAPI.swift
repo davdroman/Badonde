@@ -11,14 +11,14 @@ extension PullRequest {
 			title: String,
 			headBranch: String,
 			baseBranch: String,
-			body: String,
+			body: String?,
 			isDraft: Bool
 		) throws -> PullRequest {
 			struct Body: Encodable {
 				var title: String
 				var head: String
 				var base: String
-				var body: String
+				var body: String?
 				var draft: Bool
 			}
 
