@@ -29,6 +29,16 @@ open class API {
 		return try perform("POST", endpoint: endpoint, queryItems: queryItems, headers: headers, body: JSONEncoder().encode(body), responseType: responseType)
 	}
 
+	func patch<RequestModel: Encodable, ResponseModel: Decodable>(
+		endpoint: String?,
+		queryItems: [URLQueryItem]? = nil,
+		headers: [HTTPHeader] = [],
+		body: RequestModel,
+		responseType: ResponseModel.Type
+	) throws -> ResponseModel {
+		return try perform("PATCH", endpoint: endpoint, queryItems: queryItems, headers: headers, body: JSONEncoder().encode(body), responseType: responseType)
+	}
+
 	private func perform<ResponseModel: Decodable>(
 		_ method: String,
 		endpoint: String?,
