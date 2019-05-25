@@ -9,11 +9,11 @@ extension Issue {
 		public func edit(
 			at shorthand: Repository.Shorthand,
 			issueNumber: Int,
-			title: String?,
-			body: String?,
-			assignees: [String]?,
-			labels: [String]?,
-			milestone: Int?
+			title: String? = nil,
+			body: String? = nil,
+			assignees: [String]? = nil,
+			labels: [String]? = nil,
+			milestone: Int? = nil
 		) throws -> Issue {
 			struct Body: Encodable {
 				var title: String?
