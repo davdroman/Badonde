@@ -174,7 +174,7 @@ class BurghCommand: Command {
 			headBranch: pullRequestHeadBranch,
 			baseBranch: pullRequestBaseBranch,
 			body: nil,
-			isDraft: true
+			isDraft: false
 		)
 
 		Logger.step("Setting PR details")
