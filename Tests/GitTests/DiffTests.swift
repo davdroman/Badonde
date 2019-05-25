@@ -61,7 +61,7 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFilePath, "/dev/null")
+		XCTAssertNil(diff?.removedFilePath)
 		XCTAssertEqual(diff?.addedFilePath, "b/GitDiffSwift/Models/GitDiffLine.swift")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
@@ -108,7 +108,7 @@ final class DiffTests: XCTestCase {
 
 		let diff = diffs.first
 		XCTAssertEqual(diff?.removedFilePath, "a/Sources/Layout/MessagesCollectionViewFlowLayout+Avatar.swift")
-		XCTAssertEqual(diff?.addedFilePath, "/dev/null")
+		XCTAssertNil(diff?.addedFilePath)
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -150,7 +150,7 @@ final class DiffTests: XCTestCase {
 		// MARK: diffB
 
 		let diffB = diffs.dropFirst().first
-		XCTAssertEqual(diffB?.removedFilePath, "/dev/null")
+		XCTAssertNil(diffB?.removedFilePath)
 		XCTAssertEqual(diffB?.addedFilePath, "b/Moya.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist")
 
 		XCTAssertEqual(diffB?.hunks.count, 1)
