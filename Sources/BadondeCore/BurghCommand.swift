@@ -64,6 +64,8 @@ class BurghCommand: Command {
 
 		let labelAPI = Label.API(accessToken: githubAccessToken)
 		let milestoneAPI = Milestone.API(accessToken: githubAccessToken)
+		let issueAPI = Issue.API(accessToken: githubAccessToken)
+		let pullRequestAPI = PullRequest.API(accessToken: githubAccessToken)
 		let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
 
 		// Set up PR properties to be assigned
@@ -71,7 +73,7 @@ class BurghCommand: Command {
 		let pullRequestHeadBranch: String
 		let pullRequestTitle: String
 		var pullRequestLabels: [String] = []
-		var pullRequestMilestone: String?
+		var pullRequestMilestone: Int?
 
 		// Set PR base and target branches
 		if let baseBranchValue = baseBranch.value {
@@ -154,23 +156,35 @@ class BurghCommand: Command {
 			!rawMilestone.isEmpty
 		{
 			Logger.step("Fetching repo milestones for '\(repositoryShorthand)'")
-			let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand).map { $0.title }
-			if let milestone = milestones.fuzzyMatch(word: rawMilestone) {
+			let milestones = try milestoneAPI.getMilestones(for: repositoryShorthand)
+			let milestoneTitles = milestones.map { $0.title }
+			if
+				let milestoneTitle = milestoneTitles.fuzzyMatch(word: rawMilestone),
+				let milestone = milestones.first(where: { $0.title == milestoneTitle })
+			{
 				Logger.step("Setting milestone to '\(milestone)'")
-				pullRequestMilestone = milestone
+				pullRequestMilestone = milestone.number
 			}
 		}
 
-		Logger.step("Opening PR page")
-		let pullRequest = PullRequest(
-			repositoryShorthand: repositoryShorthand,
-			baseBranch: pullRequestBaseBranch,
-			headBranch: pullRequestHeadBranch,
+		Logger.step("Creating draft PR")
+		let pullRequest = try pullRequestAPI.createPullRequest(
+			at: repositoryShorthand,
 			title: pullRequestTitle,
-			labels: pullRequestLabels,
+			headBranch: pullRequestHeadBranch,
+			baseBranch: pullRequestBaseBranch,
+			body: nil,
+			isDraft: true
+		)
+
+		Logger.step("Setting PR details")
+		_ = try issueAPI.edit(
+			at: repositoryShorthand,
+			issueNumber: pullRequest.number,
+			labels: pullRequestLabels.nilIfEmpty,
 			milestone: pullRequestMilestone
 		)
-		try openURL(pullRequest.url())
+		try openURL(pullRequest.url)
 
 		// Report PR data (production only)
 		#if !DEBUG
@@ -180,7 +194,14 @@ class BurghCommand: Command {
 			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
 		{
 			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			try reporter.report(pullRequest.analyticsData(startDate: startDate))
+			try reporter.report(
+				PullRequest.analyticsData(
+					isDependent: pullRequestBaseBranch.isTicketBranch,
+					labelCount: pullRequestLabels.count,
+					hasMilestone: pullRequestMilestone != nil,
+					startDate: startDate
+				)
+			)
 		}
 		#endif
 	}
