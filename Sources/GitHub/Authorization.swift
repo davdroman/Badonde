@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Authorization: Codable {
+public struct Authorization: Decodable {
 	public enum Scope: String, Codable {
 		case repo
 	}

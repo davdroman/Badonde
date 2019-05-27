@@ -48,7 +48,7 @@ extension Repository.Shorthand: CustomStringConvertible {
 	}
 }
 
-extension Repository.Shorthand: Codable {
+extension Repository.Shorthand: Decodable {
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
 		let rawValue = try container.decode(String.self)
