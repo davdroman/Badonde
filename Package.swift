@@ -31,6 +31,7 @@ let package = Package(
 				"Sugar",
 			]
 		),
+		.target(name: "BadondeKit", dependencies: []),
 		.target(name: "Configuration", dependencies: ["Sugar"]),
 		.target(name: "Git", dependencies: ["SwiftCLI"]),
 		.target(name: "GitHub", dependencies: ["Git", "Sugar"]),
