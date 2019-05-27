@@ -1,11 +1,11 @@
 import Foundation
 
-public struct PullRequest {
+public struct Issue {
 	public var url: URL
 	public var number: Int
 }
 
-extension PullRequest: Decodable {
+extension Issue: Decodable {
 	enum CodingKeys: String, CodingKey {
 		case url = "html_url"
 		case number

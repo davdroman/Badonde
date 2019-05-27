@@ -2,12 +2,20 @@ import Foundation
 import GitHub
 import Sugar
 
+// Replace for `BadondeKit.PullRequestDSL.analyticsData`
+// when implemented.
+// https://github.com/davdroman/Badonde/issues/60
 extension PullRequest {
-	func analyticsData(startDate: Date) -> AnalyticsReporter.Data {
-		return AnalyticsReporter.Data(
-			isDependent: baseBranch.isTicketBranch,
-			labelCount: labels.count,
-			hasMilestone: milestone != nil,
+	static func analyticsData(
+		isDependent: Bool,
+		labelCount: Int,
+		hasMilestone: Bool,
+		startDate: Date
+	) -> PullRequest.AnalyticsReporter.Data {
+		return PullRequest.AnalyticsReporter.Data(
+			isDependent: isDependent,
+			labelCount: labelCount,
+			hasMilestone: hasMilestone,
 			elapsedTime: Date().timeIntervalSince(startDate),
 			timestamp: startDate,
 			version: CommandLineTool.Constant.version

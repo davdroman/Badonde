@@ -1,7 +1,7 @@
 import Foundation
 
-public struct Release: Codable {
-	public struct Asset: Codable {
+public struct Release: Decodable {
+	public struct Asset: Decodable {
 		public var downloadUrl: URL
 
 		private enum CodingKeys: String, CodingKey {
