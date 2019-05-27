@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Milestone: Codable {
+public struct Milestone: Decodable {
 	public let number: Int
 	public let title: String
 }
