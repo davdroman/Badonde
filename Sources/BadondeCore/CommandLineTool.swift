@@ -23,10 +23,8 @@ public final class CommandLineTool {
 			description: Constant.description,
 			commands: [
 				AppifyCommand(),
-				ClearCommand(),
 				ConfigCommand(),
 				PRCommand(startDate: startDate),
-				SetFirebaseAuthCommand()
 			]
 		)
 
