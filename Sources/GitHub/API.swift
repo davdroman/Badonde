@@ -9,7 +9,7 @@ open class API {
 		self.authorization = authorization
 	}
 
-	func get<ResponseModel: Codable>(
+	func get<ResponseModel: Decodable>(
 		endpoint: String?,
 		queryItems: [URLQueryItem]? = nil,
 		headers: [HTTPHeader] = [],
