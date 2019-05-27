@@ -23,9 +23,9 @@ public final class CommandLineTool {
 			description: Constant.description,
 			commands: [
 				AppifyCommand(),
-				BurghCommand(startDate: startDate),
 				ClearCommand(),
 				ConfigCommand(),
+				PRCommand(startDate: startDate),
 				SetFirebaseAuthCommand()
 			]
 		)

@@ -5,9 +5,9 @@ import Git
 import Jira
 import Configuration
 
-class BurghCommand: Command {
-	let name = "burgh"
-	let shortDescription = "Generates and opens PR page"
+class PRCommand: Command {
+	let name = "pr"
+	let shortDescription = "Create a PR from the current branch"
 	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
 
 	let startDate: Date
@@ -207,7 +207,7 @@ class BurghCommand: Command {
 	}
 }
 
-extension BurghCommand {
+extension PRCommand {
 	enum Error {
 		case gitRemoteMissing(String)
 		case noGitRemotes
@@ -218,7 +218,7 @@ extension BurghCommand {
 	}
 }
 
-extension BurghCommand.Error: LocalizedError {
+extension PRCommand.Error: LocalizedError {
 	var errorDescription: String? {
 		switch self {
 		case .gitRemoteMissing(let remoteName):
