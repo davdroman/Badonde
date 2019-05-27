@@ -16,7 +16,7 @@ open class API {
 		headers: [HTTPHeader] = [],
 		responseType: ResponseModel.Type
 	) throws -> ResponseModel {
-		return try perform("GET", endpoint: endpoint, queryItems: queryItems, headers: headers, responseType: responseType)
+		return try perform("GET", endpoint: endpoint, queryItems: queryItems, headers: headers, body: nil, responseType: responseType)
 	}
 
 	func post<RequestModel: Encodable, ResponseModel: Decodable>(
@@ -42,9 +42,9 @@ open class API {
 	private func perform<ResponseModel: Decodable>(
 		_ method: String,
 		endpoint: String?,
-		queryItems: [URLQueryItem]? = nil,
-		headers: [HTTPHeader] = [],
-		body: Data? = nil,
+		queryItems: [URLQueryItem]?,
+		headers: [HTTPHeader],
+		body: Data?,
 		responseType: ResponseModel.Type
 	) throws -> ResponseModel {
 		let url = try URL(

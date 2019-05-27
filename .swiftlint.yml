@@ -11,7 +11,8 @@ disabled_rules:
   - large_tuple
   - function_body_length
   - nesting
-  # - type_body_length
+  - opening_brace
+  - function_parameter_count
 
 # rules required to opt-in that are not by default.
 opt_in_rules:
@@ -57,7 +58,6 @@ opt_in_rules:
   - implicitly_unwrapped_optional
   - implicit_return
   - identical_operands
-  - function_default_parameter_at_end
   - fatal_error_message
   - explicit_init
   - empty_string
