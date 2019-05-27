@@ -167,7 +167,7 @@ class BurghCommand: Command {
 			}
 		}
 
-		Logger.step("Creating draft PR")
+		Logger.step("Creating PR")
 		let pullRequest = try pullRequestAPI.createPullRequest(
 			at: repositoryShorthand,
 			title: pullRequestTitle,
