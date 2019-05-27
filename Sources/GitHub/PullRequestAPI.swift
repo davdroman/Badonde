@@ -28,17 +28,5 @@ extension PullRequest {
 				responseType: PullRequest.self
 			)
 		}
-
-		public func requestReviewers(at shorthand: Repository.Shorthand, pullRequestNumber: Int, reviewers: [String]) throws -> PullRequest {
-			struct Body: Encodable {
-				var reviewers: [String]
-			}
-
-			return try post(
-				endpoint: "/repos/\(shorthand.rawValue)/pulls/\(pullRequestNumber)/requested_reviewers",
-				body: Body(reviewers: reviewers),
-				responseType: PullRequest.self
-			)
-		}
 	}
 }
