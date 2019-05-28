@@ -29,7 +29,6 @@ opt_in_rules:
   - yoda_condition
   - unavailable_function
   - type_contents_order
-  - switch_case_on_newline
   - strict_fileprivate
   - static_operator
   - single_test_class

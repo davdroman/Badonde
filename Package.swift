@@ -39,6 +39,7 @@ let package = Package(
 		.target(name: "Sugar"),
 		.target(name: "TestSugar"),
 
+		.testTarget(name: "BadondeKitTests", dependencies: ["BadondeKit"]),
 		.testTarget(name: "ConfigurationTests", dependencies: ["Configuration", "TestSugar"]),
 		.testTarget(name: "GitTests", dependencies: ["Git", "TestSugar"]),
 		.testTarget(name: "GitHubTests", dependencies: ["GitHub"]),
