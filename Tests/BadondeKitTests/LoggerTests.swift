@@ -14,32 +14,32 @@ final class PrinterSpy: Printer {
 }
 
 final class LoggerTests: XCTestCase {
-	func testLogInit_stepSymbol() throws {
+	func testLogInit_stepSymbol() {
 		let log = Logger.Log(rawValue: "▶ something")
 		XCTAssertEqual(log, .step("something"))
 	}
 
-	func testLogInit_infoSymbol() throws {
+	func testLogInit_infoSymbol() {
 		let log = Logger.Log(rawValue: "ℹ something")
 		XCTAssertEqual(log, .info("something"))
 	}
 
-	func testLogInit_warnSymbol() throws {
+	func testLogInit_warnSymbol() {
 		let log = Logger.Log(rawValue: "⚠ something")
 		XCTAssertEqual(log, .warn("something"))
 	}
 
-	func testLogInit_failSymbol() throws {
+	func testLogInit_failSymbol() {
 		let log = Logger.Log(rawValue: "✖ something")
 		XCTAssertEqual(log, .fail("something"))
 	}
 
-	func testLogInit_invalidSymbol() throws {
+	func testLogInit_invalidSymbol() {
 		let log = Logger.Log(rawValue: "- something")
 		XCTAssertNil(log)
 	}
 
-	func testLogInit_validSymbol_repeated() throws {
+	func testLogInit_validSymbol_repeated() {
 		let logA = Logger.Log(rawValue: "▶▶ something")
 		let logB = Logger.Log(rawValue: "▶ ▶ something")
 		let logC = Logger.Log(rawValue: "▶ ▶▶ something")
@@ -51,14 +51,14 @@ final class LoggerTests: XCTestCase {
 		XCTAssertEqual(logD, .step("▶ ▶ something"))
 	}
 
-	func testLogInit_validSymbol_emptyDescription() throws {
+	func testLogInit_validSymbol_emptyDescription() {
 		let log = Logger.Log(rawValue: "▶ ")
 		XCTAssertEqual(log, .step(""))
 	}
 }
 
 extension LoggerTests {
-	func testStep() throws {
+	func testStep() {
 		let expectation = self.expectation(description: "Printing function is invoked")
 
 		Logger.printer = PrinterSpy {
@@ -70,7 +70,7 @@ extension LoggerTests {
 		waitForExpectations(timeout: 2, handler: nil)
 	}
 
-	func testInfo() throws {
+	func testInfo() {
 		let expectation = self.expectation(description: "Printing function is invoked")
 
 		Logger.printer = PrinterSpy {
@@ -82,7 +82,7 @@ extension LoggerTests {
 		waitForExpectations(timeout: 2, handler: nil)
 	}
 
-	func testWarn() throws {
+	func testWarn() {
 		let expectation = self.expectation(description: "Printing function is invoked")
 
 		Logger.printer = PrinterSpy {
@@ -94,7 +94,7 @@ extension LoggerTests {
 		waitForExpectations(timeout: 2, handler: nil)
 	}
 
-	func testFail() throws {
+	func testFail() {
 		let expectation = self.expectation(description: "Printing function is invoked")
 
 		Logger.printer = PrinterSpy {
