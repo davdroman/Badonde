@@ -106,3 +106,29 @@ extension LoggerTests {
 		waitForExpectations(timeout: 2, handler: nil)
 	}
 }
+
+extension LoggerTests {
+	func testTrySafely() {
+		let expectation = self.expectation(description: "Printing function is invoked")
+
+		Logger.printer = PrinterSpy {
+			XCTAssertEqual($0, "✖ Error description")
+			expectation.fulfill()
+		}
+
+		trySafely { try throwingFunction() }
+
+		waitForExpectations(timeout: 2, handler: nil)
+	}
+
+	private func throwingFunction() throws {
+		enum Error: Swift.Error, LocalizedError {
+			case error
+
+			var errorDescription: String? {
+				return "Error description"
+			}
+		}
+		throw Error.error
+	}
+}

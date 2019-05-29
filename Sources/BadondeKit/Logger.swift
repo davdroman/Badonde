@@ -10,6 +10,19 @@ final class DefaultPrinter: Printer {
 	}
 }
 
+public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
+	do {
+		return try throwingClosure()
+	} catch {
+		Logger.fail(error.localizedDescription)
+		#if DEBUG
+		return () as! T
+		#else
+		exit(EXIT_FAILURE)
+		#endif
+	}
+}
+
 public enum Logger {
 	public enum Log: Equatable, RawRepresentable {
 		public enum Symbol {
