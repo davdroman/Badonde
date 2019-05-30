@@ -9,6 +9,7 @@ let package = Package(
 		.macOS(.v10_13)
 	],
 	products: [
+		.library(name: "BadondeKit", type: .dynamic, targets: ["BadondeKit"]),
 		.executable(name: "badonde", targets: ["Badonde"]),
 	],
 	dependencies: [
