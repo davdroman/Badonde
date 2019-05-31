@@ -9,7 +9,6 @@ import Configuration
 class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
-	let baseBranch = Key<String>("-b", "--base-branch", description: "The base branch to target to (or a term within it)")
 
 	let startDate: Date
 
