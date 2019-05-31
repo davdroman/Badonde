@@ -1,4 +1,5 @@
 import Foundation
+import Sugar
 
 protocol Printer {
 	func print(_ text: String)
@@ -15,11 +16,13 @@ public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 		return try throwingClosure()
 	} catch {
 		Logger.fail(error.localizedDescription)
-		#if DEBUG
-		return () as! T
-		#else
+
+		// Avoid false-failure if used in unit tests.
+		guard !ProcessInfo.isUnitTesting else {
+			return () as! T
+		}
+
 		exit(EXIT_FAILURE)
-		#endif
 	}
 }
 
