@@ -1,4 +1,5 @@
 import Foundation
+import Git
 
 extension PullRequest {
 	public final class API: GitHub.API {
