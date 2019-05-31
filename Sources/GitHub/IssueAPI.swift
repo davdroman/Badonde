@@ -1,4 +1,5 @@
 import Foundation
+import Git
 
 extension Issue {
 	public final class API: GitHub.API {
