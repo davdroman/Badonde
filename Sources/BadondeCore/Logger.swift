@@ -33,11 +33,18 @@ public enum Logger {
 		isStepping = false
 	}
 
-	public static func fail() {
+	public static func fail(_ description: String) {
 		if isStepping {
 			spinner.fail()
 			isStepping = false
 		}
+
+		let prettifiedErrorDescription = description
+			.components(separatedBy: "\n")
+			.map { "☛ " + $0 }
+			.joined(separator: "\n")
+
+		fputs(prettifiedErrorDescription + "\n", stderr)
 	}
 
 	public static func succeed() {

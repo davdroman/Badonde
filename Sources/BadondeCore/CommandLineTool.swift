@@ -34,10 +34,8 @@ public final class CommandLineTool {
 			exit(EXIT_SUCCESS)
 		}
 
-		cli.errorMessageFormatter = { $0.prettifiedErrorMessage }
-
-		cli.didThrowErrorClosure = { _ in
-			Logger.fail()
+		cli.handleErrorClosure = { error in
+			Logger.fail(error.localizedDescription)
 		}
 
 		let exitStatus: Int32
@@ -53,8 +51,7 @@ public final class CommandLineTool {
 				try reportError(error, startDate: startDate)
 				Logger.succeed()
 			} catch let error {
-				Logger.fail()
-				print(error.localizedDescription.prettifiedErrorMessage)
+				Logger.fail(error.localizedDescription)
 			}
 			#endif
 		} else {
@@ -96,11 +93,5 @@ public final class CommandLineTool {
 		numberFormatter.maximumFractionDigits = 2
 		let prettyElapsedTime = numberFormatter.string(for: elapsedTime) ?? "?"
 		print("Badonde execution took \(prettyElapsedTime)s")
-	}
-}
-
-private extension String {
-	var prettifiedErrorMessage: String {
-		return components(separatedBy: "\n").map { "☛ " + $0 }.joined(separator: "\n")
 	}
 }
