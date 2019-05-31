@@ -6,7 +6,7 @@ public protocol RemoteInteractor {
 	func defaultBranch(forRemote remote: String) throws -> String
 }
 
-public struct Remote: Equatable {
+public struct Remote: Codable, Equatable {
 	public var name: String
 	public var url: URL
 
