@@ -10,12 +10,15 @@ public final class CommandLineTool {
 		static let description = "Painless PR-ing"
 	}
 
-	public init() {}
+	var startDate = Date()
+	let startDatePointer: UnsafeMutablePointer<Date>
+
+	public init() {
+		startDatePointer = withUnsafeMutablePointer(to: &startDate) { UnsafeMutablePointer<Date>($0) }
+	}
 
 	public func run(with arguments: [String]? = nil) {
 		_ = try? LegacyConfigurationStore.migrateIfNeeded()
-
-		let startDate = Date()
 
 		let cli = CLI(
 			name: Constant.name,
@@ -24,7 +27,7 @@ public final class CommandLineTool {
 			commands: [
 				AppifyCommand(),
 				ConfigCommand(),
-				PRCommand(startDate: startDate),
+				PRCommand(startDatePointer: startDatePointer),
 			]
 		)
 
