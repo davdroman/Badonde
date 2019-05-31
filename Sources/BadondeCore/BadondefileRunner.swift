@@ -45,7 +45,7 @@ final class BadondefileRunner {
 		let task = Task(executable: "/bin/bash", arguments: ["-c", bash], stdout: output, stderr: error)
 
 		let readibilityHandlerForCaptureClosure = { (captureClosure: @escaping (String) -> Void) -> ((FileHandle) -> Void) in
-			return { handle in
+			{ handle in
 				guard
 					let string = String(data: handle.availableData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
 					!string.isEmpty
