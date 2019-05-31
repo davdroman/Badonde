@@ -39,6 +39,7 @@ let package = Package(
 			dependencies: [
 				"CryptoSwift",
 				"Git",
+				"GitHub",
 				"Sugar",
 			]
 		),

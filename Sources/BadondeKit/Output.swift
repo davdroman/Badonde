@@ -1,9 +1,21 @@
 import Foundation
 import CryptoSwift
 import Git
+import GitHub
 
 public struct Output: Codable {
+	public struct PullRequest: Codable {
+		public var title: String
+		public var headBranch: String
+		public var baseBranch: String
+		public var body: String?
+		public var assignees: [String]?
+		public var labels: [Label]?
+		public var milestone: Milestone?
+		public var isDraft: Bool
+	}
 
+	public var pullRequest: PullRequest
 }
 
 extension Output {
