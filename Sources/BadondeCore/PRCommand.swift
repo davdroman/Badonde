@@ -10,10 +10,10 @@ class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
 
-	let startDate: Date
+	let startDatePointer: UnsafeMutablePointer<Date>
 
-	init(startDate: Date) {
-		self.startDate = startDate
+	init(startDatePointer: UnsafeMutablePointer<Date>) {
+		self.startDatePointer = startDatePointer
 	}
 
 	func execute() throws {
@@ -28,6 +28,11 @@ class PRCommand: Command {
 		let repositoryShorthand = try remote.repositoryShorthand()
 
 		try autopushIfNeeded(to: remote, configuration: configuration)
+
+		// Reset start date because credentials might've been prompted
+		// or autopush might've been performed and analytics data about
+		// tool performance might be skewed as a result.
+		startDatePointer.pointee = Date()
 
 		let badondefileOutput = try BadondefileRunner(repository: repository).run(
 			with: Payload(
@@ -75,7 +80,7 @@ class PRCommand: Command {
 					isDependent: pullRequestBaseBranch.isTicketBranch,
 					labelCount: pullRequestLabels.count,
 					hasMilestone: pullRequestMilestone != nil,
-					startDate: startDate
+					startDate: startDatePointer.pointee
 				)
 			)
 		}
