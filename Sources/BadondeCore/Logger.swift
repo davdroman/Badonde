@@ -37,6 +37,8 @@ public enum Logger {
 		if isStepping {
 			spinner.fail()
 			isStepping = false
+		} else {
+			spinner.fail(text: "An error ocurred")
 		}
 
 		let prettifiedErrorDescription = description
