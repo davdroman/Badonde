@@ -15,35 +15,35 @@ final class PrinterSpy: Printer {
 
 final class LoggerTests: XCTestCase {
 	func testLogInit_stepSymbol() {
-		let log = Logger.Log(rawValue: "▶ something")
+		let log = Log(rawValue: "▶ something")
 		XCTAssertEqual(log, .step("something"))
 	}
 
 	func testLogInit_infoSymbol() {
-		let log = Logger.Log(rawValue: "ℹ something")
+		let log = Log(rawValue: "ℹ something")
 		XCTAssertEqual(log, .info("something"))
 	}
 
 	func testLogInit_warnSymbol() {
-		let log = Logger.Log(rawValue: "⚠ something")
+		let log = Log(rawValue: "⚠ something")
 		XCTAssertEqual(log, .warn("something"))
 	}
 
 	func testLogInit_failSymbol() {
-		let log = Logger.Log(rawValue: "✖ something")
+		let log = Log(rawValue: "✖ something")
 		XCTAssertEqual(log, .fail("something"))
 	}
 
 	func testLogInit_invalidSymbol() {
-		let log = Logger.Log(rawValue: "- something")
+		let log = Log(rawValue: "- something")
 		XCTAssertNil(log)
 	}
 
 	func testLogInit_validSymbol_repeated() {
-		let logA = Logger.Log(rawValue: "▶▶ something")
-		let logB = Logger.Log(rawValue: "▶ ▶ something")
-		let logC = Logger.Log(rawValue: "▶ ▶▶ something")
-		let logD = Logger.Log(rawValue: "▶ ▶ ▶ something")
+		let logA = Log(rawValue: "▶▶ something")
+		let logB = Log(rawValue: "▶ ▶ something")
+		let logC = Log(rawValue: "▶ ▶▶ something")
+		let logD = Log(rawValue: "▶ ▶ ▶ something")
 
 		XCTAssertNil(logA)
 		XCTAssertEqual(logB, .step("▶ something"))
@@ -52,7 +52,7 @@ final class LoggerTests: XCTestCase {
 	}
 
 	func testLogInit_validSymbol_emptyDescription() {
-		let log = Logger.Log(rawValue: "▶ ")
+		let log = Log(rawValue: "▶ ")
 		XCTAssertEqual(log, .step(""))
 	}
 }
@@ -104,31 +104,5 @@ extension LoggerTests {
 
 		Logger.fail("Cuatro: el Robocop")
 		waitForExpectations(timeout: 2, handler: nil)
-	}
-}
-
-extension LoggerTests {
-	func testTrySafely() {
-		let expectation = self.expectation(description: "Printing function is invoked")
-
-		Logger.printer = PrinterSpy {
-			XCTAssertEqual($0, "✖ Error description")
-			expectation.fulfill()
-		}
-
-		trySafely { try throwingFunction() }
-
-		waitForExpectations(timeout: 2, handler: nil)
-	}
-
-	private func throwingFunction() throws {
-		enum Error: Swift.Error, LocalizedError {
-			case error
-
-			var errorDescription: String? {
-				return "Error description"
-			}
-		}
-		throw Error.error
 	}
 }
