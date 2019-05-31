@@ -1,5 +1,5 @@
 import Foundation
 
-public struct Label: Decodable {
+public struct Label: Codable {
 	public let name: String
 }
