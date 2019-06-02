@@ -40,6 +40,7 @@ let package = Package(
 				"CryptoSwift",
 				"Git",
 				"GitHub",
+				"Jira",
 				"Sugar",
 			]
 		),
