@@ -2,48 +2,57 @@ import Foundation
 import CLISpinner
 
 public enum Logger {
-	private static let spinner = Spinner(pattern: .dots, color: .lightCyan)
+	private static let pattern = Pattern.dots
+	private static let spinner = Spinner(pattern: pattern, color: .lightCyan)
 	private static var isStepping = false
+	private static var currentIndentationLevel = 0
+	private static var currentIndentation: String {
+		return String(repeating: " ", count: currentIndentationLevel)
+	}
 
-	public static func step(_ description: String) {
+	public static func step(indentationLevel: Int = 0, _ description: String) {
 		if isStepping {
-			spinner.succeed()
+			spinner.succeed(indentation: currentIndentation)
 			spinner.text = description
 		} else {
 			spinner._text = description
 		}
-		spinner.pattern = Pattern(from: Pattern.dots.symbols.map { $0.applyingColor(.lightCyan) })
+		currentIndentationLevel = indentationLevel
+		spinner.pattern = Pattern(from: pattern.symbols.map { currentIndentation + $0.applyingColor(.lightCyan) })
 		spinner.start()
 		isStepping = true
 	}
 
-	public static func info(_ description: String, succeedPrevious: Bool = true) {
+	public static func info(indentationLevel: Int = 0, _ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
-			spinner.succeed()
+			spinner.succeed(indentation: currentIndentation)
 		}
-		spinner.info(text: description)
+		currentIndentationLevel = indentationLevel
+		spinner.info(indentation: currentIndentation, text: description)
 		isStepping = false
 	}
 
-	public static func warn(_ description: String, succeedPrevious: Bool = true) {
+	public static func warn(indentationLevel: Int = 0, _ description: String, succeedPrevious: Bool = true) {
 		if isStepping, succeedPrevious {
-			spinner.succeed()
+			spinner.succeed(indentation: currentIndentation)
 		}
-		spinner.warn(text: description)
+		currentIndentationLevel = indentationLevel
+		spinner.warn(indentation: currentIndentation, text: description)
 		isStepping = false
 	}
 
-	public static func fail(_ description: String) {
+	public static func fail(indentationLevel: Int = 0, _ description: String) {
 		if isStepping {
-			spinner.fail()
+			spinner.fail(indentation: currentIndentation)
 			isStepping = false
 		} else {
-			spinner.fail(text: "An error ocurred")
+			currentIndentationLevel = indentationLevel
+			spinner.fail(text: "An error ocurred", indentation: currentIndentation)
 		}
 
 		let prettifiedErrorDescription = description
 			.components(separatedBy: "\n")
-			.map { "☛ " + $0 }
+			.map { currentIndentation + "☛ " + $0 }
 			.joined(separator: "\n")
 
 		fputs(prettifiedErrorDescription + "\n", stderr)
@@ -51,12 +60,30 @@ public enum Logger {
 
 	public static func succeed() {
 		if isStepping {
-			spinner.succeed()
+			spinner.succeed(indentation: currentIndentation)
 			isStepping = false
 		}
 	}
 
 	public static func finish() {
 		spinner.unhideCursor()
+	}
+}
+
+private extension Spinner {
+	func succeed(indentation: String) {
+		stop(symbol: indentation + "✔".green)
+	}
+
+	func fail(text: String? = nil, indentation: String) {
+		stop(text: text, symbol: indentation + "✖".red)
+	}
+
+	func warn(indentation: String, text: String? = nil) {
+		stop(text: text, symbol: indentation + "⚠".yellow)
+	}
+
+	func info(indentation: String, text: String? = nil) {
+		stop(text: text, symbol: indentation + "ℹ".blue)
 	}
 }
