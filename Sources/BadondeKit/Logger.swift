@@ -8,6 +8,7 @@ protocol Printer {
 final class DefaultPrinter: Printer {
 	func print(_ text: String) {
 		Swift.print(text)
+		fflush(stdout)
 	}
 }
 
