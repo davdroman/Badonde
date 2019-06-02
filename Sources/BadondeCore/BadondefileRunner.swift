@@ -59,23 +59,22 @@ final class BadondefileRunner {
 		error.readHandle.readabilityHandler = readibilityHandlerForCaptureClosure(stderrCapture)
 
 		let exitStatus = task.runSync()
-		error.closeRead()
-		output.closeRead()
 		return exitStatus
 	}
 }
 
 private extension Logger {
 	static func printBadondefileLog(_ log: Log) {
+		let indentationLevel = 3
 		switch log {
 		case .step(let description):
-			step(description)
+			step(indentationLevel: indentationLevel, description)
 		case .info(let description):
-			info(description)
+			info(indentationLevel: indentationLevel,description)
 		case .warn(let description):
-			warn(description)
+			warn(indentationLevel: indentationLevel,description)
 		case .fail(let description):
-			fail(description)
+			fail(indentationLevel: indentationLevel,description)
 		}
 	}
 }
