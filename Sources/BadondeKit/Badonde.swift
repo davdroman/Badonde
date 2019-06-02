@@ -4,7 +4,63 @@ import GitHub
 import Jira
 
 public final class Badonde {
+	public init(
+		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy,
+		baseBranchDerivationStrategy: BaseBranchDerivationStrategy
+	) {
+		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
+			let repository = try Repository()
+			let branch = try Branch.current()
 
+			let data = try Data(contentsOf: Payload.path(for: repository))
+			let payload = try JSONDecoder().decode(Payload.self, from: data)
+
+			let githubAccessToken = payload.configuration.github.accessToken
+			let jiraEmail = payload.configuration.jira.email
+			let jiraApiToken = payload.configuration.jira.apiToken
+
+			let labelAPI = Label.API(accessToken: githubAccessToken)
+			let milestoneAPI = Milestone.API(accessToken: githubAccessToken)
+			let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
+
+			let gitDSL = try GitDSL(
+				remote: payload.configuration.git.remote,
+				defaultBranch: payload.configuration.git.remote.defaultBranch(),
+				currentBranch: branch
+			)
+
+			let jiraDSL: JiraDSL?
+			if let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) {
+				let ticket = try ticketAPI.getTicket(with: ticketKey)
+				jiraDSL = JiraDSL(ticket: ticket)
+			} else {
+				jiraDSL = nil
+			}
+
+			output = try Output(
+				pullRequest: .init(
+					title: jiraDSL?.ticket.key.rawValue ?? branch.name,
+					headBranch: branch.name,
+					baseBranch: baseBranchDerivationStrategy.baseBranch(for: gitDSL).name,
+					body: nil,
+					assignees: nil,
+					labels: nil,
+					milestone: nil,
+					isDraft: true
+				)
+			)
+
+			return (git: gitDSL, github: GitHubDSL(), jira: jiraDSL)
+		}
+
+		self.git = dsl.git
+		self.github = dsl.github
+		self.jira = dsl.jira
+	}
+
+	public var git: GitDSL
+	public var github: GitHubDSL
+	public var jira: JiraDSL?
 }
 
 extension Badonde {
