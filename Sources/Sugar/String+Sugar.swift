@@ -7,8 +7,17 @@ extension String {
 		}
 	}
 
-	public func matchesRegex(_ regex: String) -> Bool {
-		return range(of: regex, options: .regularExpression, range: nil, locale: nil) != nil
+	public func firstMatch(forRegex regex: String, options: String.CompareOptions = []) -> String? {
+		var options = options
+		options.insert(.regularExpression)
+		guard let matchRange = range(of: regex, options: options, range: nil, locale: nil) else {
+			return nil
+		}
+		return String(self[matchRange])
+	}
+
+	public func matchesRegex(_ regex: String, options: String.CompareOptions = []) -> Bool {
+		return firstMatch(forRegex: regex, options: options) != nil
 	}
 
 	public func components(losslesslySeparatedBy separator: CharacterSet) -> [String] {
