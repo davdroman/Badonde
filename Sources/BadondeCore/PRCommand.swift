@@ -34,6 +34,7 @@ class PRCommand: Command {
 		// tool performance might be skewed as a result.
 		startDatePointer.pointee = Date()
 
+		Logger.step("Evaluating Badondefile.swift")
 		let badondefileOutput = try BadondefileRunner(repository: repository).run(
 			with: Payload(
 				configuration: .init(
