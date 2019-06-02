@@ -95,10 +95,11 @@ public enum Log: Equatable, RawRepresentable {
 
 	var caseValue: String {
 		switch self {
-		case let .step(value),
-			 let .info(value),
-			 let .warn(value),
-			 let .fail(value): return value
+		case
+			let .step(value),
+			let .info(value),
+			let .warn(value),
+			let .fail(value): return value
 		}
 	}
 }

@@ -34,7 +34,6 @@ final class BadondefileRunner {
 
 		let outputData = try Data(contentsOf: Output.path(for: repository))
 		let output = try JSONDecoder().decode(Output.self, from: outputData)
-
 		return output
 	}
 
