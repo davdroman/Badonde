@@ -49,6 +49,12 @@ public final class Badonde {
 				},
 				{
 					trySafely {
+						let pullRequestAPI = PullRequest.API(accessToken: payload.configuration.github.accessToken)
+						githubDSL.openPullRequests = try pullRequestAPI.allPullRequests(for: repositoryShorthand, state: .open)
+					}
+				},
+				{
+					trySafely {
 						guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) else {
 							return
 						}
