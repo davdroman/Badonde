@@ -10,35 +10,49 @@ public final class Badonde {
 	) {
 		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
 			let repository = try Repository()
-			let branch = try Branch.current()
-
 			let data = try Data(contentsOf: Payload.path(for: repository))
 			let payload = try JSONDecoder().decode(Payload.self, from: data)
 
-			let githubAccessToken = payload.configuration.github.accessToken
-			let jiraEmail = payload.configuration.jira.email
-			let jiraApiToken = payload.configuration.jira.apiToken
+			Logger.step("Deriving repo shorthand")
+			let remote = payload.configuration.git.remote
+			let repositoryShorthand = try remote.repositoryShorthand()
 
-			let labelAPI = Label.API(accessToken: githubAccessToken)
-			let milestoneAPI = Milestone.API(accessToken: githubAccessToken)
-			let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
-
-			let gitDSL = try GitDSL(
-				remote: payload.configuration.git.remote,
-				defaultBranch: payload.configuration.git.remote.defaultBranch(),
-				currentBranch: branch
-			)
-
-			var jiraDSL: JiraDSL?
+			Logger.step("Deriving head branch")
+			let headBranch = try Branch.current()
 			var baseBranch: Branch!
 
+			let gitDSL = try GitDSL(
+				remote: remote,
+				defaultBranch: payload.configuration.git.remote.defaultBranch(),
+				currentBranch: headBranch
+			)
+			var githubDSL = GitHubDSL(labels: [], milestones: [])
+			var jiraDSL: JiraDSL?
+
+			Logger.step("Deriving base branch and fetching API data")
 			DispatchGroup().asyncExecuteAndWait(
 				{
 					trySafely {
-						if let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) {
-							let ticket = try ticketAPI.getTicket(with: ticketKey)
-							jiraDSL = JiraDSL(ticket: ticket)
+						let labelAPI = Label.API(accessToken: payload.configuration.github.accessToken)
+						githubDSL.labels = try labelAPI.getLabels(for: repositoryShorthand)
+					}
+				},
+				{
+					trySafely {
+						let milestoneAPI = Milestone.API(accessToken: payload.configuration.github.accessToken)
+						githubDSL.milestones = try milestoneAPI.getMilestones(for: repositoryShorthand)
+					}
+				},
+				{
+					trySafely {
+						guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) else {
+							return
 						}
+						let jiraEmail = payload.configuration.jira.email
+						let jiraApiToken = payload.configuration.jira.apiToken
+						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
+						let ticket = try ticketAPI.getTicket(with: ticketKey)
+						jiraDSL = JiraDSL(ticket: ticket)
 					}
 				},
 				{
@@ -50,8 +64,8 @@ public final class Badonde {
 
 			output = Output(
 				pullRequest: .init(
-					title: jiraDSL?.ticket.key.rawValue ?? branch.name,
-					headBranch: branch.name,
+					title: jiraDSL?.ticket.key.rawValue ?? headBranch.name,
+					headBranch: headBranch.name,
 					baseBranch: baseBranch.name,
 					body: nil,
 					assignees: [],
@@ -62,7 +76,7 @@ public final class Badonde {
 				analyticsData: .init(info: [:])
 			)
 
-			return (git: gitDSL, github: GitHubDSL(), jira: jiraDSL)
+			return (git: gitDSL, github: githubDSL, jira: jiraDSL)
 		}
 
 		self.git = dsl.git
