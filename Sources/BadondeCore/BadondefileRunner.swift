@@ -69,11 +69,11 @@ private extension Logger {
 		case .step(let description):
 			step(indentationLevel: indentationLevel, description)
 		case .info(let description):
-			info(indentationLevel: indentationLevel,description)
+			info(indentationLevel: indentationLevel, description)
 		case .warn(let description):
-			warn(indentationLevel: indentationLevel,description)
+			warn(indentationLevel: indentationLevel, description)
 		case .fail(let description):
-			fail(indentationLevel: indentationLevel,description)
+			fail(indentationLevel: indentationLevel, description)
 		}
 	}
 }
