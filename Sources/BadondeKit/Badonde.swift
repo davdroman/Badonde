@@ -21,10 +21,11 @@ public final class Badonde {
 			let headBranch = try Branch.current()
 			var baseBranch: Branch!
 
-			let gitDSL = try GitDSL(
+			var gitDSL = try GitDSL(
 				remote: remote,
 				defaultBranch: payload.configuration.git.remote.defaultBranch(),
-				currentBranch: headBranch
+				currentBranch: headBranch,
+				diff: []
 			)
 			var githubDSL = GitHubDSL(
 				labels: [],
@@ -35,6 +36,14 @@ public final class Badonde {
 
 			Logger.step("Deriving base branch and fetching API data")
 			DispatchGroup().asyncExecuteAndWait(
+				{
+					trySafely {
+						baseBranch = try baseBranchDerivationStrategy.baseBranch(for: gitDSL)
+						baseBranch.source = .remote(remote)
+
+						gitDSL.diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch)
+					}
+				},
 				{
 					trySafely {
 						let labelAPI = Label.API(accessToken: payload.configuration.github.accessToken)
@@ -63,11 +72,6 @@ public final class Badonde {
 						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
 						let ticket = try ticketAPI.getTicket(with: ticketKey)
 						jiraDSL = JiraDSL(ticket: ticket)
-					}
-				},
-				{
-					trySafely {
-						baseBranch = try baseBranchDerivationStrategy.baseBranch(for: gitDSL)
 					}
 				}
 			)
