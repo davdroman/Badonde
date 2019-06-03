@@ -7,15 +7,19 @@ extension Label {
 			super.init(authorization: .token(accessToken))
 		}
 
-		public func getLabels(for shorthand: Repository.Shorthand) throws -> [Label] {
+		public func labels(for shorthand: Repository.Shorthand, page: Int) throws -> [Label] {
+			return try get(
+				endpoint: "/repos/\(shorthand.rawValue)/labels",
+				queryItems: [URLQueryItem(name: "page", value: String(page))],
+				responseType: [Label].self
+			)
+		}
+
+		public func allLabels(for shorthand: Repository.Shorthand) throws -> [Label] {
 			var labels: [Label] = []
 			var currentPage = 1
 			while true {
-				let newLabels = try get(
-					endpoint: "/repos/\(shorthand.rawValue)/labels",
-					queryItems: [URLQueryItem(name: "page", value: "\(currentPage)")],
-					responseType: [Label].self
-				)
+				let newLabels = try self.labels(for: shorthand, page: currentPage)
 				guard !newLabels.isEmpty else {
 					break
 				}

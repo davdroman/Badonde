@@ -26,7 +26,11 @@ public final class Badonde {
 				defaultBranch: payload.configuration.git.remote.defaultBranch(),
 				currentBranch: headBranch
 			)
-			var githubDSL = GitHubDSL(labels: [], milestones: [])
+			var githubDSL = GitHubDSL(
+				labels: [],
+				milestones: [],
+				openPullRequests: []
+			)
 			var jiraDSL: JiraDSL?
 
 			Logger.step("Deriving base branch and fetching API data")
@@ -34,7 +38,7 @@ public final class Badonde {
 				{
 					trySafely {
 						let labelAPI = Label.API(accessToken: payload.configuration.github.accessToken)
-						githubDSL.labels = try labelAPI.getLabels(for: repositoryShorthand)
+						githubDSL.labels = try labelAPI.allLabels(for: repositoryShorthand)
 					}
 				},
 				{
