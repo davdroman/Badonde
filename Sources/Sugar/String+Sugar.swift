@@ -65,3 +65,12 @@ extension String {
 		return lhs.isRoughly(rhs)
 	}
 }
+
+extension String {
+	public func base64(using encoding: String.Encoding = .utf8) -> String? {
+		guard let stringData = data(using: encoding) else {
+			return nil
+		}
+		return stringData.base64EncodedString()
+	}
+}

@@ -1,8 +1,8 @@
 import Foundation
+import SwiftCLI
 import struct BadondeKit.Payload
 import enum BadondeKit.Log
 import struct BadondeKit.Output
-import SwiftCLI
 import Git
 
 final class BadondefileRunner {
@@ -21,7 +21,7 @@ final class BadondefileRunner {
 				line.components(losslesslySeparatedBy: CharacterSet(charactersIn: Log.Symbol.all.joined()))
 					.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
 					.compactMap { Log(rawValue: $0) }
-					.forEach { Logger.printBadondefileLog($0) }
+					.forEach { Logger.logBadondefileLog($0) }
 			},
 			stderrCapture: { line in
 				Logger.fail(line)
@@ -63,7 +63,7 @@ final class BadondefileRunner {
 }
 
 private extension Logger {
-	static func printBadondefileLog(_ log: Log) {
+	static func logBadondefileLog(_ log: Log) {
 		let indentationLevel = 3
 		switch log {
 		case .step(let description):

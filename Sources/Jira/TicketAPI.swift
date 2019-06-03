@@ -6,11 +6,7 @@ extension Ticket {
 		let email: String
 		let apiToken: String
 		var authorizationValue: String? {
-			let rawString = [email, apiToken].joined(separator: ":")
-			guard let utf8StringRepresentation = rawString.data(using: .utf8) else {
-				return nil
-			}
-			return utf8StringRepresentation.base64EncodedString()
+			return [email, apiToken].joined(separator: ":").base64()
 		}
 
 		public init(email: String, apiToken: String) {
