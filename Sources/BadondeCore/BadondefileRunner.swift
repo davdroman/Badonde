@@ -16,7 +16,7 @@ final class BadondefileRunner {
 		let payloadData = try JSONEncoder().encode(payload)
 		try payloadData.write(to: Payload.path(for: repository))
 
-		let exitStatus = try run(
+		try run(
 			stdoutCapture: { line in
 				line.components(losslesslySeparatedBy: CharacterSet(charactersIn: Log.Symbol.all.joined()))
 					.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -28,38 +28,37 @@ final class BadondefileRunner {
 			}
 		)
 
-		if exitStatus != EXIT_SUCCESS {
-			exit(exitStatus)
-		}
-
 		let outputData = try Data(contentsOf: Output.path(for: repository))
 		let output = try JSONDecoder().decode(Output.self, from: outputData)
 		return output
 	}
 
-	private func run(stdoutCapture: @escaping (String) -> Void, stderrCapture: @escaping (String) -> Void) throws -> Int32 {
+	private func run(stdoutCapture: @escaping (String) -> Void, stderrCapture: @escaping (String) -> Void) throws {
 		let output = PipeStream()
 		let error = PipeStream()
 		let bash = "swift -L ../../Badonde/.build/debug -I ../../Badonde/.build/debug -lBadondeKit Badondefile.swift"
 		let task = Task(executable: "/bin/bash", arguments: ["-c", bash], stdout: output, stderr: error)
 
-		let readibilityHandlerForCaptureClosure = { (captureClosure: @escaping (String) -> Void) -> ((FileHandle) -> Void) in
-			{ handle in
-				guard
-					let string = String(data: handle.availableData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-					!string.isEmpty
-				else {
-					return
-				}
-				captureClosure(string)
+		output.readHandle.readabilityHandler = { handle in
+			guard
+				let string = String(data: handle.availableData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+				!string.isEmpty
+			else {
+				return
 			}
+			stdoutCapture(string)
 		}
 
-		output.readHandle.readabilityHandler = readibilityHandlerForCaptureClosure(stdoutCapture)
-		error.readHandle.readabilityHandler = readibilityHandlerForCaptureClosure(stderrCapture)
-
 		let exitStatus = task.runSync()
-		return exitStatus
+
+		let stderrContent = error.readAll().trimmingCharacters(in: .whitespacesAndNewlines)
+		if !stderrContent.isEmpty {
+			stderrCapture(stderrContent)
+		}
+
+		if exitStatus != EXIT_SUCCESS {
+			exit(exitStatus)
+		}
 	}
 }
 
