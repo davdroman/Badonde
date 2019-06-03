@@ -5,8 +5,8 @@ import Jira
 
 public final class Badonde {
 	public init(
-		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy,
-		baseBranchDerivationStrategy: BaseBranchDerivationStrategy
+		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy = .regex,
+		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
 	) {
 		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
 			let repository = try Repository()
