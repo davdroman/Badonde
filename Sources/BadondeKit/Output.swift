@@ -65,6 +65,13 @@ extension Output {
 	}
 }
 
+extension Output {
+	func write(to url: URL) throws {
+		let outputData = try JSONEncoder().encode(self)
+		try outputData.write(to: url)
+	}
+}
+
 var output: Output!
 
 public func title(_ title: String) {

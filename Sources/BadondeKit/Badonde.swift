@@ -83,21 +83,18 @@ public final class Badonde {
 		self.github = dsl.github
 		self.jira = dsl.jira
 
-		saveOutputOnExit()
+		atexit {
+			trySafely {
+				let repository = try Repository()
+				let outputPath = Output.path(for: repository)
+				try output.write(to: outputPath)
+			}
+		}
 	}
 
 	public var git: GitDSL
 	public var github: GitHubDSL
 	public var jira: JiraDSL?
-
-	func saveOutputOnExit() {
-		atexit {
-			let repository = try! Repository()
-			let outputPath = Output.path(for: repository)
-			let outputData = try! JSONEncoder().encode(output)
-			try! outputData.write(to: outputPath)
-		}
-	}
 }
 
 extension Badonde {
