@@ -6,20 +6,9 @@ extension String {
 			String(decoding: $0, as: UTF8.self)
 		}
 	}
+}
 
-	public func firstMatch(forRegex regex: String, options: String.CompareOptions = []) -> String? {
-		var options = options
-		options.insert(.regularExpression)
-		guard let matchRange = range(of: regex, options: options, range: nil, locale: nil) else {
-			return nil
-		}
-		return String(self[matchRange])
-	}
-
-	public func matchesRegex(_ regex: String, options: String.CompareOptions = []) -> Bool {
-		return firstMatch(forRegex: regex, options: options) != nil
-	}
-
+extension String {
 	public func components(losslesslySeparatedBy separator: CharacterSet) -> [String] {
 		var components = [String]()
 		var latestSeparatorIndex = startIndex
@@ -48,5 +37,20 @@ extension String {
 		}
 
 		return components
+	}
+}
+
+extension String {
+	public func firstMatch(forRegex regex: String, options: String.CompareOptions = []) -> String? {
+		var options = options
+		options.insert(.regularExpression)
+		guard let matchRange = range(of: regex, options: options, range: nil, locale: nil) else {
+			return nil
+		}
+		return String(self[matchRange])
+	}
+
+	public func matchesRegex(_ regex: String, options: String.CompareOptions = []) -> Bool {
+		return firstMatch(forRegex: regex, options: options) != nil
 	}
 }
