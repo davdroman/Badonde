@@ -76,14 +76,23 @@ private extension Spinner {
 	}
 
 	func fail(text: String? = nil, indentation: String) {
-		stop(text: text, symbol: indentation + "✖".red)
+		stop(text: indentedText(indentation, text), symbol: indentation + "✖".red)
 	}
 
 	func warn(indentation: String, text: String? = nil) {
-		stop(text: text, symbol: indentation + "⚠".yellow)
+		stop(text: indentedText(indentation, text), symbol: indentation + "⚠".yellow)
 	}
 
 	func info(indentation: String, text: String? = nil) {
-		stop(text: text, symbol: indentation + "ℹ".blue)
+		stop(text: indentedText(indentation, text), symbol: indentation + "ℹ".blue)
+	}
+
+	private func indentedText(_ indentation: String, _ text: String?) -> String? {
+		let symbolIndentation = String(repeating: " ", count: 2)
+		return text?
+			.components(separatedBy: "\n")
+			.enumerated()
+			.map { $0.offset > 0 ? indentation + symbolIndentation + $0.element : $0.element }
+			.joined(separator: "\n")
 	}
 }
