@@ -18,6 +18,34 @@ public struct Output: Codable {
 	public var pullRequest: PullRequest
 }
 
+extension Output: CustomStringConvertible {
+	public var description: String {
+		let indentation = String(repeating: " ", count: 3)
+		let assignees = (pullRequest.assignees?
+			.map { indentation + $0 }
+			.joined(separator: "\n"))
+			.map { "\n" + $0 }
+
+		let labels = (pullRequest.labels?
+			.map { indentation + $0.name }
+			.joined(separator: "\n"))
+			.map { "\n" + $0 }
+
+		return """
+		Output:
+		   Pull request:
+		      title: \(pullRequest.title)
+		      headBranch: \(pullRequest.headBranch)
+		      baseBranch: \(pullRequest.baseBranch)
+		      body: \(pullRequest.body ?? "<none>")
+		      assignees: \(assignees ?? "<none>")
+		      labels: \(labels ?? "<none>")
+		      milestone: \(pullRequest.milestone?.title ?? "<none>")
+		      isDraft: \(pullRequest.isDraft)
+		"""
+	}
+}
+
 extension Output {
 	public static func path(for repository: Repository) -> URL {
 		let repositoryPathSha1 = repository.topLevelPath.path.sha1()
