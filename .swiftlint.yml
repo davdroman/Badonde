@@ -73,3 +73,4 @@ opt_in_rules:
 # paths to ignore during linting. Takes precedence over `included`.
 excluded:
   - .build
+  - Sources/Sugar/AnyCodable
