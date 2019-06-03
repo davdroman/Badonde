@@ -69,7 +69,8 @@ class PRCommand: Command {
 		_ = try issueAPI.edit(
 			at: repositoryShorthand,
 			issueNumber: pullRequest.number,
-			labels: badondefileOutput.pullRequest.labels?.map { $0.name },
+			assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
+			labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
 			milestone: badondefileOutput.pullRequest.milestone?.number
 		)
 
@@ -130,7 +131,7 @@ class PRCommand: Command {
 			.map { $0.count }
 			.max()
 		let separator = String(repeating: "=", count: maxLineLength ?? 80)
-		print(["", separator, output, separator, ""].joined(separator: "\n"))
+		print(["", "Output", separator, output, separator, ""].joined(separator: "\n"))
 	}
 }
 
