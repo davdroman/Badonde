@@ -1,5 +1,4 @@
 import Foundation
-import Sugar
 
 protocol Printer {
 	func print(_ text: String)

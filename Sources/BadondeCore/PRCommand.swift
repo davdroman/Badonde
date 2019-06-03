@@ -1,11 +1,11 @@
 import Foundation
+import SwiftCLI
 import struct BadondeKit.Payload
 import struct BadondeKit.Output
-import SwiftCLI
-import GitHub
-import Git
-import Jira
 import Configuration
+import Git
+import GitHub
+import Jira
 
 class PRCommand: Command {
 	let name = "pr"

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftCLI
-import GitHub
 import Configuration
+import GitHub
 
 private extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!

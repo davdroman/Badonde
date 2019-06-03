@@ -14,11 +14,9 @@ extension API {
 			case let .token(token):
 				return ["token", token].joined(separator: " ")
 			case let .basic(username, password):
-				let rawString = [username, password].joined(separator: ":")
-				guard let utf8StringRepresentation = rawString.data(using: .utf8) else {
+				guard let token = [username, password].joined(separator: ":").base64() else {
 					throw Error.authorizationEncodingError
 				}
-				let token = utf8StringRepresentation.base64EncodedString()
 				return ["Basic", token].joined(separator: " ")
 			}
 		}

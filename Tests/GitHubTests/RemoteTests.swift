@@ -1,6 +1,6 @@
 import XCTest
-@testable import GitHub
 import Git
+@testable import GitHub
 import TestSugar
 
 final class RemoteInteractorMock: GitHub.RemoteInteractor {

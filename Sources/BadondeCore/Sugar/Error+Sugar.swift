@@ -1,4 +1,5 @@
 import Foundation
+import Sugar
 
 extension Error {
 	func analyticsData(startDate: Date) -> ErrorAnalyticsReporter.Data {
