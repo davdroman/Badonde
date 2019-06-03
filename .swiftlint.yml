@@ -66,7 +66,6 @@ opt_in_rules:
   - conditional_returns_on_newline
   - closure_spacing
   - closure_end_indentation
-  - closure_body_length
   - attributes
   - array_init
   - anyobject_protocol
