@@ -1,5 +1,6 @@
 import Foundation
 import struct BadondeKit.Payload
+import struct BadondeKit.Output
 import SwiftCLI
 import GitHub
 import Git
@@ -9,6 +10,7 @@ import Configuration
 class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
+	let dryRun = Flag("--dry-run", description: "Print generated PR details instead of creating it")
 
 	let startDatePointer: UnsafeMutablePointer<Date>
 
@@ -44,6 +46,11 @@ class PRCommand: Command {
 				)
 			)
 		)
+
+		guard !dryRun.value else {
+			logBadondefileOutput(badondefileOutput)
+			return
+		}
 
 		let pullRequestAPI = PullRequest.API(accessToken: githubAccessToken)
 		let issueAPI = Issue.API(accessToken: githubAccessToken)
@@ -115,6 +122,17 @@ class PRCommand: Command {
 				Logger.info("Local branch is ahead of remote, please push your changes")
 			}
 		}
+	}
+
+	func logBadondefileOutput(_ output: Output) {
+		Logger.succeed()
+		let output = output.description
+		let maxLineLength = output.description
+			.components(separatedBy: "\n")
+			.map { $0.count }
+			.max()
+		let separator = String(repeating: "=", count: maxLineLength ?? 80)
+		print(["", separator, output, separator, ""].joined(separator: "\n"))
 	}
 }
 
