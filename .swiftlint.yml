@@ -54,7 +54,6 @@ opt_in_rules:
   - first_where
   - last_where
   - joined_default_parameter
-  - implicitly_unwrapped_optional
   - implicit_return
   - identical_operands
   - fatal_error_message
