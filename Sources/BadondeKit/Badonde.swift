@@ -43,8 +43,8 @@ public final class Badonde {
 					headBranch: branch.name,
 					baseBranch: baseBranchDerivationStrategy.baseBranch(for: gitDSL).name,
 					body: nil,
-					assignees: nil,
-					labels: nil,
+					assignees: [],
+					labels: [],
 					milestone: nil,
 					isDraft: true
 				),
@@ -57,11 +57,22 @@ public final class Badonde {
 		self.git = dsl.git
 		self.github = dsl.github
 		self.jira = dsl.jira
+
+		saveOutputOnExit()
 	}
 
 	public var git: GitDSL
 	public var github: GitHubDSL
 	public var jira: JiraDSL?
+
+	func saveOutputOnExit() {
+		atexit {
+			let repository = try! Repository()
+			let outputPath = Output.path(for: repository)
+			let outputData = try! JSONEncoder().encode(output)
+			try! outputData.write(to: outputPath)
+		}
+	}
 }
 
 extension Badonde {
