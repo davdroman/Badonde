@@ -14,9 +14,9 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/DavdRoman/CLISpinner", .branch("master")),
-		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
+		.package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.0.0"),
 		.package(url: "https://github.com/DavdRoman/SwiftCLI", .branch("master")),
-		.package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: Version(1, 0, 0)),
+		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
 	],
 	targets: [
 		.target(name: "Badonde", dependencies: ["BadondeCore"]),
