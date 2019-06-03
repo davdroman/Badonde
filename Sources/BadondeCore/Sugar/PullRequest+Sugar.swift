@@ -1,21 +1,12 @@
 import Foundation
+import struct BadondeKit.Output
 import GitHub
 import Sugar
 
-// Replace for `BadondeKit.PullRequestDSL.analyticsData`
-// when implemented.
-// https://github.com/davdroman/Badonde/issues/60
-extension PullRequest {
-	static func analyticsData(
-		isDependent: Bool,
-		labelCount: Int,
-		hasMilestone: Bool,
-		startDate: Date
-	) -> PullRequest.AnalyticsReporter.Data {
-		return PullRequest.AnalyticsReporter.Data(
-			isDependent: isDependent,
-			labelCount: labelCount,
-			hasMilestone: hasMilestone,
+extension PullRequest.AnalyticsReporter.Data {
+	init(outputAnalyticsData: Output.AnalyticsData, startDate: Date) {
+		self.init(
+			info: outputAnalyticsData.info,
 			elapsedTime: Date().timeIntervalSince(startDate),
 			timestamp: startDate,
 			version: CommandLineTool.Constant.version
@@ -26,9 +17,7 @@ extension PullRequest {
 extension PullRequest {
 	final class AnalyticsReporter {
 		struct Data: Codable {
-			var isDependent: Bool
-			var labelCount: Int
-			var hasMilestone: Bool
+			var info: [String: AnyCodable]
 			var elapsedTime: TimeInterval
 			var timestamp: Date
 			var version: String

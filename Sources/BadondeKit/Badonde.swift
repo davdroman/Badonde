@@ -47,7 +47,8 @@ public final class Badonde {
 					labels: nil,
 					milestone: nil,
 					isDraft: true
-				)
+				),
+				analyticsData: .init(info: [:])
 			)
 
 			return (git: gitDSL, github: GitHubDSL(), jira: jiraDSL)

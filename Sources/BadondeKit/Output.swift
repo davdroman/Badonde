@@ -2,6 +2,7 @@ import Foundation
 import CryptoSwift
 import Git
 import GitHub
+import Sugar
 
 public struct Output: Codable {
 	public struct PullRequest: Codable {
@@ -15,23 +16,29 @@ public struct Output: Codable {
 		public var isDraft: Bool
 	}
 
+	public struct AnalyticsData: Codable {
+		public var info: [String: AnyCodable]
+	}
+
 	public var pullRequest: PullRequest
+	public var analyticsData: AnalyticsData
 }
 
 extension Output: CustomStringConvertible {
 	public var description: String {
-		let indentation = String(repeating: " ", count: 3)
+		let indentation: (Int) -> String = { String(repeating: " ", count: $0) }
+
 		let assignees = (pullRequest.assignees?
-			.map { indentation + $0 }
+			.map { indentation(9) + $0 }
 			.joined(separator: "\n"))
 			.map { "\n" + $0 }
 
 		let labels = (pullRequest.labels?
-			.map { indentation + $0.name }
+			.map { indentation(9) + $0.name }
 			.joined(separator: "\n"))
 			.map { "\n" + $0 }
 
-		return """
+		let pullRequestDescription = """
 		Output:
 		   Pull request:
 		      title: \(pullRequest.title)
@@ -42,6 +49,19 @@ extension Output: CustomStringConvertible {
 		      labels: \(labels ?? "<none>")
 		      milestone: \(pullRequest.milestone?.title ?? "<none>")
 		      isDraft: \(pullRequest.isDraft)
+		"""
+
+		guard !analyticsData.info.isEmpty else {
+			return pullRequestDescription
+		}
+
+		let analyticsDataInfo = analyticsData.info
+			.map { indentation(6) + "\($0): \($1)" }
+			.joined(separator: "\n")
+
+		return pullRequestDescription + "\n" + """
+		   Analytics data:
+		\(analyticsDataInfo)
 		"""
 	}
 }
@@ -100,4 +120,16 @@ public func milestone(_ milestone: Milestone) {
 
 public func draft(_ isDraft: Bool) {
 	output?.pullRequest.isDraft = isDraft
+}
+
+public func analytics<T: Codable>(key: String, value: T) {
+	output?.analyticsData.info[key] = AnyCodable(value)
+}
+
+public func analytics<T: Codable>(pullRequestClosure: (Output.PullRequest) -> [String: T]) {
+	guard let pullRequest = output?.pullRequest else {
+		return
+	}
+	let info = pullRequestClosure(pullRequest).mapValues { AnyCodable($0) }
+	output?.analyticsData.info.merge(info, uniquingKeysWith: { _, new in new })
 }
