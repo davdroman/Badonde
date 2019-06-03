@@ -1,4 +1,5 @@
 import Foundation
+import SwiftyStringScore
 
 extension String {
 	public init(staticString: StaticString) {
@@ -52,5 +53,15 @@ extension String {
 
 	public func matchesRegex(_ regex: String, options: String.CompareOptions = []) -> Bool {
 		return firstMatch(forRegex: regex, options: options) != nil
+	}
+}
+
+extension String {
+	public func isRoughly(_ otherString: String) -> Bool {
+		return otherString.score(word: self, fuzziness: 1) > 0.5
+	}
+
+	public static func ~= (lhs: String, rhs: String) -> Bool {
+		return lhs.isRoughly(rhs)
 	}
 }

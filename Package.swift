@@ -26,7 +26,6 @@ let package = Package(
 				"BadondeKit",
 				"Configuration",
 				"SwiftCLI",
-				"SwiftyStringScore",
 				"CLISpinner",
 				"Git",
 				"GitHub",
@@ -48,7 +47,7 @@ let package = Package(
 		.target(name: "Git", dependencies: ["SwiftCLI"]),
 		.target(name: "GitHub", dependencies: ["Git", "Sugar"]),
 		.target(name: "Jira", dependencies: ["Sugar"]),
-		.target(name: "Sugar"),
+		.target(name: "Sugar", dependencies: ["SwiftyStringScore"]),
 		.target(name: "TestSugar"),
 
 		.testTarget(name: "BadondeKitTests", dependencies: ["BadondeKit"]),
