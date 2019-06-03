@@ -84,10 +84,8 @@ class PRCommand: Command {
 		{
 			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 			try reporter.report(
-				PullRequest.analyticsData(
-					isDependent: pullRequestBaseBranch.isTicketBranch,
-					labelCount: pullRequestLabels.count,
-					hasMilestone: pullRequestMilestone != nil,
+				PullRequest.AnalyticsReporter.Data(
+					outputAnalyticsData: badondefileOutput.analyticsData,
 					startDate: startDatePointer.pointee
 				)
 			)
