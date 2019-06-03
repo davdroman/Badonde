@@ -29,19 +29,30 @@ public final class Badonde {
 				currentBranch: branch
 			)
 
-			let jiraDSL: JiraDSL?
-			if let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) {
-				let ticket = try ticketAPI.getTicket(with: ticketKey)
-				jiraDSL = JiraDSL(ticket: ticket)
-			} else {
-				jiraDSL = nil
-			}
+			var jiraDSL: JiraDSL?
+			var baseBranch: Branch!
 
-			output = try Output(
+			DispatchGroup().asyncExecuteAndWait(
+				{
+					trySafely {
+						if let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) {
+							let ticket = try ticketAPI.getTicket(with: ticketKey)
+							jiraDSL = JiraDSL(ticket: ticket)
+						}
+					}
+				},
+				{
+					trySafely {
+						baseBranch = try baseBranchDerivationStrategy.baseBranch(for: gitDSL)
+					}
+				}
+			)
+
+			output = Output(
 				pullRequest: .init(
 					title: jiraDSL?.ticket.key.rawValue ?? branch.name,
 					headBranch: branch.name,
-					baseBranch: baseBranchDerivationStrategy.baseBranch(for: gitDSL).name,
+					baseBranch: baseBranch.name,
 					body: nil,
 					assignees: [],
 					labels: [],
