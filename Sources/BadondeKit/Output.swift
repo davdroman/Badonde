@@ -91,7 +91,21 @@ public func label(_ label: Label) {
 	output.pullRequest.labels.append(label)
 }
 
+public func label(roughlyNamed name: String) {
+	guard let label = badonde.github.labels.first(where: { $0.name ~= name }) else {
+		return
+	}
+	output.pullRequest.labels.append(label)
+}
+
 public func milestone(_ milestone: Milestone) {
+	output.pullRequest.milestone = milestone
+}
+
+public func milestone(roughlyNamed name: String) {
+	guard let milestone = badonde.github.milestones.first(where: { $0.title ~= name }) else {
+		return
+	}
 	output.pullRequest.milestone = milestone
 }
 
@@ -99,11 +113,7 @@ public func draft(_ isDraft: Bool) {
 	output.pullRequest.isDraft = isDraft
 }
 
-public func analytics<T: Codable>(key: String, value: T) {
-	output.analyticsData.info[key] = AnyCodable(value)
-}
-
-public func analytics<T: Codable>(pullRequestClosure: (Output.PullRequest) -> [String: T]) {
-	let info = pullRequestClosure(output.pullRequest).mapValues { AnyCodable($0) }
+public func analytics<T>(_ dictionary: [String: T]) {
+	let info = dictionary.mapValues { AnyCodable($0) }
 	output.analyticsData.info.merge(info, uniquingKeysWith: { _, new in new })
 }
