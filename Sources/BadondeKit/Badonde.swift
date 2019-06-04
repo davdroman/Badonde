@@ -97,6 +97,8 @@ public final class Badonde {
 		self.github = dsl.github
 		self.jira = dsl.jira
 
+		badonde = self
+
 		atexit {
 			trySafely {
 				let repository = try Repository()
@@ -109,7 +111,13 @@ public final class Badonde {
 	public var git: GitDSL
 	public var github: GitHubDSL
 	public var jira: JiraDSL?
+
+	public var pullRequest: Output.PullRequest {
+		return output.pullRequest
+	}
 }
+
+var badonde: Badonde!
 
 extension Badonde {
 	public enum TicketNumberDerivationStrategy {
