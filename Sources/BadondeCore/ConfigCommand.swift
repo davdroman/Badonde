@@ -2,7 +2,6 @@ import Foundation
 import SwiftCLI
 import Configuration
 import Git
-import Sugar
 
 class ConfigCommand: Command {
 	let name = "config"

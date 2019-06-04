@@ -1,7 +1,7 @@
 import Foundation
+import SwiftCLI
 import Configuration
 import Git
-import SwiftCLI
 
 struct LegacyConfiguration: Codable {
 	var jiraEmail: String

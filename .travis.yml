@@ -15,8 +15,8 @@ addons:
       - swiftlint
 script:
   - danger-swift ci
-  - swift test
-  - make
+  - make test
+  - make build
 branches:
   only:
     - master

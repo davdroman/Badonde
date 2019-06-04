@@ -1,5 +1,6 @@
 import XCTest
 @testable import GitHub
+import Git
 
 final class RepositoryShorthandTests: XCTestCase {
 	// MARK: init(rawValue:) tests
