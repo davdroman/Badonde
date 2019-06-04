@@ -28,6 +28,7 @@ extension Output: CustomStringConvertible {
 	public var description: String {
 		let indentation: (Int) -> String = { String(repeating: " ", count: $0) }
 
+		let body = pullRequest.body.map { "\n" + $0.components(separatedBy: .newlines).map { indentation(6) + $0 }.joined(separator: "\n") }
 		let assignees = !pullRequest.assignees.isEmpty ? "\n" + pullRequest.assignees.map { indentation(6) + $0 }.joined(separator: "\n") : "<none>"
 		let labels = !pullRequest.labels.isEmpty ? "\n" + pullRequest.labels.map { indentation(6) + $0.name }.joined(separator: "\n") : "<none>"
 
@@ -36,7 +37,7 @@ extension Output: CustomStringConvertible {
 		   title: \(pullRequest.title)
 		   headBranch: \(pullRequest.headBranch)
 		   baseBranch: \(pullRequest.baseBranch)
-		   body: \(pullRequest.body ?? "<none>")
+		   body: \(body ?? "<none>")
 		   assignees: \(assignees)
 		   labels: \(labels)
 		   milestone: \(pullRequest.milestone?.title ?? "<none>")
