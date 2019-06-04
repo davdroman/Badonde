@@ -91,22 +91,38 @@ public func label(_ label: Label) {
 	output.pullRequest.labels.append(label)
 }
 
-public func label(roughlyNamed name: String) {
-	guard let label = badonde.github.labels.first(where: { $0.name ~= name }) else {
+public func label(where labelMatcher: (Label) -> Bool) {
+	guard let label = badonde.github.labels.first(where: labelMatcher) else {
 		return
 	}
-	output.pullRequest.labels.append(label)
+	BadondeKit.label(label)
+}
+
+public func label(named name: String) {
+	label(where: { $0.name == name })
+}
+
+public func label(roughlyNamed name: String) {
+	label(where: { $0.name ~= name })
 }
 
 public func milestone(_ milestone: Milestone) {
 	output.pullRequest.milestone = milestone
 }
 
-public func milestone(roughlyNamed name: String) {
-	guard let milestone = badonde.github.milestones.first(where: { $0.title ~= name }) else {
+public func milestone(where milestoneMatcher: (Milestone) -> Bool) {
+	guard let milestone = badonde.github.milestones.first(where: milestoneMatcher) else {
 		return
 	}
-	output.pullRequest.milestone = milestone
+	BadondeKit.milestone(milestone)
+}
+
+public func milestone(named name: String) {
+	milestone(where: { $0.title == name })
+}
+
+public func milestone(roughlyNamed name: String) {
+	milestone(where: { $0.title ~= name })
 }
 
 public func draft(_ isDraft: Bool) {
