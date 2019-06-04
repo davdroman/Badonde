@@ -1,9 +1,9 @@
 import Foundation
 import SwiftCLI
+import Configuration
+import Git
 import GitHub
 import OSAKit
-import Git
-import Configuration
 
 class AppifyCommand: Command {
 	let name = "appify"

@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "CryptoSwift",
+        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift",
+        "state": {
+          "branch": null,
+          "revision": "3a2acbb32ab68215ee1596ee6004da8e90c3721b",
+          "version": "1.0.0"
+        }
+      },
+      {
         "package": "Rainbow",
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {
@@ -24,7 +33,7 @@
         "repositoryURL": "https://github.com/DavdRoman/SwiftCLI",
         "state": {
           "branch": "master",
-          "revision": "fc3d8415c4c4d98db4c60b22e9457413ee8de01a",
+          "revision": "491ed6ce33e8c690185c23896540021ecae11c65",
           "version": null
         }
       },

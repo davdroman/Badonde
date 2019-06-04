@@ -13,7 +13,7 @@ struct Service {
 extension Service {
 	final class KeyEquivalentConfigurator {
 		enum Constant {
-			static let pbsPlistPath = FileManager().homeDirectoryForCurrentUser.appendingPathComponent("Library/Preferences/pbs.plist")
+			static let pbsPlistPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Preferences/pbs.plist")
 			static let serviceStatusKey = "NSServicesStatus"
 			static let keyEquivalentKey = "key_equivalent"
 		}

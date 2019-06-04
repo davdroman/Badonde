@@ -29,7 +29,6 @@ opt_in_rules:
   - yoda_condition
   - unavailable_function
   - type_contents_order
-  - switch_case_on_newline
   - strict_fileprivate
   - static_operator
   - single_test_class
@@ -55,7 +54,6 @@ opt_in_rules:
   - first_where
   - last_where
   - joined_default_parameter
-  - implicitly_unwrapped_optional
   - implicit_return
   - identical_operands
   - fatal_error_message
@@ -67,7 +65,6 @@ opt_in_rules:
   - conditional_returns_on_newline
   - closure_spacing
   - closure_end_indentation
-  - closure_body_length
   - attributes
   - array_init
   - anyobject_protocol
@@ -75,3 +72,4 @@ opt_in_rules:
 # paths to ignore during linting. Takes precedence over `included`.
 excluded:
   - .build
+  - Sources/Sugar/AnyCodable
