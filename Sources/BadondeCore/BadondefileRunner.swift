@@ -34,11 +34,9 @@ final class BadondefileRunner {
 	}
 
 	private func run(stdoutCapture: @escaping (String) -> Void, stderrCapture: @escaping (String) -> Void) throws {
-		let badondefilePath = try self.badondefilePath()
-
 		let output = PipeStream()
 		let error = PipeStream()
-		let bash = "swift -L ../../Badonde/.build/debug -I ../../Badonde/.build/debug -lBadondeKit \(badondefilePath)"
+		let bash = try ["swift", bashLibraryPathArgument("-L"), bashLibraryPathArgument("-I"), "-lBadondeKit", bashBadondefilePath()].joined(separator: " ")
 		let task = Task(executable: "/bin/bash", arguments: ["-c", bash], stdout: output, stderr: error)
 
 		output.readHandle.readabilityHandler = { handle in
@@ -63,12 +61,26 @@ final class BadondefileRunner {
 		}
 	}
 
-	private func badondefilePath() throws -> String {
+	private func bashLibraryPathArgument(_ name: String) -> String {
+		return [name, bashLibrariesPath].joined(separator: " ")
+	}
+
+	private lazy var bashLibrariesPath: String = {
+		let path: String
+		#if DEBUG
+		path = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent().path
+		#else
+		path = "/usr/local/lib/badonde"
+		#endif
+		return "'\(path)'"
+	}()
+
+	private func bashBadondefilePath() throws -> String {
 		let bash = "find '\(repository.topLevelPath.path)' -type f -iname 'Badondefile.swift'"
 		guard let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first else {
 			throw Error.badondefileNotFound
 		}
-		return path
+		return "'\(path)'"
 	}
 }
 
