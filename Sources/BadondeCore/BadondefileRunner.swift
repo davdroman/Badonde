@@ -34,9 +34,11 @@ final class BadondefileRunner {
 	}
 
 	private func run(stdoutCapture: @escaping (String) -> Void, stderrCapture: @escaping (String) -> Void) throws {
+		let badondefilePath = try self.badondefilePath()
+
 		let output = PipeStream()
 		let error = PipeStream()
-		let bash = "swift -L ../../Badonde/.build/debug -I ../../Badonde/.build/debug -lBadondeKit Badondefile.swift"
+		let bash = "swift -L ../../Badonde/.build/debug -I ../../Badonde/.build/debug -lBadondeKit \(badondefilePath)"
 		let task = Task(executable: "/bin/bash", arguments: ["-c", bash], stdout: output, stderr: error)
 
 		output.readHandle.readabilityHandler = { handle in
@@ -58,6 +60,27 @@ final class BadondefileRunner {
 
 		if exitStatus != EXIT_SUCCESS {
 			exit(exitStatus)
+		}
+	}
+
+	private func badondefilePath() throws -> String {
+		let bash = "find '\(repository.topLevelPath.path)' -type f -iname 'Badondefile.swift'"
+		guard let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first else {
+			throw Error.badondefileNotFound
+		}
+		return path
+	}
+}
+
+extension BadondefileRunner {
+	public enum Error: LocalizedError {
+		case badondefileNotFound
+
+		public var errorDescription: String? {
+			switch self {
+			case .badondefileNotFound:
+				return "Could not find Badondefile.swift within current repository"
+			}
 		}
 	}
 }
