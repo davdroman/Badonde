@@ -76,8 +76,11 @@ final class BadondefileRunner {
 	}()
 
 	private func bashBadondefilePath() throws -> String {
-		let bash = "find '\(repository.topLevelPath.path)' -type f -iname 'Badondefile.swift'"
-		guard let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first else {
+		let bash = "find '\(repository.topLevelPath.path)' -type f -iname 'Badondefile.swift' ! -path .git"
+		guard
+			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
+			!path.isEmpty
+		else {
 			throw Error.badondefileNotFound
 		}
 		return "'\(path)'"
