@@ -20,12 +20,6 @@ Badonde is a command line tool that combines the JIRA and GitHub APIs to make cr
 brew install davdroman/tap/badonde
 ```
 
-### [Mint](https://github.com/yonaskolb/Mint)
-
-```sh
-mint install davdroman/Badonde
-```
-
 ### Make
 
 ```sh
