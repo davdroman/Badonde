@@ -2,6 +2,7 @@ import Foundation
 import SwiftCLI
 import struct BadondeKit.Payload
 import struct BadondeKit.Output
+import func BadondeKit.trySafely
 import Configuration
 import Git
 import GitHub
@@ -66,12 +67,37 @@ class PRCommand: Command {
 		)
 
 		Logger.step("Setting PR details")
-		_ = try issueAPI.edit(
-			at: repositoryShorthand,
-			issueNumber: pullRequest.number,
-			assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
-			labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
-			milestone: badondefileOutput.pullRequest.milestone?.number
+		DispatchGroup().asyncExecuteAndWait(
+			{
+				guard
+					!badondefileOutput.pullRequest.assignees.isEmpty ||
+					!badondefileOutput.pullRequest.labels.isEmpty ||
+					badondefileOutput.pullRequest.milestone != nil
+				else {
+					return
+				}
+				trySafely {
+					_ = try issueAPI.edit(
+						at: repositoryShorthand,
+						issueNumber: pullRequest.number,
+						assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
+						labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
+						milestone: badondefileOutput.pullRequest.milestone?.number
+					)
+				}
+			},
+			{
+				guard !badondefileOutput.pullRequest.reviewers.isEmpty else {
+					return
+				}
+				trySafely {
+					_ = try pullRequestAPI.requestReviewers(
+						at: repositoryShorthand,
+						pullRequestNumber: pullRequest.number,
+						reviewers: badondefileOutput.pullRequest.reviewers
+					)
+				}
+			}
 		)
 
 		try openURL(pullRequest.url)
