@@ -1,7 +1,7 @@
 ---
 name: Feature Pitch
 about: Pitch a new feature to be considered for development.
-title: "[PITCH] Feature summary"
+title: Feature name or summary
 labels: 'Pitch :bulb:'
 assignees: davdroman
 
