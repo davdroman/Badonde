@@ -74,6 +74,12 @@ class PRCommand: Command {
 			milestone: badondefileOutput.pullRequest.milestone?.number
 		)
 
+		_ = try pullRequestAPI.requestReviewers(
+			at: repositoryShorthand,
+			pullRequestNumber: pullRequest.number,
+			reviewers: badondefileOutput.pullRequest.assignees
+		)
+
 		try openURL(pullRequest.url)
 
 		// Report PR data (production only)
