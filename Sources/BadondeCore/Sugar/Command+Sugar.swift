@@ -26,13 +26,18 @@ extension Command {
 	}
 }
 
+private var hasPromptedForCredentials = false
+
 extension Command {
 	func getOrPromptRawValue(forKeyPath keyPath: KeyPath, in configuration: KeyValueInteractive) throws -> String {
 		if let value = try configuration.getRawValue(forKeyPath: keyPath) {
 			return value
 		}
 
-		Logger.info("Credentials required", succeedPrevious: false)
+		if !hasPromptedForCredentials {
+			hasPromptedForCredentials.toggle()
+			Logger.info("Credentials required", succeedPrevious: false)
+		}
 
 		switch keyPath {
 		case .jiraEmail:
