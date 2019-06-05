@@ -10,6 +10,7 @@ public struct Output: Codable {
 		public var headBranch: String
 		public var baseBranch: String
 		public var body: String?
+		public var reviewers: [String]
 		public var assignees: [String]
 		public var labels: [Label]
 		public var milestone: Milestone?
@@ -29,6 +30,7 @@ extension Output: CustomStringConvertible {
 		let indentation: (Int) -> String = { String(repeating: " ", count: $0) }
 
 		let body = pullRequest.body.map { "\n" + $0.components(separatedBy: .newlines).map { indentation(6) + $0 }.joined(separator: "\n") }
+		let reviewers = !pullRequest.reviewers.isEmpty ? "\n" + pullRequest.reviewers.map { indentation(6) + $0 }.joined(separator: "\n") : "<none>"
 		let assignees = !pullRequest.assignees.isEmpty ? "\n" + pullRequest.assignees.map { indentation(6) + $0 }.joined(separator: "\n") : "<none>"
 		let labels = !pullRequest.labels.isEmpty ? "\n" + pullRequest.labels.map { indentation(6) + $0.name }.joined(separator: "\n") : "<none>"
 
@@ -38,6 +40,7 @@ extension Output: CustomStringConvertible {
 		   headBranch: \(pullRequest.headBranch)
 		   baseBranch: \(pullRequest.baseBranch)
 		   body: \(body ?? "<none>")
+		   reviewers: \(reviewers)
 		   assignees: \(assignees)
 		   labels: \(labels)
 		   milestone: \(pullRequest.milestone?.title ?? "<none>")
@@ -83,8 +86,20 @@ public func body(_ body: String) {
 	output.pullRequest.body = body
 }
 
-public func assignee(_ assignee: String) {
-	output.pullRequest.assignees.append(assignee)
+public func reviewer(_ reviewer: User) {
+	BadondeKit.reviewer(reviewer.login)
+}
+
+public func reviewer(_ name: String) {
+	output.pullRequest.reviewers.append(name)
+}
+
+public func assignee(_ assignee: User) {
+	BadondeKit.assignee(assignee.login)
+}
+
+public func assignee(_ name: String) {
+	output.pullRequest.assignees.append(name)
 }
 
 public func label(_ label: Label) {

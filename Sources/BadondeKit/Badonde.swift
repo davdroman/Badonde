@@ -82,6 +82,7 @@ public final class Badonde {
 					headBranch: headBranch.name,
 					baseBranch: baseBranch.name,
 					body: nil,
+					reviewers: [],
 					assignees: [],
 					labels: [],
 					milestone: nil,
