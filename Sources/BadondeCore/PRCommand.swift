@@ -69,6 +69,13 @@ class PRCommand: Command {
 		Logger.step("Setting PR details")
 		DispatchGroup().asyncExecuteAndWait(
 			{
+				guard
+					!badondefileOutput.pullRequest.assignees.isEmpty ||
+					!badondefileOutput.pullRequest.labels.isEmpty ||
+					badondefileOutput.pullRequest.milestone != nil
+				else {
+					return
+				}
 				trySafely {
 					_ = try issueAPI.edit(
 						at: repositoryShorthand,
@@ -80,11 +87,14 @@ class PRCommand: Command {
 				}
 			},
 			{
+				guard !badondefileOutput.pullRequest.reviewers.isEmpty else {
+					return
+				}
 				trySafely {
 					_ = try pullRequestAPI.requestReviewers(
 						at: repositoryShorthand,
 						pullRequestNumber: pullRequest.number,
-						reviewers: badondefileOutput.pullRequest.assignees
+						reviewers: badondefileOutput.pullRequest.reviewers
 					)
 				}
 			}
