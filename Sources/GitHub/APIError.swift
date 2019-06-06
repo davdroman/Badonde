@@ -14,9 +14,7 @@ extension API {
 			case let .token(token):
 				return ["token", token].joined(separator: " ")
 			case let .basic(username, password):
-				guard let token = [username, password].joined(separator: ":").base64() else {
-					throw Error.authorizationEncodingError
-				}
+				let token = [username, password].joined(separator: ":").base64()
 				return ["Basic", token].joined(separator: " ")
 			}
 		}
@@ -25,13 +23,10 @@ extension API {
 
 extension API {
 	public enum Error: LocalizedError {
-		case authorizationEncodingError
 		case http(response: HTTPURLResponse, githubError: GitHubError?)
 
 		public var errorDescription: String? {
 			switch self {
-			case .authorizationEncodingError:
-				return "GitHub authorization token encoding failed"
 			case let .http(response, githubError):
 				return [
 					"GitHub API call failed with HTTP status code \(response.statusCode)",
