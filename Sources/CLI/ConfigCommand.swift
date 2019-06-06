@@ -1,6 +1,7 @@
 import Foundation
 import SwiftCLI
 import Configuration
+import Core
 import Git
 
 class ConfigCommand: Command {

@@ -4,6 +4,7 @@ import struct BadondeKit.Payload
 import struct BadondeKit.Output
 import func BadondeKit.trySafely
 import Configuration
+import Core
 import Git
 import GitHub
 import Jira
@@ -38,14 +39,16 @@ class PRCommand: Command {
 		startDatePointer.pointee = Date()
 
 		Logger.step("Evaluating Badondefile.swift")
-		let badondefileOutput = try BadondefileRunner(repository: repository).run(
+		let badondefileOutput = try BadondefileRunner(forRepositoryAt: repository.topLevelPath).run(
 			with: Payload(
 				configuration: .init(
 					git: .init(remote: remote),
 					github: .init(accessToken: githubAccessToken),
 					jira: .init(email: jiraEmail, apiToken: jiraApiToken)
 				)
-			)
+			),
+			logCapture: { Logger.logBadondefileLog($0) },
+			stderrCapture: { Logger.fail($0) }
 		)
 
 		guard !dryRun.value else {

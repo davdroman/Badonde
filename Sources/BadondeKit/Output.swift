@@ -1,5 +1,4 @@
 import Foundation
-import CryptoSwift
 import Git
 import GitHub
 import Sugar
@@ -63,9 +62,8 @@ extension Output: CustomStringConvertible {
 }
 
 extension Output {
-	public static func path(for repository: Repository) -> URL {
-		let repositoryPathSha1 = repository.topLevelPath.path.sha1()
-		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-output-\(repositoryPathSha1).json")
+	public static func path(forRepositoryAt url: URL) -> URL {
+		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-output-\(url.path.sha1()).json")
 	}
 }
 
