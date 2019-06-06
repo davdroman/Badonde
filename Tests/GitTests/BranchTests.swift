@@ -101,11 +101,57 @@ final class BranchTests: XCTestCase {
 	}
 }
 
-//extension BranchTests {
-//	func testBranchSourceInit_InvalidRawValue() {
-//
-//	}
-//}
+extension BranchTests {
+	func testBranchSourceInit_withEmptyRawValue() {
+		let source = Branch.Source(rawValue: "")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withInvalidRawValueContainingLocal() {
+		let source = Branch.Source(rawValue: "localandsomething origin https://github.com/user/repo.git")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withInvalidRawValueContainingRemote() {
+		let source = Branch.Source(rawValue: "remoteandsomething origin https://github.com/user/repo.git")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValueWithFieldsSwapped() {
+		let source = Branch.Source(rawValue: "origin https://github.com/user/repo.git remote")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValueWithoutAllFields() {
+		let source = Branch.Source(rawValue: "remote origin")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValue() {
+		let source = Branch.Source(rawValue: "remote origin https://github.com/user/repo.git")
+		XCTAssertEqual(source, .remote(Remote(name: "origin", url: URL(string: "https://github.com/user/repo.git")!)))
+	}
+
+	func testBranchSourceInit_withLocalRawValue() {
+		let source = Branch.Source(rawValue: "local")
+		XCTAssertEqual(source, .local)
+	}
+
+	func testBranchSourceInit_withLocalRawValueWithAdditionalFields() {
+		let source = Branch.Source(rawValue: "local origin https://github.com/user/repo.git")
+		XCTAssertEqual(source, .local)
+	}
+
+	func testRemoteBranchSourceRawValue_isInCorrectFormat() {
+		let source = Branch.Source.remote(Remote(name: "origin", url: URL(string: "https://github.com/user/repo.git")!))
+		XCTAssertEqual(source.rawValue, "remote origin https://github.com/user/repo.git")
+	}
+
+	func testLocalBranchSourceRawValue_isInCorrectFormat() {
+		let source = Branch.Source.local
+		XCTAssertEqual(source.rawValue, "local")
+	}
+}
 
 extension BranchTests {
 	func testBranchGetCurrent() throws {
