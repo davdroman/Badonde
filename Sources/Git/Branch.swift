@@ -1,14 +1,42 @@
 import Foundation
 
 protocol BranchInteractor {
-	func getCurrentBranch() throws -> String
-	func getAllBranches(from source: Branch.Source) throws -> String
+	func getCurrentBranch(atPath path: String) throws -> String
+	func getAllBranches(from source: Branch.Source, atPath path: String) throws -> String
 }
 
-public struct Branch: Equatable {
-	public enum Source: Equatable {
+public struct Branch: Equatable, Codable {
+	public enum Source: Equatable, RawRepresentable {
 		case local
 		case remote(Remote)
+
+		public init?(rawValue: String) {
+			let components = rawValue.components(separatedBy: .whitespaces)
+			let component1 = components.first
+			let component2 = components.dropFirst().first
+			let component3 = components.dropFirst(2).first
+
+			switch (component1, component2, component3) {
+			case ("local", _, _):
+				self = .local
+			case ("remote", let name?, let urlString?):
+				guard let url = URL(string: urlString) else {
+					return nil
+				}
+				self = .remote(Remote(name: name, url: url))
+			default:
+				return nil
+			}
+		}
+
+		public var rawValue: String {
+			switch self {
+			case .local:
+				return "local"
+			case .remote(let remote):
+				return ["remote", remote.name, remote.url.absoluteString].joined(separator: " ")
+			}
+		}
 
 		public var remote: Remote? {
 			switch self {
@@ -48,35 +76,55 @@ public struct Branch: Equatable {
 	}
 }
 
+extension Branch.Source: Codable {
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let rawValue = try container.decode(String.self)
+		guard let instance = Branch.Source(rawValue: rawValue) else {
+			throw DecodingError.dataCorruptedError(
+				in: container,
+				debugDescription: "Raw value '\(rawValue)' is not a valid 'Branch.Source' raw value type"
+			)
+		}
+		self = instance
+	}
+
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(rawValue)
+	}
+}
+
 extension Branch {
 	static var interactor: BranchInteractor = SwiftCLI()
 
-	public static func current() throws -> Branch {
-		return try Branch(name: interactor.getCurrentBranch(), source: .local)
+	public static func current(atPath path: String) throws -> Branch {
+		return try Branch(name: interactor.getCurrentBranch(atPath: path), source: .local)
 	}
 
-	public static func getAll(from source: Branch.Source) throws -> [Branch] {
-		return try interactor.getAllBranches(from: source)
+	public static func getAll(from source: Branch.Source, atPath path: String) throws -> [Branch] {
+		return try interactor.getAllBranches(from: source, atPath: path)
 			.components(separatedBy: "\n")
 			.compactMap { try? Branch(name: $0, source: source) }
 	}
 
-	public func isAhead(of remote: Remote) throws -> Bool {
+	public func isAhead(of remote: Remote, atPath path: String) throws -> Bool {
 		var remoteBranch = self
 		remoteBranch.source = .remote(remote)
 
-		return try Commit.count(baseBranch: remoteBranch, targetBranch: self) > 0
+		return try Commit.count(baseBranch: remoteBranch, targetBranch: self, atPath: path) > 0
 	}
 
-	public func parent(for remote: Remote) throws -> Branch {
-		let defaultBranch = try remote.defaultBranch()
-		let allRemoteBranches = try Branch.getAll(from: .remote(remote))
+	public func parent(for remote: Remote, atPath path: String) throws -> Branch {
+		let defaultBranch = try remote.defaultBranch(atPath: path)
+		let allRemoteBranches = try Branch.getAll(from: .remote(remote), atPath: path)
 
 		let recentDate = Date(timeIntervalSinceNow: -2_592_000) // 1 month ago
 
 		let latestRecentCommitHashes = try Commit.latestHashes(
 			branches: allRemoteBranches,
-			after: recentDate
+			after: recentDate,
+			atPath: path
 		)
 
 		let recentRemoteBranches = allRemoteBranches.enumerated()
@@ -86,7 +134,8 @@ extension Branch {
 		let commitsAndBranches = try Commit.count(
 			baseBranches: recentRemoteBranches,
 			targetBranch: self,
-			after: recentDate
+			after: recentDate,
+			atPath: path
 		)
 
 		let branchesWithLowestEqualCommitCount = commitsAndBranches

@@ -11,7 +11,7 @@ final class PushInteractorSpy: PushInteractor {
 		self.performSpy = performSpy
 	}
 
-	func perform(remote: String, branch: String) throws {
+	func perform(remote: String, branch: String, atPath path: String) throws {
 		performSpy((remote: remote, branch: branch))
 	}
 }
@@ -26,7 +26,7 @@ final class PushTests: XCTestCase {
 			XCTAssertEqual($0.branch, "develop")
 		}
 
-		try Push.perform(remote: remote, branch: branch)
+		try Push.perform(remote: remote, branch: branch, atPath: "")
 	}
 
 	func testPerform_RemoteBranch() throws {
@@ -38,6 +38,6 @@ final class PushTests: XCTestCase {
 			XCTAssertEqual($0.branch, "develop")
 		}
 
-		try Push.perform(remote: remote, branch: branch)
+		try Push.perform(remote: remote, branch: branch, atPath: "")
 	}
 }

@@ -14,11 +14,11 @@ final class BranchInteractorMock: BranchInteractor {
 		case allSshOriginRemoteBranches = "all_ssh_origin_remote_branches"
 	}
 
-	func getCurrentBranch() throws -> String {
+	func getCurrentBranch(atPath path: String) throws -> String {
 		return try Fixture.currentBranch.load(as: String.self)
 	}
 
-	func getAllBranches(from source: Branch.Source) throws -> String {
+	func getAllBranches(from source: Branch.Source, atPath path: String) throws -> String {
 		switch source {
 		case .local:
 			return try Fixture.allLocalBranches.load(as: String.self)
@@ -101,9 +101,15 @@ final class BranchTests: XCTestCase {
 	}
 }
 
+//extension BranchTests {
+//	func testBranchSourceInit_InvalidRawValue() {
+//
+//	}
+//}
+
 extension BranchTests {
 	func testBranchGetCurrent() throws {
-		let currentBranch = try Branch.current()
+		let currentBranch = try Branch.current(atPath: "")
 
 		XCTAssertEqual(currentBranch.name, "standalone-git-module")
 	}
@@ -111,7 +117,7 @@ extension BranchTests {
 
 extension BranchTests {
 	func testBranchGetAll_Local() throws {
-		let allBranches = try Branch.getAll(from: .local)
+		let allBranches = try Branch.getAll(from: .local, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -134,7 +140,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_OriginRemote() throws {
-		let allBranches = try Branch.getAll(from: Constant.originRemoteSource)
+		let allBranches = try Branch.getAll(from: Constant.originRemoteSource, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -157,7 +163,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_SshOriginRemote() throws {
-		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource)
+		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -186,7 +192,7 @@ extension BranchTests {
 
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote)
+		let isAhead = try branch.isAhead(of: remote, atPath: "")
 
 		XCTAssertTrue(isAhead)
 	}
@@ -198,7 +204,7 @@ extension BranchTests {
 
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote)
+		let isAhead = try branch.isAhead(of: remote, atPath: "")
 
 		XCTAssertFalse(isAhead)
 	}
@@ -224,7 +230,7 @@ extension BranchTests {
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(for: remote)
+		let parentBranch = try branch.parent(for: remote, atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "swift-5")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
@@ -239,7 +245,7 @@ extension BranchTests {
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(for: remote)
+		let parentBranch = try branch.parent(for: remote, atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "develop")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
