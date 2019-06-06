@@ -25,9 +25,6 @@ install: build
 	install $(SWIFT_BIN_FILES) $(BIN_PATH)
 	install $(SWIFT_LIB_FILES) $(LIB_PATH)
 
-test:
-	swift test
-
 uninstall:
 	rm -rf $(BIN_PATH)/badonde
 	rm -rf $(LIB_PATH)
