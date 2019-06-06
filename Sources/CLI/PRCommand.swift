@@ -22,13 +22,13 @@ class PRCommand: Command {
 
 	func execute() throws {
 		Logger.step("Reading configuration")
-		let repository = try Repository()
+		let repository = try Repository(atPath: FileManager.default.currentDirectoryPath)
 		let projectPath = repository.topLevelPath
-		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
 		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
 		let jiraEmail = try getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration)
 		let jiraApiToken = try getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration)
-		let remote = try self.remote(for: projectPath, configuration: configuration)
+		let remote = try repository.remote(for: configuration)
 		let repositoryShorthand = try remote.repositoryShorthand()
 
 		try autopushIfNeeded(to: remote, configuration: configuration)
@@ -39,13 +39,16 @@ class PRCommand: Command {
 		startDatePointer.pointee = Date()
 
 		Logger.step("Evaluating Badondefile.swift")
-		let badondefileOutput = try BadondefileRunner(forRepositoryAt: repository.topLevelPath).run(
+		let badondefileOutput = try BadondefileRunner(forRepositoryPath: repository.topLevelPath).run(
 			with: Payload(
-				configuration: .init(
-					git: .init(remote: remote),
-					github: .init(accessToken: githubAccessToken),
-					jira: .init(email: jiraEmail, apiToken: jiraApiToken)
-				)
+				git: .init(
+					path: projectPath,
+					shorthand: repositoryShorthand,
+					headBranch: repository.currentBranch,
+					remote: remote
+				),
+				github: .init(accessToken: githubAccessToken),
+				jira: .init(email: jiraEmail, apiToken: jiraApiToken)
 			),
 			logCapture: { Logger.logBadondefileLog($0) },
 			stderrCapture: { Logger.fail($0) }
@@ -123,29 +126,14 @@ class PRCommand: Command {
 		#endif
 	}
 
-	func remote(for url: URL, configuration: KeyValueInteractive) throws -> Remote {
-		let allRemotes = try Remote.getAll()
-		if let remoteName = try configuration.getValue(ofType: String.self, forKeyPath: .gitRemote) {
-			guard let selectedRemote = allRemotes.first(where: { $0.name == remoteName }) else {
-				throw Error.gitRemoteMissing(remoteName)
-			}
-			return selectedRemote
-		} else {
-			guard let selectedRemote = allRemotes.first else {
-				throw Error.noGitRemotes
-			}
-			return selectedRemote
-		}
-	}
-
 	func autopushIfNeeded(to remote: Remote, configuration: KeyValueInteractive) throws {
-		let currentBranch = try Branch.current()
+		let currentBranch = try Branch.current(atPath: "")
 
-		if try currentBranch.isAhead(of: remote) {
+		if try currentBranch.isAhead(of: remote, atPath: "") {
 			let isGitAutopushEnabled = try configuration.getValue(ofType: Bool.self, forKeyPath: .gitAutopush) == true
 			if isGitAutopushEnabled {
 				Logger.step("Local branch is ahead of remote, pushing changes now")
-				try Git.Push.perform(remote: remote, branch: currentBranch)
+				try Git.Push.perform(remote: remote, branch: currentBranch, atPath: "")
 			} else {
 				Logger.info("Local branch is ahead of remote, please push your changes")
 			}
@@ -161,6 +149,22 @@ class PRCommand: Command {
 			.max()
 		let separator = String(repeating: "=", count: maxLineLength ?? 80)
 		print(["", "Output", separator, output, separator, ""].joined(separator: "\n"))
+	}
+}
+
+extension Repository {
+	func remote(for configuration: KeyValueInteractive) throws -> Remote {
+		if let remoteName = try configuration.getValue(ofType: String.self, forKeyPath: .gitRemote) {
+			guard let selectedRemote = remotes.first(where: { $0.name == remoteName }) else {
+				throw PRCommand.Error.gitRemoteMissing(remoteName)
+			}
+			return selectedRemote
+		} else {
+			guard let selectedRemote = remotes.first else {
+				throw PRCommand.Error.noGitRemotes
+			}
+			return selectedRemote
+		}
 	}
 }
 

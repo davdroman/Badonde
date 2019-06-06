@@ -11,7 +11,7 @@ final class DiffInteractorMock: DiffInteractor {
 		case baseReleaseTargetDevelop = "base_release_target_develop" // multi-diff
 	}
 
-	func diff(baseBranch: String, targetBranch: String) throws -> String {
+	func diff(baseBranch: String, targetBranch: String, atPath path: String) throws -> String {
 		return try Fixture(rawValue: "base_\(baseBranch)_target_\(targetBranch)")!.load(as: String.self)
 	}
 }
@@ -243,22 +243,24 @@ final class DiffTests: XCTestCase {
 
 extension DiffTests {
 	func testInit_baseBranch_targetBranch() throws {
-		let interactor = DiffInteractorMock()
+		Diff.interactor = DiffInteractorMock()
+
 		let diff = try Diff(
 			baseBranch: Branch(name: "master", source: .local),
 			targetBranch: Branch(name: "develop", source: .local),
-			interactor: interactor
+			atPath: ""
 		)
 
 		XCTAssertEqual(diff.hunks.count, 1)
 	}
 
 	func testInitArray_baseBranch_targetBranch() throws {
-		let interactor = DiffInteractorMock()
+		Diff.interactor = DiffInteractorMock()
+
 		let diffs = try [Diff](
 			baseBranch: Branch(name: "release", source: .local),
 			targetBranch: Branch(name: "develop", source: .local),
-			interactor: interactor
+			atPath: ""
 		)
 
 		XCTAssertEqual(diffs.count, 3)

@@ -9,21 +9,20 @@ public final class Badonde {
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
 	) {
 		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
-			let repository = try Repository()
-			let data = try Data(contentsOf: Payload.path(forRepositoryAt: repository.topLevelPath))
-			let payload = try JSONDecoder().decode(Payload.self, from: data)
+			guard let payloadPath = CommandLine.arguments.first(where: { $0.hasPrefix(FileManager.default.temporaryDirectory.path) }) else {
+				throw Error.payloadMissing
+			}
+			let data = try Data(contentsOf: URL(fileURLWithPath: payloadPath))
+			payload = try JSONDecoder().decode(Payload.self, from: data)
 
-			Logger.step("Deriving repo shorthand")
-			let remote = payload.configuration.git.remote
-			let repositoryShorthand = try remote.repositoryShorthand()
-
-			Logger.step("Deriving head branch")
-			let headBranch = try Branch.current()
+			let repositoryShorthand = payload.git.shorthand
+			let remote = payload.git.remote
+			let headBranch = payload.git.headBranch
 			var baseBranch: Branch!
 
 			var gitDSL = try GitDSL(
 				remote: remote,
-				defaultBranch: payload.configuration.git.remote.defaultBranch(),
+				defaultBranch: payload.git.remote.defaultBranch(atPath: payload.git.path),
 				currentBranch: headBranch,
 				diff: []
 			)
@@ -41,24 +40,24 @@ public final class Badonde {
 						baseBranch = try baseBranchDerivationStrategy.baseBranch(for: gitDSL)
 						baseBranch.source = .remote(remote)
 
-						gitDSL.diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch)
+						gitDSL.diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch, atPath: payload.git.path)
 					}
 				},
 				{
 					trySafely {
-						let labelAPI = Label.API(accessToken: payload.configuration.github.accessToken)
+						let labelAPI = Label.API(accessToken: payload.github.accessToken)
 						githubDSL.labels = try labelAPI.allLabels(for: repositoryShorthand)
 					}
 				},
 				{
 					trySafely {
-						let milestoneAPI = Milestone.API(accessToken: payload.configuration.github.accessToken)
+						let milestoneAPI = Milestone.API(accessToken: payload.github.accessToken)
 						githubDSL.milestones = try milestoneAPI.getMilestones(for: repositoryShorthand)
 					}
 				},
 				{
 					trySafely {
-						let pullRequestAPI = PullRequest.API(accessToken: payload.configuration.github.accessToken)
+						let pullRequestAPI = PullRequest.API(accessToken: payload.github.accessToken)
 						githubDSL.openPullRequests = try pullRequestAPI.allPullRequests(for: repositoryShorthand, state: .open)
 					}
 				},
@@ -67,8 +66,8 @@ public final class Badonde {
 						guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) else {
 							return
 						}
-						let jiraEmail = payload.configuration.jira.email
-						let jiraApiToken = payload.configuration.jira.apiToken
+						let jiraEmail = payload.jira.email
+						let jiraApiToken = payload.jira.apiToken
 						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
 						let ticket = try ticketAPI.getTicket(with: ticketKey)
 						jiraDSL = JiraDSL(ticket: ticket)
@@ -102,9 +101,8 @@ public final class Badonde {
 
 		atexit {
 			trySafely {
-				let repository = try Repository()
-				let outputPath = Output.path(forRepositoryAt: repository.topLevelPath)
-				try output.write(to: outputPath)
+				let outputPath = Output.path(forRepositoryPath: payload.git.path)
+				try output.write(to: URL(fileURLWithPath: outputPath))
 			}
 		}
 	}
@@ -121,13 +119,24 @@ public final class Badonde {
 var badonde: Badonde!
 
 extension Badonde {
+	enum Error {
+		case payloadMissing
+	}
+}
+
+extension Badonde.Error: LocalizedError {
+	var errorDescription: String? {
+		switch self {
+		case .payloadMissing:
+			return "Payload missing"
+		}
+	}
+}
+
+extension Badonde {
 	public enum TicketNumberDerivationStrategy {
 		enum Constant {
 			static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
-		}
-
-		public enum Error: Swift.Error {
-			case invalidTicketNumberByCustomStrategy
 		}
 
 		case regex
@@ -156,6 +165,19 @@ extension Badonde {
 	}
 }
 
+extension Badonde.TicketNumberDerivationStrategy {
+	public enum Error: LocalizedError {
+		case invalidTicketNumberByCustomStrategy
+
+		public var errorDescription: String? {
+			switch self {
+			case .invalidTicketNumberByCustomStrategy:
+				return "The ticket number derived by custom strategy has invalid format"
+			}
+		}
+	}
+}
+
 extension Badonde {
 	public enum BaseBranchDerivationStrategy {
 		case defaultBranch
@@ -167,7 +189,7 @@ extension Badonde {
 			case .defaultBranch:
 				return git.defaultBranch
 			case .commitProximity:
-				return try git.currentBranch.parent(for: git.remote)
+				return try git.currentBranch.parent(for: git.remote, atPath: "")
 			case .custom(let strategyClosure):
 				return try Branch(name: strategyClosure(git), source: .local)
 			}

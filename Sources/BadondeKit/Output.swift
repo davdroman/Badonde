@@ -62,8 +62,8 @@ extension Output: CustomStringConvertible {
 }
 
 extension Output {
-	public static func path(forRepositoryAt url: URL) -> URL {
-		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-output-\(url.path.sha1()).json")
+	public static func path(forRepositoryPath path: String) -> String {
+		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-output-\(path.sha1()).json").path
 	}
 }
 

@@ -5,10 +5,10 @@ import enum BadondeKit.Log
 import struct BadondeKit.Output
 
 public final class BadondefileRunner {
-	let repositoryUrl: URL
+	let repositoryPath: String
 
-	public init(forRepositoryAt url: URL) {
-		self.repositoryUrl = url
+	public init(forRepositoryPath path: String) {
+		self.repositoryPath = path
 	}
 
 	public func run(
@@ -17,7 +17,7 @@ public final class BadondefileRunner {
 		stderrCapture: ((String) -> Void)? = nil
 	) throws -> Output {
 		let payloadData = try JSONEncoder().encode(payload)
-		try payloadData.write(to: Payload.path(forRepositoryAt: repositoryUrl))
+		try payloadData.write(to: URL(fileURLWithPath: Payload.path(forRepositoryPath: repositoryPath)))
 
 		try run(
 			stdoutCapture: { line in
@@ -31,7 +31,7 @@ public final class BadondefileRunner {
 			}
 		)
 
-		let outputData = try Data(contentsOf: Output.path(forRepositoryAt: repositoryUrl))
+		let outputData = try Data(contentsOf: URL(fileURLWithPath: Output.path(forRepositoryPath: repositoryPath)))
 		let output = try JSONDecoder().decode(Output.self, from: outputData)
 		return output
 	}
@@ -39,7 +39,14 @@ public final class BadondefileRunner {
 	private func run(stdoutCapture: @escaping (String) -> Void, stderrCapture: @escaping (String) -> Void) throws {
 		let output = PipeStream()
 		let error = PipeStream()
-		let bash = try ["swift", bashLibraryPathArgument("-L"), bashLibraryPathArgument("-I"), "-lBadondeKit", bashBadondefilePath()].joined(separator: " ")
+		let bash = try [
+			"swift",
+			bashLibraryPathArgument("-L"),
+			bashLibraryPathArgument("-I"),
+			"-lBadondeKit",
+			bashBadondefilePath(),
+			bashPayloadPath(),
+		].joined(separator: " ")
 		let task = Task(executable: "/bin/bash", arguments: ["-c", bash], stdout: output, stderr: error)
 
 		output.readHandle.readabilityHandler = { handle in
@@ -79,13 +86,18 @@ public final class BadondefileRunner {
 	}()
 
 	private func bashBadondefilePath() throws -> String {
-		let bash = "find '\(repositoryUrl.path)' -type f -iname 'Badondefile.swift' ! -path .git"
+		let bash = "find '\(repositoryPath)' -type f -iname 'Badondefile.swift' ! -path .git"
 		guard
 			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
 			!path.isEmpty
 		else {
 			throw Error.badondefileNotFound
 		}
+		return "'\(path)'"
+	}
+
+	private func bashPayloadPath() -> String {
+		let path = Payload.path(forRepositoryPath: repositoryPath)
 		return "'\(path)'"
 	}
 }

@@ -70,8 +70,8 @@ public final class CommandLineTool {
 	}
 
 	private func reportError(_ error: Error, startDate: Date) throws {
-		let projectPath = try Repository().topLevelPath
-		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let projectPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
 
 		guard
 			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
