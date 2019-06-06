@@ -139,10 +139,6 @@ extension Badonde {
 			static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
 		}
 
-		public enum Error: Swift.Error {
-			case invalidTicketNumberByCustomStrategy
-		}
-
 		case regex
 		case custom((GitDSL) -> String?)
 
@@ -164,6 +160,19 @@ extension Badonde {
 					throw Error.invalidTicketNumberByCustomStrategy
 				}
 				return ticketKey
+			}
+		}
+	}
+}
+
+extension Badonde.TicketNumberDerivationStrategy {
+	public enum Error: LocalizedError {
+		case invalidTicketNumberByCustomStrategy
+
+		public var errorDescription: String? {
+			switch self {
+			case .invalidTicketNumberByCustomStrategy:
+				return "The ticket number derived by custom strategy has invalid format"
 			}
 		}
 	}
