@@ -1,7 +1,7 @@
 import Foundation
 
 protocol DiffInteractor {
-	func diff(baseBranch: String, targetBranch: String) throws -> String
+	func diff(baseBranch: String, targetBranch: String, atPath path: String) throws -> String
 }
 
 public struct Diff: Equatable, CustomStringConvertible {
@@ -110,20 +110,22 @@ extension Array where Element == Diff {
 extension Diff {
 	static var interactor: DiffInteractor = SwiftCLI()
 
-	public init(baseBranch: Branch, targetBranch: Branch) throws {
+	public init(baseBranch: Branch, targetBranch: Branch, atPath path: String) throws {
 		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
-			targetBranch: targetBranch.fullName
+			targetBranch: targetBranch.fullName,
+			atPath: path
 		)
 		self = try Diff(rawDiffContent: rawDiffContent)
 	}
 }
 
 extension Array where Element == Diff {
-	public init(baseBranch: Branch, targetBranch: Branch) throws {
+	public init(baseBranch: Branch, targetBranch: Branch, atPath path: String) throws {
 		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
-			targetBranch: targetBranch.fullName
+			targetBranch: targetBranch.fullName,
+			atPath: path
 		)
 		self = try [Diff](rawDiffContent: rawDiffContent)
 	}

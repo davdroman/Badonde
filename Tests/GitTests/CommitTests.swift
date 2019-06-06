@@ -18,7 +18,7 @@ final class CommitInteractorMock: CommitInteractor {
 	var multipleCommitCountFixture: FixtureLoadable?
 	var latestCommitHashesFixture: FixtureLoadable?
 
-	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String {
+	func count(baseBranches: [String], targetBranch: String, after date: Date?, atPath path: String) throws -> String {
 		guard !returnCommitCountZero else {
 			return try Fixture.commitCountZero.load(as: String.self)
 		}
@@ -34,7 +34,7 @@ final class CommitInteractorMock: CommitInteractor {
 		}
 	}
 
-	func latestHashes(branches: [String], after date: Date?) throws -> String {
+	func latestHashes(branches: [String], after date: Date?, atPath path: String) throws -> String {
 		let fixture = latestCommitHashesFixture ?? Fixture.latestCommitHashes
 		return try fixture.load(as: String.self)
 	}
@@ -50,7 +50,7 @@ final class CommitTests: XCTestCase {
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let targetBranch = try Branch(name: "target-branch", source: .remote(remote))
 
-		XCTAssertThrowsError(try Commit.count(baseBranches: [], targetBranch: targetBranch, after: nil)) { error in
+		XCTAssertThrowsError(try Commit.count(baseBranches: [], targetBranch: targetBranch, after: nil, atPath: "")) { error in
 			switch error {
 			case Commit.Error.numberNotFound:
 				break
@@ -64,7 +64,7 @@ final class CommitTests: XCTestCase {
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let baseBranch = try Branch(name: "base-branch", source: .remote(remote))
 		let targetBranch = try Branch(name: "target-branch", source: .remote(remote))
-		let count = try Commit.count(baseBranch: baseBranch, targetBranch: targetBranch, after: nil)
+		let count = try Commit.count(baseBranch: baseBranch, targetBranch: targetBranch, after: nil, atPath: "")
 
 		XCTAssertEqual(count, 7)
 	}
@@ -77,7 +77,7 @@ final class CommitTests: XCTestCase {
 			try Branch(name: "base-branch-c", source: .remote(remote))
 		]
 		let targetBranch = try Branch(name: "target-branch", source: .remote(remote))
-		let counts = try Commit.count(baseBranches: baseBranches, targetBranch: targetBranch, after: nil)
+		let counts = try Commit.count(baseBranches: baseBranches, targetBranch: targetBranch, after: nil, atPath: "")
 
 		let (branchA, countA) = counts[0]
 		XCTAssertEqual(branchA, baseBranches[0])
@@ -99,7 +99,7 @@ final class CommitTests: XCTestCase {
 			try Branch(name: "base-branch-b", source: .remote(remote)),
 			try Branch(name: "base-branch-c", source: .remote(remote))
 		]
-		let hashes = try Commit.latestHashes(branches: branches, after: nil)
+		let hashes = try Commit.latestHashes(branches: branches, after: nil, atPath: "")
 
 		XCTAssertEqual(hashes.count, 16)
 

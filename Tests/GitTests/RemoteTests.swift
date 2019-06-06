@@ -13,15 +13,15 @@ final class RemoteInteractorMock: RemoteInteractor {
 		case originDefaultBranch = "origin_default_branch"
 	}
 
-	func getAllRemotes() throws -> String {
+	func getAllRemotes(atPath path: String) throws -> String {
 		return try Fixture.allRemotes.load(as: String.self)
 	}
 
-	func getURL(forRemote remote: String) throws -> String {
+	func getURL(forRemote remote: String, atPath path: String) throws -> String {
 		return try Fixture(rawValue: remote + "_url")!.load(as: String.self)
 	}
 
-	func defaultBranch(forRemote remote: String) throws -> String {
+	func defaultBranch(forRemote remote: String, atPath path: String) throws -> String {
 		return try Fixture.originDefaultBranch.load(as: String.self)
 	}
 }
@@ -41,7 +41,7 @@ final class RemoteTests: XCTestCase {
 
 extension RemoteTests {
 	func testRemoteGetAll() throws {
-		let allRemotes = try Remote.getAll()
+		let allRemotes = try Remote.getAll(atPath: "")
 
 		let remoteA = allRemotes.first
 		let remoteB = allRemotes.dropFirst().first
@@ -57,7 +57,7 @@ extension RemoteTests {
 extension RemoteTests {
 	func testRemoteDefaultBranch() throws {
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let defaultBranch = try remote.defaultBranch()
+		let defaultBranch = try remote.defaultBranch(atPath: "")
 		let expectedDefaultBranch = try Branch(name: "develop", source: .remote(remote))
 
 		XCTAssertEqual(defaultBranch, expectedDefaultBranch)

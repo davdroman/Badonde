@@ -3,13 +3,13 @@ import Configuration
 
 extension Configuration {
 	public enum Scope {
-		case local(URL)
+		case local(path: String)
 		case global
 
 		public var url: URL {
 			switch self {
-			case .local(let url):
-				return url.appendingPathComponent(".badonde/config.json")
+			case .local(let path):
+				return URL(fileURLWithPath: path).appendingPathComponent(".badonde/config.json")
 			case .global:
 				return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/badonde/config.json")
 			}

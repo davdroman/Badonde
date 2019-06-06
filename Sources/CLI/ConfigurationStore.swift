@@ -31,12 +31,12 @@ final class LegacyConfigurationStore {
 		// Append .badonde to .gitignore if not present.
 		// Remove along with whole class when `badonde init` is implemented.
 		// https://github.com/davdroman/Badonde/pull/79
-		let projectPath = try Repository().topLevelPath
-		let gitignorePath = projectPath.appendingPathComponent(".gitignore")
-		let gitignoreContents = try String(contentsOf: gitignorePath)
+		let projectPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
+		let gitignorePath = URL(fileURLWithPath: projectPath).appendingPathComponent(".gitignore").path
+		let gitignoreContents = try String(contentsOfFile: gitignorePath)
 		if !gitignoreContents.contains(".badonde") {
-			_ = try capture(bash: "echo >> \(gitignorePath.path)")
-			_ = try capture(bash: "echo '.badonde' >> \(gitignorePath.path)")
+			_ = try capture(bash: "echo >> \(gitignorePath)")
+			_ = try capture(bash: "echo '.badonde' >> \(gitignorePath)")
 		}
 
 		let store = LegacyConfigurationStore()
@@ -48,7 +48,7 @@ final class LegacyConfigurationStore {
 
 		Logger.step("Legacy configuration detected, migrating...")
 
-		let configuration = try Configuration(scope: .local(projectPath))
+		let configuration = try Configuration(scope: .local(path: projectPath))
 
 		if let legacyConfiguration = store.configuration {
 			try configuration.setValue(legacyConfiguration.githubAccessToken, forKeyPath: .githubAccessToken)
