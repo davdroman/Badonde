@@ -14,33 +14,40 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/DavdRoman/CLISpinner", .branch("master")),
-		.package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.0.0"),
 		.package(url: "https://github.com/DavdRoman/SwiftCLI", .branch("master")),
 		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
 	],
 	targets: [
-		.target(name: "CLI", dependencies: ["Core"]),
+		.target(
+			name: "CLI",
+			dependencies: [
+				"BadondeKit",
+				"CLISpinner",
+				"Configuration",
+				"Core",
+				"Git",
+				"GitHub",
+				"Jira",
+				"Sugar",
+				"SwiftCLI",
+			]
+		),
 		.target(
 			name: "Core",
 			dependencies: [
 				"BadondeKit",
 				"Configuration",
 				"SwiftCLI",
-				"CLISpinner",
-				"Git",
-				"GitHub",
-				"Jira",
-				"Sugar",
 			]
 		),
 		.target(
 			name: "BadondeKit",
 			dependencies: [
-				"CryptoSwift",
 				"Git",
 				"GitHub",
 				"Jira",
 				"Sugar",
+				"SwiftCLI",
 			]
 		),
 		.target(name: "Configuration", dependencies: ["Sugar"]),
