@@ -5,6 +5,7 @@ import struct BadondeKit.Output
 import func BadondeKit.trySafely
 import Configuration
 import Core
+import Firebase
 import Git
 import GitHub
 import Jira
@@ -115,11 +116,13 @@ class PRCommand: Command {
 			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
 			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
 		{
-			let reporter = PullRequest.AnalyticsReporter(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			try reporter.report(
-				PullRequest.AnalyticsReporter.Data(
+			let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+			try reporter.post(
+				documentName: "pull-requests",
+				body: PullRequestAnalyticsData(
 					outputAnalyticsData: badondefileOutput.analyticsData,
-					startDate: startDatePointer.pointee
+					startDate: startDatePointer.pointee,
+					version: CommandLineTool.Constant.version
 				)
 			)
 		}
