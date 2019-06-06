@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol BranchInteractor {
+protocol BranchInteractor {
 	func getCurrentBranch() throws -> String
 	func getAllBranches(from source: Branch.Source) throws -> String
 }
@@ -49,43 +49,34 @@ public struct Branch: Equatable {
 }
 
 extension Branch {
-	public static func current(interactor: BranchInteractor? = nil) throws -> Branch {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: BranchInteractor = SwiftCLI()
 
+	public static func current() throws -> Branch {
 		return try Branch(name: interactor.getCurrentBranch(), source: .local)
 	}
 
-	public static func getAll(from source: Branch.Source, interactor: BranchInteractor? = nil) throws -> [Branch] {
-		let interactor = interactor ?? SwiftCLI()
-
+	public static func getAll(from source: Branch.Source) throws -> [Branch] {
 		return try interactor.getAllBranches(from: source)
 			.components(separatedBy: "\n")
 			.compactMap { try? Branch(name: $0, source: source) }
 	}
 
-	public func isAhead(of remote: Remote, interactor: CommitInteractor? = nil) throws -> Bool {
-		let interactor = interactor ?? SwiftCLI()
-
+	public func isAhead(of remote: Remote) throws -> Bool {
 		var remoteBranch = self
 		remoteBranch.source = .remote(remote)
 
-		return try Commit.count(baseBranch: remoteBranch, targetBranch: self, interactor: interactor) > 0
+		return try Commit.count(baseBranch: remoteBranch, targetBranch: self) > 0
 	}
 
-	public func parent(for remote: Remote, branchInteractor: BranchInteractor? = nil, commitInteractor: CommitInteractor? = nil, remoteInteractor: RemoteInteractor? = nil) throws -> Branch {
-		let branchInteractor = branchInteractor ?? SwiftCLI()
-		let commitInteractor = commitInteractor ?? SwiftCLI()
-		let remoteInteractor = remoteInteractor ?? SwiftCLI()
-
-		let defaultBranch = try remote.defaultBranch(interactor: remoteInteractor)
-		let allRemoteBranches = try Branch.getAll(from: .remote(remote), interactor: branchInteractor)
+	public func parent(for remote: Remote) throws -> Branch {
+		let defaultBranch = try remote.defaultBranch()
+		let allRemoteBranches = try Branch.getAll(from: .remote(remote))
 
 		let recentDate = Date(timeIntervalSinceNow: -2_592_000) // 1 month ago
 
 		let latestRecentCommitHashes = try Commit.latestHashes(
 			branches: allRemoteBranches,
-			after: recentDate,
-			interactor: commitInteractor
+			after: recentDate
 		)
 
 		let recentRemoteBranches = allRemoteBranches.enumerated()
@@ -95,8 +86,7 @@ extension Branch {
 		let commitsAndBranches = try Commit.count(
 			baseBranches: recentRemoteBranches,
 			targetBranch: self,
-			after: recentDate,
-			interactor: commitInteractor
+			after: recentDate
 		)
 
 		let branchesWithLowestEqualCommitCount = commitsAndBranches

@@ -17,9 +17,9 @@ final class RepositoryInteractorMock: RepositoryInteractor {
 
 final class RepositoryTests: XCTestCase {
 	func testInit() throws {
-		let interactor = RepositoryInteractorMock()
-		let repository = try Repository(path: URL(fileURLWithPath: "/Users/user/projects/repo/Sources/ModuleA"), interactor: interactor)
+		Repository.interactor = RepositoryInteractorMock()
 
+		let repository = try Repository(path: URL(fileURLWithPath: "/Users/user/projects/repo/Sources/ModuleA"))
 		XCTAssertEqual(repository.topLevelPath.path, "/Users/user/projects/repo")
 	}
 }

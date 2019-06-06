@@ -27,6 +27,11 @@ final class RemoteInteractorMock: RemoteInteractor {
 }
 
 final class RemoteTests: XCTestCase {
+	override func setUp() {
+		super.setUp()
+		Remote.interactor = RemoteInteractorMock()
+	}
+
 	func testInit() {
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		XCTAssertEqual(remote.name, "origin")
@@ -36,8 +41,7 @@ final class RemoteTests: XCTestCase {
 
 extension RemoteTests {
 	func testRemoteGetAll() throws {
-		let interactor = RemoteInteractorMock()
-		let allRemotes = try Remote.getAll(interactor: interactor)
+		let allRemotes = try Remote.getAll()
 
 		let remoteA = allRemotes.first
 		let remoteB = allRemotes.dropFirst().first
@@ -52,9 +56,8 @@ extension RemoteTests {
 
 extension RemoteTests {
 	func testRemoteDefaultBranch() throws {
-		let interactor = RemoteInteractorMock()
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let defaultBranch = try remote.defaultBranch(interactor: interactor)
+		let defaultBranch = try remote.defaultBranch()
 		let expectedDefaultBranch = try Branch(name: "develop", source: .remote(remote))
 
 		XCTAssertEqual(defaultBranch, expectedDefaultBranch)

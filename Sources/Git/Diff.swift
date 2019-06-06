@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol DiffInteractor {
+protocol DiffInteractor {
 	func diff(baseBranch: String, targetBranch: String) throws -> String
 }
 
@@ -108,10 +108,10 @@ extension Array where Element == Diff {
 }
 
 extension Diff {
-	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: DiffInteractor = SwiftCLI()
 
-		let rawDiffContent = try interactor.diff(
+	public init(baseBranch: Branch, targetBranch: Branch) throws {
+		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
 			targetBranch: targetBranch.fullName
 		)
@@ -120,10 +120,8 @@ extension Diff {
 }
 
 extension Array where Element == Diff {
-	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
-		let interactor = interactor ?? SwiftCLI()
-
-		let rawDiffContent = try interactor.diff(
+	public init(baseBranch: Branch, targetBranch: Branch) throws {
+		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
 			targetBranch: targetBranch.fullName
 		)
