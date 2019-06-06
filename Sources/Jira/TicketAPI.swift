@@ -5,7 +5,7 @@ extension Ticket {
 	public final class API {
 		let email: String
 		let apiToken: String
-		var authorizationValue: String? {
+		var authorizationValue: String {
 			return [email, apiToken].joined(separator: ":").base64()
 		}
 
@@ -25,10 +25,6 @@ extension Ticket {
 				path: "/rest/api/2/issue/\(key.rawValue)",
 				queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 			)
-
-			guard let authorizationValue = authorizationValue else {
-				throw Error.authorizationEncodingError
-			}
 
 			let session = URLSession(configuration: .default)
 			var request = URLRequest(url: url)
@@ -60,7 +56,6 @@ extension Ticket {
 
 extension Ticket.API {
 	public enum Error {
-		case authorizationEncodingError
 		case http(Int)
 	}
 }
@@ -68,8 +63,6 @@ extension Ticket.API {
 extension Ticket.API.Error: LocalizedError {
 	public var errorDescription: String? {
 		switch self {
-		case .authorizationEncodingError:
-			return "JIRA authorization token encoding failed"
 		case .http(let statusCode):
 			return "JIRA API call failed with HTTP status code \(statusCode)"
 		}
