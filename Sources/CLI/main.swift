@@ -1,3 +1,3 @@
-import BadondeCore
+import Core
 
 CommandLineTool().run()
