@@ -83,7 +83,7 @@ public final class CommandLineTool {
 
 		Logger.step("Reporting error")
 		let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-		try reporter.post(documentName: "errors", body: error.analyticsData(startDate: startDate))
+		try reporter.post(documentName: "errors", body: error.analyticsData(startDate: startDate, version: Constant.version))
 	}
 
 	private func logElapsedTime(withStartDate startDate: Date) {
