@@ -10,8 +10,6 @@ public struct Repository {
 	public var topLevelPath: URL
 
 	public init(path: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) throws {
-		let interactor = Repository.interactor
-
-		topLevelPath = try URL(fileURLWithPath: interactor.getTopLevelPath(from: path.path))
+		topLevelPath = try URL(fileURLWithPath: Repository.interactor.getTopLevelPath(from: path.path))
 	}
 }
