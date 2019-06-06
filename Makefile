@@ -9,7 +9,6 @@ SWIFT_BIN_FILES = \
 SWIFT_LIB_FILES = \
 	$(BUILD_PATH)/*.dylib \
 	$(BUILD_PATH)/BadondeKit.swift* \
-	$(BUILD_PATH)/CryptoSwift.swift* \
 	$(BUILD_PATH)/Git.swift* \
 	$(BUILD_PATH)/GitHub.swift* \
 	$(BUILD_PATH)/Jira.swift* \
