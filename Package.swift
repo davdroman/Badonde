@@ -51,6 +51,7 @@ let package = Package(
 			]
 		),
 		.target(name: "Configuration", dependencies: ["Sugar"]),
+		.target(name: "Firebase", dependencies: ["Sugar"]),
 		.target(name: "Git", dependencies: ["SwiftCLI"]),
 		.target(name: "GitHub", dependencies: ["Git", "Sugar"]),
 		.target(name: "Jira", dependencies: ["Sugar"]),
