@@ -19,7 +19,7 @@ public struct Branch: Equatable, Codable {
 			switch (component1, component2, component3) {
 			case ("local", _, _):
 				self = .local
-			case ("remote", let name?, let urlString?):
+			case let ("remote", name?, urlString?):
 				guard let url = URL(string: urlString) else {
 					return nil
 				}
