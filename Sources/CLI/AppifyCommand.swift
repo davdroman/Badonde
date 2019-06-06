@@ -6,9 +6,9 @@ import Git
 import GitHub
 import OSAKit
 
-class AppifyCommand: Command {
+final class AppifyCommand: Command {
 	let name = "appify"
-	let shortDescription = "Generates a Badonde.app for your specific project"
+	let shortDescription = "Generates a Badonde.app for your project"
 
 	func execute() throws {
 		Logger.step("Reading configuration")

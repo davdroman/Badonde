@@ -10,7 +10,7 @@ import Git
 import GitHub
 import Jira
 
-class PRCommand: Command {
+final class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
 	let dryRun = Flag("--dry-run", description: "Print generated PR details instead of creating it")
