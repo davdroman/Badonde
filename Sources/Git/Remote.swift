@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol RemoteInteractor {
+protocol RemoteInteractor {
 	func getAllRemotes() throws -> String
 	func getURL(forRemote remote: String) throws -> String
 	func defaultBranch(forRemote remote: String) throws -> String
@@ -17,9 +17,9 @@ public struct Remote: Codable, Equatable {
 }
 
 extension Remote {
-	public static func getAll(interactor: RemoteInteractor? = nil) throws -> [Remote] {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: RemoteInteractor = SwiftCLI()
 
+	public static func getAll() throws -> [Remote] {
 		return try interactor.getAllRemotes()
 			.components(separatedBy: "\n")
 			.compactMap { remoteName in
@@ -30,11 +30,9 @@ extension Remote {
 			}
 	}
 
-	public func defaultBranch(interactor: RemoteInteractor? = nil) throws -> Branch {
-		let interactor = interactor ?? SwiftCLI()
-
+	public func defaultBranch() throws -> Branch {
 		return try Branch(
-			name: interactor.defaultBranch(forRemote: name),
+			name: Remote.interactor.defaultBranch(forRemote: name),
 			source: .remote(self)
 		)
 	}

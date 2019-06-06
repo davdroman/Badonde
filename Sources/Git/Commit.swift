@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol CommitInteractor {
+protocol CommitInteractor {
 	func count(baseBranches: [String], targetBranch: String, after date: Date?) throws -> String
 	func latestHashes(branches: [String], after date: Date?) throws -> String
 }
@@ -8,8 +8,9 @@ public protocol CommitInteractor {
 public enum Commit { }
 
 extension Commit {
-	public static func count(baseBranch: Branch, targetBranch: Branch, after date: Date? = nil, interactor: CommitInteractor? = nil) throws -> Int {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: CommitInteractor = SwiftCLI()
+
+	public static func count(baseBranch: Branch, targetBranch: Branch, after date: Date? = nil) throws -> Int {
 		let commitCountRaw = try interactor.count(baseBranches: [baseBranch.fullName], targetBranch: targetBranch.name, after: date)
 		guard let commitCount = Int(commitCountRaw) else {
 			throw Error.numberNotFound
@@ -17,8 +18,7 @@ extension Commit {
 		return commitCount
 	}
 
-	public static func count(baseBranches: [Branch], targetBranch: Branch, after date: Date? = nil, interactor: CommitInteractor? = nil) throws -> [(Branch, Int)] {
-		let interactor = interactor ?? SwiftCLI()
+	public static func count(baseBranches: [Branch], targetBranch: Branch, after date: Date? = nil) throws -> [(Branch, Int)] {
 		let commitCountRaw = try interactor.count(baseBranches: baseBranches.map { $0.fullName }, targetBranch: targetBranch.name, after: date)
 		return try commitCountRaw
 			.components(separatedBy: "\n")
@@ -31,8 +31,7 @@ extension Commit {
 			}
 	}
 
-	public static func latestHashes(branches: [Branch], after date: Date?, interactor: CommitInteractor? = nil) throws -> [String] {
-		let interactor = interactor ?? SwiftCLI()
+	public static func latestHashes(branches: [Branch], after date: Date?) throws -> [String] {
 		return try interactor.latestHashes(branches: branches.map { $0.fullName }, after: date)
 			.components(separatedBy: "\n")
 	}

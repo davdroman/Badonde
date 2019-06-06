@@ -36,6 +36,11 @@ extension BranchTests {
 }
 
 final class BranchTests: XCTestCase {
+	override func setUp() {
+		super.setUp()
+		Branch.interactor = BranchInteractorMock()
+	}
+
 	func testBranchInit_withLocalSource_normalName() throws {
 		let branch = try Branch(name: "my-branch", source: .local)
 		XCTAssertEqual(branch.name, "my-branch")
@@ -98,8 +103,7 @@ final class BranchTests: XCTestCase {
 
 extension BranchTests {
 	func testBranchGetCurrent() throws {
-		let interactor = BranchInteractorMock()
-		let currentBranch = try Branch.current(interactor: interactor)
+		let currentBranch = try Branch.current()
 
 		XCTAssertEqual(currentBranch.name, "standalone-git-module")
 	}
@@ -107,8 +111,7 @@ extension BranchTests {
 
 extension BranchTests {
 	func testBranchGetAll_Local() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: .local, interactor: interactor)
+		let allBranches = try Branch.getAll(from: .local)
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -131,8 +134,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_OriginRemote() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: Constant.originRemoteSource, interactor: interactor)
+		let allBranches = try Branch.getAll(from: Constant.originRemoteSource)
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -155,8 +157,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_SshOriginRemote() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource, interactor: interactor)
+		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource)
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -181,10 +182,11 @@ extension BranchTests {
 
 extension BranchTests {
 	func testBranchIsAheadOfRemote() throws {
-		let interactor = CommitInteractorMock()
+		Commit.interactor = CommitInteractorMock()
+
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+		let isAhead = try branch.isAhead(of: remote)
 
 		XCTAssertTrue(isAhead)
 	}
@@ -192,9 +194,11 @@ extension BranchTests {
 	func testBranchIsNotAheadOfRemote() throws {
 		let interactor = CommitInteractorMock()
 		interactor.returnCommitCountZero = true
+		Commit.interactor = interactor
+
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+		let isAhead = try branch.isAhead(of: remote)
 
 		XCTAssertFalse(isAhead)
 	}
@@ -212,40 +216,30 @@ extension BranchTests {
 	}
 
 	func testBranchParent() throws {
-		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultiple
 		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
-		let remoteInteractor = RemoteInteractorMock()
+		Commit.interactor = commitInteractor
+		Remote.interactor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(
-			for: remote,
-			branchInteractor: branchInteractor,
-			commitInteractor: commitInteractor,
-			remoteInteractor: remoteInteractor
-		)
+		let parentBranch = try branch.parent(for: remote)
 
 		XCTAssertEqual(parentBranch.name, "swift-5")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
 	}
 
 	func testBranchParent_fallsBackToDefaultBranch() throws {
-		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultipleEqual
 		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
-		let remoteInteractor = RemoteInteractorMock()
+		Commit.interactor = commitInteractor
+		Remote.interactor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(
-			for: remote,
-			branchInteractor: branchInteractor,
-			commitInteractor: commitInteractor,
-			remoteInteractor: remoteInteractor
-		)
+		let parentBranch = try branch.parent(for: remote)
 
 		XCTAssertEqual(parentBranch.name, "develop")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
