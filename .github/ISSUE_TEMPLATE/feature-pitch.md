@@ -2,7 +2,7 @@
 name: Feature Pitch
 about: Pitch a new feature to be considered for development.
 title: Feature name or summary
-labels: 'Pitch :bulb:'
+labels: 'Pitch :memo:'
 assignees: davdroman
 
 ---
