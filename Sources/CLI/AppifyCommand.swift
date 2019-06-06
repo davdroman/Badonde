@@ -12,8 +12,8 @@ class AppifyCommand: Command {
 
 	func execute() throws {
 		Logger.step("Reading configuration")
-		let projectPath = try Repository().topLevelPath
-		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(projectPath), .global])
+		let projectPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
+		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
 		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
 
 		Logger.step("Searching for latest .app template available")

@@ -101,12 +101,12 @@ class ConfigCommand: Command {
 	private func configuration(forLocalValue localValue: Bool, globalValue: Bool) throws -> KeyValueInteractive {
 		switch (localValue, globalValue) {
 		case (true, false):
-			let repository = try Repository()
-			return try Configuration(scope: .local(repository.topLevelPath))
+			let repository = try Repository(atPath: FileManager.default.currentDirectoryPath)
+			return try Configuration(scope: .local(path: repository.topLevelPath))
 		case (false, true):
 			return try Configuration(scope: .global)
 		case (false, false):
-			let localScope = (try? Repository().topLevelPath).map { Configuration.Scope.local($0) }
+			let localScope = (try? Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath).map { Configuration.Scope.local(path: $0) }
 			return try DynamicConfiguration(prioritizedScopes: [localScope, .global].compacted())
 		case (true, true):
 			fatalError("More than one config scope option was specified")

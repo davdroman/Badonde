@@ -2,7 +2,7 @@ import Foundation
 import Git
 
 extension Repository {
-	public struct Shorthand {
+	public struct Shorthand: Codable {
 		public let username: String
 		public let repository: String
 	}
@@ -46,25 +46,6 @@ extension Repository.Shorthand: ExpressibleByStringLiteral {
 extension Repository.Shorthand: CustomStringConvertible {
 	public var description: String {
 		return rawValue
-	}
-}
-
-extension Repository.Shorthand: Decodable {
-	public init(from decoder: Decoder) throws {
-		let container = try decoder.singleValueContainer()
-		let rawValue = try container.decode(String.self)
-		guard let _self = type(of: self).init(rawValue: rawValue) else {
-			throw DecodingError.dataCorruptedError(
-				in: container,
-				debugDescription: "Failed to decode repository shorthand"
-			)
-		}
-		self = _self
-	}
-
-	public func encode(to encoder: Encoder) throws {
-		var container = encoder.singleValueContainer()
-		try container.encode(rawValue)
 	}
 }
 

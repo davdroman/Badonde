@@ -1,12 +1,12 @@
 import Foundation
 
-public protocol RemoteInteractor {
-	func getAllRemotes() throws -> String
-	func getURL(forRemote remote: String) throws -> String
-	func defaultBranch(forRemote remote: String) throws -> String
+protocol RemoteInteractor {
+	func getAllRemotes(atPath path: String) throws -> String
+	func getURL(forRemote remote: String, atPath path: String) throws -> String
+	func defaultBranch(forRemote remote: String, atPath path: String) throws -> String
 }
 
-public struct Remote: Codable, Equatable {
+public struct Remote: Equatable, Codable {
 	public var name: String
 	public var url: URL
 
@@ -17,24 +17,22 @@ public struct Remote: Codable, Equatable {
 }
 
 extension Remote {
-	public static func getAll(interactor: RemoteInteractor? = nil) throws -> [Remote] {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: RemoteInteractor = SwiftCLI()
 
-		return try interactor.getAllRemotes()
+	public static func getAll(atPath path: String) throws -> [Remote] {
+		return try interactor.getAllRemotes(atPath: path)
 			.components(separatedBy: "\n")
 			.compactMap { remoteName in
-				guard let remoteURL = try? URL(string: interactor.getURL(forRemote: remoteName)) else {
+				guard let remoteURL = try? URL(string: interactor.getURL(forRemote: remoteName, atPath: path)) else {
 					return nil
 				}
 				return Remote(name: remoteName, url: remoteURL)
 			}
 	}
 
-	public func defaultBranch(interactor: RemoteInteractor? = nil) throws -> Branch {
-		let interactor = interactor ?? SwiftCLI()
-
+	public func defaultBranch(atPath path: String) throws -> Branch {
 		return try Branch(
-			name: interactor.defaultBranch(forRemote: name),
+			name: Remote.interactor.defaultBranch(forRemote: name, atPath: path),
 			source: .remote(self)
 		)
 	}

@@ -10,16 +10,16 @@ final class RepositoryInteractorMock: RepositoryInteractor {
 		case repository
 	}
 
-	func getTopLevelPath(from path: String) throws -> String {
+	func getTopLevelPath(forPath path: String) throws -> String {
 		return try Fixture.repository.load(as: String.self)
 	}
 }
 
 final class RepositoryTests: XCTestCase {
 	func testInit() throws {
-		let interactor = RepositoryInteractorMock()
-		let repository = try Repository(path: URL(fileURLWithPath: "/Users/user/projects/repo/Sources/ModuleA"), interactor: interactor)
+		Repository.interactor = RepositoryInteractorMock()
 
-		XCTAssertEqual(repository.topLevelPath.path, "/Users/user/projects/repo")
+		let repository = try Repository(atPath: "/Users/user/projects/repo/Sources/ModuleA")
+		XCTAssertEqual(repository.topLevelPath, "/Users/user/projects/repo")
 	}
 }
