@@ -1,5 +1,4 @@
 import Foundation
-import CryptoSwift
 import Git
 
 public struct Payload: Codable {
@@ -49,8 +48,7 @@ public struct Payload: Codable {
 }
 
 extension Payload {
-	public static func path(for repository: Repository) -> URL {
-		let repositoryPathSha1 = repository.topLevelPath.path.sha1()
-		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-payload-\(repositoryPathSha1).json")
+	public static func path(forRepositoryAt url: URL) -> URL {
+		return FileManager.default.temporaryDirectory.appendingPathComponent("badonde-payload-\(url.path.sha1()).json")
 	}
 }

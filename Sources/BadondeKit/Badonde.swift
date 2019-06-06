@@ -10,7 +10,7 @@ public final class Badonde {
 	) {
 		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
 			let repository = try Repository()
-			let data = try Data(contentsOf: Payload.path(for: repository))
+			let data = try Data(contentsOf: Payload.path(forRepositoryAt: repository.topLevelPath))
 			let payload = try JSONDecoder().decode(Payload.self, from: data)
 
 			Logger.step("Deriving repo shorthand")
@@ -103,7 +103,7 @@ public final class Badonde {
 		atexit {
 			trySafely {
 				let repository = try Repository()
-				let outputPath = Output.path(for: repository)
+				let outputPath = Output.path(forRepositoryAt: repository.topLevelPath)
 				try output.write(to: outputPath)
 			}
 		}

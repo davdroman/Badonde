@@ -2,11 +2,11 @@ import Foundation
 import Configuration
 
 extension Configuration {
-	enum Scope {
+	public enum Scope {
 		case local(URL)
 		case global
 
-		var url: URL {
+		public var url: URL {
 			switch self {
 			case .local(let url):
 				return url.appendingPathComponent(".badonde/config.json")
@@ -16,7 +16,7 @@ extension Configuration {
 		}
 	}
 
-	static let supportedKeyPaths: [KeyPath] = [
+	public static let supportedKeyPaths: [KeyPath] = [
 		.jiraEmail,
 		.jiraApiToken,
 		.githubAccessToken,
@@ -26,13 +26,13 @@ extension Configuration {
 		.firebaseSecretToken,
 	]
 
-	convenience init(scope: Scope) throws {
+	public convenience init(scope: Scope) throws {
 		try self.init(contentsOf: scope.url, supportedKeyPaths: Configuration.supportedKeyPaths)
 	}
 }
 
 extension DynamicConfiguration {
-	convenience init(prioritizedScopes: [Configuration.Scope]) throws {
+	public convenience init(prioritizedScopes: [Configuration.Scope]) throws {
 		try self.init(prioritizedConfigurations: prioritizedScopes.map(Configuration.init(scope:)))
 	}
 }
