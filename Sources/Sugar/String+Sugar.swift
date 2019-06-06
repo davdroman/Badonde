@@ -1,4 +1,5 @@
 import Foundation
+import CommonCrypto
 import SwiftyStringScore
 
 extension String {
@@ -67,10 +68,19 @@ extension String {
 }
 
 extension String {
-	public func base64(using encoding: String.Encoding = .utf8) -> String? {
-		guard let stringData = data(using: encoding) else {
-			return nil
+	public func base64() -> String {
+		return Data(self.utf8).base64EncodedString()
+	}
+}
+
+extension String {
+	public func sha1() -> String {
+		let data = Data(self.utf8)
+		var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+		data.withUnsafeBytes {
+			_ = CC_SHA1($0.baseAddress, CC_LONG(data.count), &digest)
 		}
-		return stringData.base64EncodedString()
+		let hexBytes = digest.map { String(format: "%02hhx", $0) }
+		return hexBytes.joined()
 	}
 }

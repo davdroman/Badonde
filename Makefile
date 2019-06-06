@@ -9,7 +9,6 @@ SWIFT_BIN_FILES = \
 SWIFT_LIB_FILES = \
 	$(BUILD_PATH)/*.dylib \
 	$(BUILD_PATH)/BadondeKit.swift* \
-	$(BUILD_PATH)/CryptoSwift.swift* \
 	$(BUILD_PATH)/Git.swift* \
 	$(BUILD_PATH)/GitHub.swift* \
 	$(BUILD_PATH)/Jira.swift* \
@@ -25,9 +24,6 @@ install: build
 	mkdir -p $(LIB_PATH)
 	install $(SWIFT_BIN_FILES) $(BIN_PATH)
 	install $(SWIFT_LIB_FILES) $(LIB_PATH)
-
-test:
-	swift test
 
 uninstall:
 	rm -rf $(BIN_PATH)/badonde

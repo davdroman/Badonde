@@ -3,32 +3,35 @@ import SwiftCLI
 import struct BadondeKit.Payload
 import enum BadondeKit.Log
 import struct BadondeKit.Output
-import Git
 
-final class BadondefileRunner {
-	let repository: Repository
+public final class BadondefileRunner {
+	let repositoryUrl: URL
 
-	init(repository: Repository) {
-		self.repository = repository
+	public init(forRepositoryAt url: URL) {
+		self.repositoryUrl = url
 	}
 
-	func run(with payload: Payload) throws -> Output {
+	public func run(
+		with payload: Payload,
+		logCapture: ((Log) -> Void)? = nil,
+		stderrCapture: ((String) -> Void)? = nil
+	) throws -> Output {
 		let payloadData = try JSONEncoder().encode(payload)
-		try payloadData.write(to: Payload.path(for: repository))
+		try payloadData.write(to: Payload.path(forRepositoryAt: repositoryUrl))
 
 		try run(
 			stdoutCapture: { line in
 				line.components(losslesslySeparatedBy: CharacterSet(charactersIn: Log.Symbol.all.joined()))
 					.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
 					.compactMap { Log(rawValue: $0) }
-					.forEach { Logger.logBadondefileLog($0) }
+					.forEach { logCapture?($0) }
 			},
 			stderrCapture: { line in
-				Logger.fail(line)
+				stderrCapture?(line)
 			}
 		)
 
-		let outputData = try Data(contentsOf: Output.path(for: repository))
+		let outputData = try Data(contentsOf: Output.path(forRepositoryAt: repositoryUrl))
 		let output = try JSONDecoder().decode(Output.self, from: outputData)
 		return output
 	}
@@ -76,7 +79,7 @@ final class BadondefileRunner {
 	}()
 
 	private func bashBadondefilePath() throws -> String {
-		let bash = "find '\(repository.topLevelPath.path)' -type f -iname 'Badondefile.swift' ! -path .git"
+		let bash = "find '\(repositoryUrl.path)' -type f -iname 'Badondefile.swift' ! -path .git"
 		guard
 			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
 			!path.isEmpty
@@ -96,22 +99,6 @@ extension BadondefileRunner {
 			case .badondefileNotFound:
 				return "Could not find Badondefile.swift within current repository"
 			}
-		}
-	}
-}
-
-private extension Logger {
-	static func logBadondefileLog(_ log: Log) {
-		let indentationLevel = 3
-		switch log {
-		case .step(let description):
-			step(indentationLevel: indentationLevel, description)
-		case .info(let description):
-			info(indentationLevel: indentationLevel, description)
-		case .warn(let description):
-			warn(indentationLevel: indentationLevel, description)
-		case .fail(let description):
-			fail(indentationLevel: indentationLevel, description)
 		}
 	}
 }

@@ -10,37 +10,44 @@ let package = Package(
 	],
 	products: [
 		.library(name: "BadondeKit", type: .dynamic, targets: ["BadondeKit"]),
-		.executable(name: "badonde", targets: ["Badonde"]),
+		.executable(name: "badonde", targets: ["CLI"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/DavdRoman/CLISpinner", .branch("master")),
-		.package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.0.0"),
 		.package(url: "https://github.com/DavdRoman/SwiftCLI", .branch("master")),
 		.package(url: "https://github.com/DavdRoman/SwiftyStringScore", .branch("master")),
 	],
 	targets: [
-		.target(name: "Badonde", dependencies: ["BadondeCore"]),
 		.target(
-			name: "BadondeCore",
+			name: "CLI",
 			dependencies: [
 				"BadondeKit",
-				"Configuration",
-				"SwiftCLI",
 				"CLISpinner",
+				"Configuration",
+				"Core",
 				"Git",
 				"GitHub",
 				"Jira",
 				"Sugar",
+				"SwiftCLI",
+			]
+		),
+		.target(
+			name: "Core",
+			dependencies: [
+				"BadondeKit",
+				"Configuration",
+				"SwiftCLI",
 			]
 		),
 		.target(
 			name: "BadondeKit",
 			dependencies: [
-				"CryptoSwift",
 				"Git",
 				"GitHub",
 				"Jira",
 				"Sugar",
+				"SwiftCLI",
 			]
 		),
 		.target(name: "Configuration", dependencies: ["Sugar"]),
