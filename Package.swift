@@ -25,6 +25,7 @@ let package = Package(
 				"CLISpinner",
 				"Configuration",
 				"Core",
+				"Firebase",
 				"Git",
 				"GitHub",
 				"Jira",
