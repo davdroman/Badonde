@@ -3,27 +3,22 @@ import SwiftCLI
 import Configuration
 import GitHub
 
+func open(_ url: URL) throws {
+	_ = try capture(bash: "open \"\(url)\"")
+}
+
+func open(_ url: URL, delay: TimeInterval) {
+	let queue = DispatchQueue(label: "badonde_delay_queue")
+	queue.asyncAfter(deadline: .now() + delay) {
+		_ = try? open(url)
+	}
+}
+
 private extension URL {
 	static let jiraApiTokenUrl = URL(string: "https://id.atlassian.com/manage/api-tokens")!
-}
-
-#if !DEBUG
-private enum CommandConstant {
-	static let urlOpeningDelay: TimeInterval = 1.5
-}
-#endif
-
-extension Command {
-	func openURL(_ url: URL) throws {
-		_ = try capture(bash: "open \"\(url)\"")
-	}
-
-	func openURL(_ url: URL, delay: TimeInterval) {
-		let queue = DispatchQueue(label: "badonde_delay_queue")
-		queue.asyncAfter(deadline: .now() + delay) {
-			_ = try? self.openURL(url)
-		}
-	}
+	#if !DEBUG
+	static let jiraApiTokenUrlOpeningDelay: TimeInterval = 1.5
+	#endif
 }
 
 private var hasPromptedForCredentials = false
@@ -52,7 +47,7 @@ extension Command {
 			return jiraEmailInput
 		case .jiraApiToken:
 			#if !DEBUG
-			openURL(.jiraApiTokenUrl, delay: CommandConstant.urlOpeningDelay)
+			openURL(.jiraApiTokenUrl, delay: URL.jiraApiTokenUrlOpeningDelay)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)'):",

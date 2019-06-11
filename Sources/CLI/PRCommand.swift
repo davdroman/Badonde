@@ -107,7 +107,7 @@ final class PRCommand: Command {
 			}
 		)
 
-		try openURL(pullRequest.url)
+		try open(pullRequest.url)
 
 		// Report PR data (production only)
 		#if !DEBUG
