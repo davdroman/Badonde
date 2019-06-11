@@ -1,5 +1,5 @@
 <p align="center">
-<img width="250" src="https://imgur.com/download/pCSvugO" alt="Project header"/>
+<img width="250" src="https://imgur.com/download/qwCI0pa" alt="Project header"/>
 </p>
 
 <p align="center">
