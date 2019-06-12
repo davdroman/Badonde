@@ -27,6 +27,7 @@ public final class Badonde {
 				diff: []
 			)
 			var githubDSL = GitHubDSL(
+				me: nil,
 				labels: [],
 				milestones: [],
 				openPullRequests: []
@@ -41,6 +42,12 @@ public final class Badonde {
 						baseBranch.source = .remote(remote)
 
 						gitDSL.diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch, atPath: payload.git.path)
+					}
+				},
+				{
+					trySafely {
+						let userAPI = User.API(accessToken: payload.github.accessToken)
+						githubDSL.me = try userAPI.authenticatedUser()
 					}
 				},
 				{
