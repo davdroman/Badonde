@@ -277,9 +277,9 @@ extension ConfigurationTests {
 		let interactor = JSONFileInteractorSpy(readFixture: fixture) { _, _ in expectation.fulfill() }
 		let config = try Configuration(contentsOf: fixture.url, supportedKeyPaths: [], fileInteractor: interactor)
 
-		try config.setValue(72.5, forKeyPath: .weight)
+		try config.setValue(73.5, forKeyPath: .weight)
 		let value = try config.getValue(ofType: Double.self, forKeyPath: .weight)
-		XCTAssertEqual(value, 72.5)
+		XCTAssertEqual(value, 73.5)
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
