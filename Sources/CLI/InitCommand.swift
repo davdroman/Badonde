@@ -21,8 +21,28 @@ final class InitCommand: Command {
 		If either of these steps have previously ocurred, said step will be skipped.
 		"""
 
+	let startDatePointer: UnsafeMutablePointer<Date>
+
+	init(startDatePointer: UnsafeMutablePointer<Date>) {
+		self.startDatePointer = startDatePointer
+	}
+
 	func execute() throws {
-		
+		let fileManager = FileManager.default
+		let repositoryPath = try Repository(atPath: fileManager.currentDirectoryPath).topLevelPath
+
+		let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: repositoryPath), .global])
+		let credentials = try Initializer.Credentials(
+			jiraEmail: getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration),
+			jiraApiToken: getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration),
+			githubAccessToken: getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
+		)
+
+		// Reset start date because credentials might've been prompted
+		// and analytics data about tool performance might be skewed as a result.
+		startDatePointer.pointee = Date()
+
+		try Initializer(fileInteractor: fileManager).initializeBadonde(forRepositoryPath: repositoryPath, credentials: credentials)
 	}
 }
 

@@ -24,8 +24,8 @@ private extension URL {
 private var hasPromptedForCredentials = false
 
 extension Command {
-	func getOrPromptRawValue(forKeyPath keyPath: KeyPath, in configuration: KeyValueInteractive) throws -> String {
-		if let value = try configuration.getRawValue(forKeyPath: keyPath) {
+	func getOrPromptRawValue(forKeyPath keyPath: KeyPath, in configuration: KeyValueInteractive? = nil) throws -> String {
+		if let value = try configuration?.getRawValue(forKeyPath: keyPath) {
 			return value
 		}
 
@@ -43,7 +43,7 @@ extension Command {
 					self.stderr <<< "'\(input)' is invalid; \(invalidInputReason)"
 				}
 			)
-			try configuration.setRawValue(jiraEmailInput, forKeyPath: keyPath)
+			try configuration?.setRawValue(jiraEmailInput, forKeyPath: keyPath)
 			return jiraEmailInput
 		case .jiraApiToken:
 			#if !DEBUG
@@ -56,7 +56,7 @@ extension Command {
 					self.stderr <<< "Invalid token; \(invalidInputReason)"
 				}
 			)
-			try configuration.setRawValue(jiraApiTokenInput, forKeyPath: keyPath)
+			try configuration?.setRawValue(jiraApiTokenInput, forKeyPath: keyPath)
 			return jiraApiTokenInput
 		case .githubAccessToken:
 			let usernameInput = Input.readLine(
@@ -86,7 +86,7 @@ extension Command {
 					}
 				)
 			)
-			try configuration.setRawValue(authorization.token, forKeyPath: keyPath)
+			try configuration?.setRawValue(authorization.token, forKeyPath: keyPath)
 			return authorization.token
 		default:
 			fatalError("KeyPath not supported for prompting")
