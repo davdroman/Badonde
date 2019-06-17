@@ -2,26 +2,6 @@ import Foundation
 import Sugar
 
 extension API {
-	public enum Authorization {
-		case unauthenticated
-		case token(String)
-		case basic(username: String, password: String)
-
-		func headerValue() throws -> String? {
-			switch self {
-			case .unauthenticated:
-				return nil
-			case let .token(token):
-				return ["token", token].joined(separator: " ")
-			case let .basic(username, password):
-				let token = [username, password].joined(separator: ":").base64()
-				return ["Basic", token].joined(separator: " ")
-			}
-		}
-	}
-}
-
-extension API {
 	public enum Error: LocalizedError {
 		case http(response: HTTPURLResponse, githubError: GitHubError?)
 

@@ -6,15 +6,20 @@ import Git
 import GitHub
 import OSAKit
 
-class AppifyCommand: Command {
+final class AppifyCommand: Command {
 	let name = "appify"
-	let shortDescription = "Generates a Badonde.app for your specific project"
+	let shortDescription = "Generates a Badonde.app for your project"
 
 	func execute() throws {
 		Logger.step("Reading configuration")
 		let projectPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
-		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
-		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
+
+		guard
+			let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global]),
+			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken)
+		else {
+			throw Error.configMissing
+		}
 
 		Logger.step("Searching for latest .app template available")
 		let releaseAPI = Release.API(accessToken: githubAccessToken)
@@ -88,6 +93,7 @@ class AppifyCommand: Command {
 
 extension AppifyCommand {
 	enum Error {
+		case configMissing
 		case noAppTemplateAvailable
 		case appCompilationFailed
 	}
@@ -96,6 +102,8 @@ extension AppifyCommand {
 extension AppifyCommand.Error: LocalizedError {
 	var errorDescription: String? {
 		switch self {
+		case .configMissing:
+			return "Configuration not found, please set up Badonde by running 'badonde init'"
 		case .noAppTemplateAvailable:
 			return "No .app templates available on GitHub, please contact d@vidroman.dev"
 		case .appCompilationFailed:

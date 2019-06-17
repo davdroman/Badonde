@@ -4,6 +4,7 @@ import CLISpinner
 public enum Logger {
 	private static let pattern = Pattern.dots
 	private static let spinner = Spinner(pattern: pattern, color: .lightCyan)
+
 	private static var isStepping = false
 	private static var currentIndentationLevel = 0
 	private static var currentIndentation: String {
