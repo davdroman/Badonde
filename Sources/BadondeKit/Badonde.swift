@@ -34,7 +34,6 @@ public final class Badonde {
 			)
 			var jiraDSL: JiraDSL?
 
-			Logger.step("Deriving base branch and fetching API data")
 			DispatchGroup().asyncExecuteAndWait(
 				{
 					trySafely {
