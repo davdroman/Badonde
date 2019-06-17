@@ -24,9 +24,9 @@ extension FileManager: FileInteractor {
 
 final class Initializer {
 	struct Credentials {
+		var githubAccessToken: String
 		var jiraEmail: String
 		var jiraApiToken: String
-		var githubAccessToken: String
 	}
 
 	private let fileInteractor: FileInteractor
