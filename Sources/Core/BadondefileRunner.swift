@@ -15,6 +15,16 @@ public enum Badondefile {
 		}
 		return path
 	}
+
+	public static func librariesPath(forRepositoryPath path: String) -> String {
+		let path: String
+		#if DEBUG
+		path = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent().path
+		#else
+		path = "/usr/local/lib/badonde"
+		#endif
+		return path
+	}
 }
 
 extension Badondefile {
@@ -90,13 +100,7 @@ extension Badondefile {
 		}
 
 		private lazy var bashLibrariesPath: String = {
-			let path: String
-			#if DEBUG
-			path = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent().path
-			#else
-			path = "/usr/local/lib/badonde"
-			#endif
-			return "'\(path)'"
+			return "'\(Badondefile.librariesPath(forRepositoryPath: self.repositoryPath))'"
 		}()
 
 		private func bashBadondefilePath() throws -> String {
