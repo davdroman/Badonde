@@ -45,7 +45,7 @@ final class PRCommand: Command {
 		startDatePointer.pointee = Date()
 
 		Logger.step("Evaluating Badondefile.swift")
-		let badondefileOutput = try BadondefileRunner(forRepositoryPath: repository.topLevelPath).run(
+		let badondefileOutput = try Badondefile.Runner(forRepositoryPath: repository.topLevelPath).run(
 			with: Payload(
 				git: .init(
 					path: projectPath,

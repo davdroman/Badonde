@@ -80,7 +80,7 @@ final class Initializer {
 	}
 
 	private func createBadondefile(forRepositoryPath path: String) throws {
-		if (try? BadondefileRunner(forRepositoryPath: path).badondefilePath()) != nil {
+		if (try? Badondefile.path(forRepositoryPath: path)) != nil {
 			return
 		}
 
