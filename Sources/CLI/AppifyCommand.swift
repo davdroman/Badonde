@@ -60,6 +60,7 @@ class AppifyCommand: Command {
 
 		Logger.step("Adding app to Script Menu")
 		_ = try capture(bash: "mkdir -p ~/Library/Scripts")
+		_ = try capture(bash: "mkdir -p ~/Library/Services")
 		_ = try capture(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
 		do {
 			_ = try capture(bash: "open '/System/Library/CoreServices/Script Menu.app'")
