@@ -5,7 +5,7 @@ import Core
 protocol FileInteractor {
 	func contents(atPath path: String) throws -> Data
 	func fileExists(atPath path: String) -> Bool
-	func createFile(atPath path: String, withIntermediateDirectories createIntermediates: Bool, contents data: Data?, attributes attr: [FileAttributeKey : Any]?) throws
+	func createFile(atPath path: String, withIntermediateDirectories createIntermediates: Bool, contents data: Data?, attributes attr: [FileAttributeKey: Any]?) throws
 }
 
 extension FileManager: FileInteractor {
@@ -13,7 +13,7 @@ extension FileManager: FileInteractor {
 		return try Data(contentsOf: URL(fileURLWithPath: path))
 	}
 
-	func createFile(atPath path: String, withIntermediateDirectories createIntermediates: Bool, contents data: Data?, attributes attr: [FileAttributeKey : Any]? = nil) throws {
+	func createFile(atPath path: String, withIntermediateDirectories createIntermediates: Bool, contents data: Data?, attributes attr: [FileAttributeKey: Any]? = nil) throws {
 		let fileURL = URL(fileURLWithPath: path)
 		let folderPath = fileURL.deletingLastPathComponent().path
 		if !fileExists(atPath: folderPath) {

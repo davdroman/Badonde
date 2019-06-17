@@ -58,12 +58,12 @@ extension String {
 }
 
 extension String {
-	public func isRoughly(_ otherString: String) -> Bool {
-		return otherString.score(word: self, fuzziness: 1) > 0.5
-	}
-
 	public static func ~= (lhs: String, rhs: String) -> Bool {
 		return lhs.isRoughly(rhs)
+	}
+
+	public func isRoughly(_ otherString: String) -> Bool {
+		return otherString.score(word: self, fuzziness: 1) > 0.5
 	}
 }
 
