@@ -11,6 +11,17 @@ public final class BadondefileRunner {
 		self.repositoryPath = path
 	}
 
+	public func badondefilePath() throws -> String {
+		let bash = "find '\(repositoryPath)' -type f -iname 'Badondefile.swift' ! -path .git"
+		guard
+			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
+			!path.isEmpty
+		else {
+			throw Error.badondefileNotFound
+		}
+		return path
+	}
+
 	public func run(
 		with payload: Payload,
 		logCapture: ((Log) -> Void)? = nil,
@@ -86,14 +97,7 @@ public final class BadondefileRunner {
 	}()
 
 	private func bashBadondefilePath() throws -> String {
-		let bash = "find '\(repositoryPath)' -type f -iname 'Badondefile.swift' ! -path .git"
-		guard
-			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
-			!path.isEmpty
-		else {
-			throw Error.badondefileNotFound
-		}
-		return "'\(path)'"
+		return try "'\(badondefilePath())'"
 	}
 
 	private func bashPayloadPath() -> String {

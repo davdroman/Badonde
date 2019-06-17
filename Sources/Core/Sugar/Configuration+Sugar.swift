@@ -6,12 +6,12 @@ extension Configuration {
 		case local(path: String)
 		case global
 
-		public var url: URL {
+		public var fullPath: String {
 			switch self {
 			case .local(let path):
-				return URL(fileURLWithPath: path).appendingPathComponent(".badonde/config.json")
+				return URL(fileURLWithPath: path).appendingPathComponent(".badonde/config.json").path
 			case .global:
-				return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/badonde/config.json")
+				return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config/badonde/config.json").path
 			}
 		}
 	}
@@ -27,7 +27,7 @@ extension Configuration {
 	]
 
 	public convenience init(scope: Scope) throws {
-		try self.init(contentsOf: scope.url, supportedKeyPaths: Configuration.supportedKeyPaths)
+		try self.init(contentsOfFile: scope.fullPath, supportedKeyPaths: Configuration.supportedKeyPaths)
 	}
 }
 

@@ -10,7 +10,7 @@ import Git
 import GitHub
 import Jira
 
-class PRCommand: Command {
+final class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
 	let dryRun = Flag("--dry-run", description: "Print generated PR details instead of creating it")
@@ -25,10 +25,16 @@ class PRCommand: Command {
 		Logger.step("Reading configuration")
 		let repository = try Repository(atPath: FileManager.default.currentDirectoryPath)
 		let projectPath = repository.topLevelPath
-		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
-		let githubAccessToken = try getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
-		let jiraEmail = try getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration)
-		let jiraApiToken = try getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration)
+
+		guard
+			let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global]),
+			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken),
+			let jiraEmail = try configuration.getRawValue(forKeyPath: .jiraEmail),
+			let jiraApiToken = try configuration.getRawValue(forKeyPath: .jiraApiToken)
+		else {
+			throw Error.configMissing
+		}
+
 		let remote = try repository.remote(for: configuration)
 		let repositoryShorthand = try remote.repositoryShorthand()
 
@@ -107,14 +113,14 @@ class PRCommand: Command {
 			}
 		)
 
-		try openURL(pullRequest.url)
+		try open(pullRequest.url)
 
 		// Report PR data (production only)
 		#if !DEBUG
 		Logger.step("Reporting analytics data")
 		if
-			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
-			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
+			let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
+			let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
 		{
 			let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
 			try reporter.post(
@@ -157,7 +163,7 @@ class PRCommand: Command {
 
 extension Repository {
 	func remote(for configuration: KeyValueInteractive) throws -> Remote {
-		if let remoteName = try configuration.getValue(ofType: String.self, forKeyPath: .gitRemote) {
+		if let remoteName = try configuration.getRawValue(forKeyPath: .gitRemote) {
 			guard let selectedRemote = remotes.first(where: { $0.name == remoteName }) else {
 				throw PRCommand.Error.gitRemoteMissing(remoteName)
 			}
@@ -173,6 +179,7 @@ extension Repository {
 
 extension PRCommand {
 	enum Error {
+		case configMissing
 		case gitRemoteMissing(String)
 		case noGitRemotes
 	}
@@ -181,10 +188,12 @@ extension PRCommand {
 extension PRCommand.Error: LocalizedError {
 	var errorDescription: String? {
 		switch self {
+		case .configMissing:
+			return "Configuration not found, please set up Badonde by running 'badonde init'"
 		case .gitRemoteMissing(let remoteName):
-			return "Git remote '\(remoteName)' is missing, please add it with `git remote add \(remoteName) [GIT_URL]`"
+			return "Git remote '\(remoteName)' is missing, please add it with 'git remote add \(remoteName) [GIT_URL]'"
 		case .noGitRemotes:
-			return "Git remote is missing, please add it with `git remote add [REMOTE_NAME] [GIT_URL]`"
+			return "Git remote is missing, please add it with 'git remote add [REMOTE_NAME] [GIT_URL]'"
 		}
 	}
 }
