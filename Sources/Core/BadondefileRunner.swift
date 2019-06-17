@@ -117,7 +117,10 @@ extension Badondefile {
 		public var errorDescription: String? {
 			switch self {
 			case .badondefileNotFound:
-				return "Could not find Badondefile.swift within current repository"
+				return [
+					"Could not find Badondefile.swift within current repository",
+					"Please run 'badonde init'"
+				].joined(separator: "\n")
 			}
 		}
 	}
