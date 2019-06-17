@@ -47,7 +47,7 @@ extension Command {
 			return jiraEmailInput
 		case .jiraApiToken:
 			#if !DEBUG
-			openURL(.jiraApiTokenUrl, delay: URL.jiraApiTokenUrlOpeningDelay)
+			open(.jiraApiTokenUrl, delay: URL.jiraApiTokenUrlOpeningDelay)
 			#endif
 			let jiraApiTokenInput = Input.readLine(
 				prompt: "Enter JIRA API token (generated at '\(URL.jiraApiTokenUrl)'):",
