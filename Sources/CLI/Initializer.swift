@@ -40,11 +40,12 @@ final class Initializer {
 	}
 
 	private func configuration(forRepositoryPath path: String) throws -> KeyValueInteractive {
-		let configPath = URL(fileURLWithPath: path).appendingPathComponent(".badonde/config.json").path
-		if !fileInteractor.fileExists(atPath: configPath) {
-			try fileInteractor.createFile(atPath: configPath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
+		let scope = Configuration.Scope.local(path: path)
+		let fullPath = scope.fullPath
+		if !fileInteractor.fileExists(atPath: fullPath) {
+			try fileInteractor.createFile(atPath: fullPath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
 		}
-		return try Configuration(scope: .local(path: path))
+		return try Configuration(scope: scope)
 	}
 
 	private func saveCredentials(_ credentials: Credentials, to configuration: KeyValueInteractive) throws {

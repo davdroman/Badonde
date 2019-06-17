@@ -1,20 +1,20 @@
 import Foundation
 
-public protocol URLContentInitializable {
-	init(contentsOf url: URL) throws
+public protocol FilePathInitializable {
+	init(contentsOfFile path: String) throws
 }
 
-extension String: URLContentInitializable {}
+extension String: FilePathInitializable {}
 
-extension Data: URLContentInitializable {
-	public init(contentsOf url: URL) throws {
-		self = try Data(contentsOf: url, options: [])
+extension Data: FilePathInitializable {
+	public init(contentsOfFile path: String) throws {
+		self = try Data(contentsOf: URL(fileURLWithPath: path))
 	}
 }
 
-extension Dictionary: URLContentInitializable {
-	public init(contentsOf url: URL) throws {
-		let data = try Data(contentsOf: url)
+extension Dictionary: FilePathInitializable {
+	public init(contentsOfFile path: String) throws {
+		let data = try Data(contentsOfFile: path)
 		let object = try JSONSerialization.jsonObject(with: data, options: [])
 		guard let _self = object as? [Key: Value] else {
 			throw DecodingError.typeMismatch(
@@ -29,9 +29,9 @@ extension Dictionary: URLContentInitializable {
 	}
 }
 
-extension Array: URLContentInitializable {
-	public init(contentsOf url: URL) throws {
-		let data = try Data(contentsOf: url)
+extension Array: FilePathInitializable {
+	public init(contentsOfFile path: String) throws {
+		let data = try Data(contentsOfFile: path)
 		let object = try JSONSerialization.jsonObject(with: data, options: [])
 		guard let _self = object as? [Element] else {
 			throw DecodingError.typeMismatch(
@@ -51,7 +51,7 @@ public protocol FixtureLoadable {
 	var fixtureFolderSuffix: String { get }
 	var fixtureFileExtension: String { get }
 
-	func load<T: URLContentInitializable>(as type: T.Type) throws -> T
+	func load<T: FilePathInitializable>(as type: T.Type) throws -> T
 }
 
 extension FixtureLoadable {
@@ -65,15 +65,16 @@ extension FixtureLoadable {
 }
 
 public extension FixtureLoadable where Self: RawRepresentable, Self.RawValue == String {
-	var url: URL {
+	var path: String {
 		let sourceFileURL = URL(fileURLWithPath: sourceFilePath)
 		let fileNameWithoutExtension = sourceFileURL.lastPathComponent.prefix(while: { $0 != "." })
-		return URL(fileURLWithPath: sourceFilePath)
+		return sourceFileURL
 			.deletingLastPathComponent()
 			.appendingPathComponent("\(fileNameWithoutExtension)\(fixtureFolderSuffix)/\(rawValue).\(fixtureFileExtension)")
+			.path
 	}
 
-	func load<T: URLContentInitializable>(as type: T.Type) throws -> T {
-		return try T(contentsOf: url)
+	func load<T: FilePathInitializable>(as type: T.Type) throws -> T {
+		return try T(contentsOfFile: path)
 	}
 }
