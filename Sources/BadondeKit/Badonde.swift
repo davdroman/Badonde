@@ -4,6 +4,14 @@ import GitHub
 import Jira
 
 public final class Badonde {
+	public var git: GitDSL
+	public var github: GitHubDSL
+	public var jira: JiraDSL?
+
+	public var pullRequest: Output.PullRequest {
+		return output.pullRequest
+	}
+
 	public init(
 		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy = .regex,
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
@@ -111,14 +119,6 @@ public final class Badonde {
 				try output.write(to: URL(fileURLWithPath: outputPath))
 			}
 		}
-	}
-
-	public var git: GitDSL
-	public var github: GitHubDSL
-	public var jira: JiraDSL?
-
-	public var pullRequest: Output.PullRequest {
-		return output.pullRequest
 	}
 }
 

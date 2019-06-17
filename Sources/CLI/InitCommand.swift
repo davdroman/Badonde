@@ -45,15 +45,3 @@ final class InitCommand: Command {
 		try Initializer(fileInteractor: fileManager).initializeBadonde(forRepositoryPath: repositoryPath, credentials: credentials)
 	}
 }
-
-extension InitCommand {
-	enum Error {
-
-	}
-}
-
-extension InitCommand.Error: LocalizedError {
-	var errorDescription: String? {
-		return nil
-	}
-}

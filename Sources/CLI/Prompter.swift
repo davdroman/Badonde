@@ -17,14 +17,14 @@ private extension URL {
 	#endif
 }
 
-final class Prompter {
+enum Prompter {
 	enum Subject {
 		case githubAccessToken
 		case jiraEmail
 		case jiraApiToken
 	}
 
-	class func prompt(_ subject: Subject) throws -> String {
+	static func prompt(_ subject: Subject) throws -> String {
 		switch subject {
 		case .githubAccessToken:
 			let usernameInput = Input.readLine(prompt: "Enter GitHub username:")
