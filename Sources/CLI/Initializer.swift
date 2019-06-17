@@ -1,5 +1,6 @@
 import Foundation
 import Configuration
+import Core
 
 protocol FileInteractor {
 	func contents(atPath path: String) throws -> Data
@@ -38,6 +39,7 @@ final class Initializer {
 	func initializeBadonde(forRepositoryPath path: String, credentials: Credentials) throws {
 		try saveCredentials(credentials, to: configuration(forRepositoryPath: path))
 		try updateGitignore(forRepositoryPath: path)
+		try createBadondefile(forRepositoryPath: path)
 	}
 
 	private func configuration(forRepositoryPath path: String) throws -> Configuration {
@@ -73,6 +75,28 @@ final class Initializer {
 			atPath: gitignorePath,
 			withIntermediateDirectories: true,
 			contents: Data(newGitignoreContents.utf8),
+			attributes: nil
+		)
+	}
+
+	private func createBadondefile(forRepositoryPath path: String) throws {
+		if (try? BadondefileRunner(forRepositoryPath: path).badondefilePath()) != nil {
+			return
+		}
+
+		let badondefilePath = URL(fileURLWithPath: path).appendingPathComponent("Badondefile.swift").path
+		let badondefileContents = """
+		import BadondeKit
+
+		let badonde = Badonde()
+
+		// Edit me by running 'badonde edit' from your project folder.
+		"""
+
+		try fileInteractor.createFile(
+			atPath: badondefilePath,
+			withIntermediateDirectories: false,
+			contents: Data(badondefileContents.utf8),
 			attributes: nil
 		)
 	}
