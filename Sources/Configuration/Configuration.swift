@@ -2,7 +2,7 @@ import Foundation
 
 public protocol KeyValueInteractive {
 	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T?
-	func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws
+	func setValue<T: Equatable>(_ value: T, forKeyPath keyPath: KeyPath) throws
 	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String?
 	func setRawValue(_ value: String, forKeyPath keyPath: KeyPath) throws
 	func removeValue(forKeyPath keyPath: KeyPath) throws
@@ -66,7 +66,7 @@ public class Configuration: KeyValueInteractive {
 		}
 	}
 
-	public func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
+	public func setValue<T: Equatable>(_ value: T, forKeyPath keyPath: KeyPath) throws {
 		switch T.self {
 		case is Bool.Type, is Double.Type, is Int.Type, is String.Type:
 			break
@@ -76,6 +76,11 @@ public class Configuration: KeyValueInteractive {
 
 		guard keyPath.isCompatible(in: allocatedKeyPaths) else {
 			throw Error.incompatibleKeyPath(keyPath)
+		}
+
+		// Optimization to not write to disk unnecessarily if the new value isn't.
+		if let existingValue = keyPathedObject[keyPath.rawValue] as? T, existingValue == value {
+			return
 		}
 
 		keyPathedObject[keyPath.rawValue] = value

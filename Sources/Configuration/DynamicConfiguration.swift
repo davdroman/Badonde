@@ -14,7 +14,7 @@ public final class DynamicConfiguration: KeyValueInteractive {
 			.first
 	}
 
-	public func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
+	public func setValue<T: Equatable>(_ value: T, forKeyPath keyPath: KeyPath) throws {
 		try configurations.first?.setValue(value, forKeyPath: keyPath)
 	}
 
