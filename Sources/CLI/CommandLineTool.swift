@@ -26,9 +26,10 @@ public final class CommandLineTool {
 			version: Constant.version,
 			description: Constant.description,
 			commands: [
-				InitCommand(startDatePointer: startDatePointer),
 				AppifyCommand(),
 				ConfigCommand(),
+				EditCommand(startDatePointer: startDatePointer),
+				InitCommand(startDatePointer: startDatePointer),
 				PRCommand(startDatePointer: startDatePointer),
 			]
 		)
