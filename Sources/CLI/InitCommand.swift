@@ -33,9 +33,9 @@ final class InitCommand: Command {
 
 		let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: repositoryPath), .global])
 		let credentials = try Initializer.Credentials(
-			jiraEmail: getOrPromptRawValue(forKeyPath: .jiraEmail, in: configuration),
-			jiraApiToken: getOrPromptRawValue(forKeyPath: .jiraApiToken, in: configuration),
-			githubAccessToken: getOrPromptRawValue(forKeyPath: .githubAccessToken, in: configuration)
+			githubAccessToken: configuration?.getRawValue(forKeyPath: .githubAccessToken) ?? Prompter.prompt(.githubAccessToken),
+			jiraEmail: configuration?.getRawValue(forKeyPath: .jiraEmail) ?? Prompter.prompt(.jiraEmail),
+			jiraApiToken: configuration?.getRawValue(forKeyPath: .jiraApiToken) ?? Prompter.prompt(.jiraApiToken)
 		)
 
 		// Reset start date because credentials might've been prompted

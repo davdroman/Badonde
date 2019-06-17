@@ -76,8 +76,8 @@ public final class CommandLineTool {
 		let configuration = try DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global])
 
 		guard
-			let firebaseProjectId = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseProjectId),
-			let firebaseSecretToken = try configuration.getValue(ofType: String.self, forKeyPath: .firebaseSecretToken)
+			let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
+			let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
 		else {
 			return
 		}
