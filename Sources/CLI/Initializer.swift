@@ -37,9 +37,10 @@ final class Initializer {
 
 	func initializeBadonde(forRepositoryPath path: String, credentials: Credentials) throws {
 		try saveCredentials(credentials, to: configuration(forRepositoryPath: path))
+		try updateGitignore(forRepositoryPath: path)
 	}
 
-	private func configuration(forRepositoryPath path: String) throws -> KeyValueInteractive {
+	private func configuration(forRepositoryPath path: String) throws -> Configuration {
 		let scope = Configuration.Scope.local(path: path)
 		let fullPath = scope.fullPath
 		if !fileInteractor.fileExists(atPath: fullPath) {
@@ -52,5 +53,27 @@ final class Initializer {
 		try configuration.setValue(credentials.githubAccessToken, forKeyPath: .githubAccessToken)
 		try configuration.setValue(credentials.jiraApiToken, forKeyPath: .jiraApiToken)
 		try configuration.setValue(credentials.jiraEmail, forKeyPath: .jiraEmail)
+	}
+
+	private func updateGitignore(forRepositoryPath path: String) throws {
+		let gitignorePath = URL(fileURLWithPath: path).appendingPathComponent(".gitignore").path
+		let gitignoreContents = (try? String(contentsOfFile: gitignorePath)) ?? ""
+
+		guard !gitignoreContents.contains(".badonde") else {
+			return
+		}
+
+		let newGitignoreContents = gitignoreContents
+			.trimmingCharacters(in: .whitespacesAndNewlines)
+			.appending("\n\n")
+			.appending(".badonde")
+			.trimmingCharacters(in: .whitespacesAndNewlines)
+
+		try fileInteractor.createFile(
+			atPath: gitignorePath,
+			withIntermediateDirectories: true,
+			contents: Data(newGitignoreContents.utf8),
+			attributes: nil
+		)
 	}
 }

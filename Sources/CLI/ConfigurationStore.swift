@@ -1,3 +1,6 @@
+// Remove sometime after `badonde init` is implemented.
+// https://github.com/davdroman/Badonde/pull/79
+
 import Foundation
 import SwiftCLI
 import Configuration
@@ -28,16 +31,7 @@ final class LegacyConfigurationStore {
 	}
 
 	class func migrateIfNeeded() throws {
-		// Append .badonde to .gitignore if not present.
-		// Remove along with whole class sometime after `badonde init` is implemented.
-		// https://github.com/davdroman/Badonde/pull/79
 		let projectPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
-		let gitignorePath = URL(fileURLWithPath: projectPath).appendingPathComponent(".gitignore").path
-		let gitignoreContents = try String(contentsOfFile: gitignorePath)
-		if !gitignoreContents.contains(".badonde") {
-			_ = try capture(bash: "echo >> \(gitignorePath)")
-			_ = try capture(bash: "echo '.badonde' >> \(gitignorePath)")
-		}
 
 		let store = LegacyConfigurationStore()
 		let migrationNeeded = store.configuration != nil || store.additionalConfiguration != nil
