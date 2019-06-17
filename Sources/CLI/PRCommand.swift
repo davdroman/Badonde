@@ -40,9 +40,8 @@ final class PRCommand: Command {
 
 		try autopushIfNeeded(to: remote, configuration: configuration)
 
-		// Reset start date because credentials might've been prompted
-		// or autopush might've been performed and analytics data about
-		// tool performance might be skewed as a result.
+		// Reset start date because autopush might've been performed
+		// and analytics data about tool performance might be skewed as a result.
 		startDatePointer.pointee = Date()
 
 		Logger.step("Evaluating Badondefile.swift")
