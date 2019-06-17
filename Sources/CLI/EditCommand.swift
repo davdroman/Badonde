@@ -21,6 +21,9 @@ final class EditCommand: Command {
 	}
 
 	func execute() throws {
+		let repositoryPath = try Repository(atPath: FileManager.default.currentDirectoryPath).topLevelPath
+		try EditingCoordinator().editBadondefileAndWait(forRepositoryPath: repositoryPath)
+
 		// Reset start date because editing take an indefinite amount of time
 		// and this time is irrelevant to tool performance.
 		startDatePointer.pointee = Date()
