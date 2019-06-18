@@ -100,7 +100,7 @@ extension Badondefile {
 		}
 
 		private lazy var bashLibrariesPath: String = {
-			return "'\(Badondefile.librariesPath(forRepositoryPath: self.repositoryPath))'"
+			"'\(Badondefile.librariesPath(forRepositoryPath: self.repositoryPath))'"
 		}()
 
 		private func bashBadondefilePath() throws -> String {
