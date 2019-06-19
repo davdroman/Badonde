@@ -78,7 +78,8 @@ final class PRCommand: Command {
 			isDraft: badondefileOutput.pullRequest.isDraft
 		)
 
-		Logger.step("Setting PR details")
+		try open(pullRequest.url)
+
 		DispatchGroup().asyncExecuteAndWait(
 			{
 				guard
@@ -109,29 +110,30 @@ final class PRCommand: Command {
 						reviewers: badondefileOutput.pullRequest.reviewers
 					)
 				}
+			},
+			{
+				#if !DEBUG
+				trySafely {
+					guard
+						let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
+						let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
+					else {
+						return
+					}
+					Logger.step("Reporting analytics data")
+					let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+					try reporter.post(
+						documentName: "pull-requests",
+						body: PullRequestAnalyticsData(
+							outputAnalyticsData: badondefileOutput.analyticsData,
+							startDate: self.startDatePointer.pointee,
+							version: CommandLineTool.Constant.version
+						)
+					)
+				}
+				#endif
 			}
 		)
-
-		try open(pullRequest.url)
-
-		// Report PR data (production only)
-		#if !DEBUG
-		Logger.step("Reporting analytics data")
-		if
-			let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
-			let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
-		{
-			let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-			try reporter.post(
-				documentName: "pull-requests",
-				body: PullRequestAnalyticsData(
-					outputAnalyticsData: badondefileOutput.analyticsData,
-					startDate: startDatePointer.pointee,
-					version: CommandLineTool.Constant.version
-				)
-			)
-		}
-		#endif
 	}
 
 	func autopushIfNeeded(to remote: Remote, configuration: KeyValueInteractive) throws {
