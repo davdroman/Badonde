@@ -8,7 +8,13 @@ import OSAKit
 
 final class AppifyCommand: Command {
 	let name = "appify"
-	let shortDescription = "Generates a Badonde.app for your project"
+	let shortDescription = "Generates a shortcut app for your project"
+	let longDescription = """
+	Generates a shortcut app for your project.
+
+	When run on your project directory, this command generates and installs
+	a Badonde.app that, when opened, executes 'badonde pr' for said project.
+	"""
 
 	func execute() throws {
 		Logger.step("Reading configuration")

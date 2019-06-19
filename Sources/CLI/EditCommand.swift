@@ -10,9 +10,8 @@ final class EditCommand: Command {
 		"""
 		Opens Badondefile.swift on Xcode.
 
-		This command helps editing your current Badondefile.swift
-		by setting up an temporary Xcode project for it enabling
-		full autocompletion support.
+		This command helps editing your current Badondefile.swift by setting up
+		a temporary Xcode project for it enabling full autocompletion support.
 		"""
 
 	let startDatePointer: UnsafeMutablePointer<Date>
