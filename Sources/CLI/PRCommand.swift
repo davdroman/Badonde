@@ -78,6 +78,8 @@ final class PRCommand: Command {
 			isDraft: badondefileOutput.pullRequest.isDraft
 		)
 
+		try open(pullRequest.url)
+
 		Logger.step("Setting PR details")
 		DispatchGroup().asyncExecuteAndWait(
 			{
@@ -111,8 +113,6 @@ final class PRCommand: Command {
 				}
 			}
 		)
-
-		try open(pullRequest.url)
 
 		// Report PR data (production only)
 		#if !DEBUG
