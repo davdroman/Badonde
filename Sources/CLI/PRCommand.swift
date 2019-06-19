@@ -126,7 +126,7 @@ final class PRCommand: Command {
 						documentName: "pull-requests",
 						body: PullRequestAnalyticsData(
 							outputAnalyticsData: badondefileOutput.analyticsData,
-							startDate: startDatePointer.pointee,
+							startDate: self.startDatePointer.pointee,
 							version: CommandLineTool.Constant.version
 						)
 					)
