@@ -51,10 +51,10 @@ extension Badondefile {
 			"""
 			try fileManager.createFile(atPath: xcconfigPath, withIntermediateDirectories: false, contents: Data(xcconfigContents.utf8))
 
-			_ = try capture(bash: "(cd \(badondefileProjectURL.path) && swift package generate-xcodeproj --xcconfig-overrides config.xcconfig)")
+			_ = try Task.capture(bash: "(cd \(badondefileProjectURL.path) && swift package generate-xcodeproj --xcconfig-overrides config.xcconfig)")
 
 			let xcodeProjectPath = badondefileProjectURL.appendingPathComponent("Badondefile.xcodeproj").path
-			_ = try capture(bash: "open '\(xcodeProjectPath)'")
+			_ = try Task.capture(bash: "open '\(xcodeProjectPath)'")
 
 			Logger.info("Badonde will keep running, in order to save any changes you make in Xcode back to the original Badondefile")
 			Logger.info("Press the RETURN key once you're done editing")
