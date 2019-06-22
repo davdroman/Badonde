@@ -43,13 +43,13 @@ final class AppifyCommand: Command {
 		let applescriptFilePath = URL(fileURLWithPath: "\(tmpAppPath)/Contents/Resources/Scripts/main.scpt")
 
 		Logger.step("Downloading .app template")
-		_ = try capture(bash: "rm -rf \(zipPath)")
-		_ = try capture(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
-		_ = try capture(bash: "rm -rf \(folderPath)")
-		_ = try capture(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
+		_ = try Task.capture(bash: "rm -rf \(zipPath)")
+		_ = try Task.capture(bash: "curl -s -L -o \(zipPath) -O \(latestReleaseAsset.downloadUrl)")
+		_ = try Task.capture(bash: "rm -rf \(folderPath)")
+		_ = try Task.capture(bash: "unzip -qq -o \(zipPath) -d \(folderPath)")
 
 		Logger.step("Setting up Badonde.app for your current project folder")
-		let currentDirectory = try capture(bash: "pwd").stdout
+		let currentDirectory = try Task.capture(bash: "pwd").stdout
 		let applescript = try OSAScript(contentsOf: applescriptFilePath, languageInstance: nil, using: OSAStorageOptions.compileIntoContext)
 		let newApplescriptSource = applescript.source.replacingOccurrences(of: "{PATH_TO_PROJECT_DIR}", with: currentDirectory)
 		let newApplescript = OSAScript(source: newApplescriptSource)
@@ -60,15 +60,15 @@ final class AppifyCommand: Command {
 
 		Logger.step("Installing Badonde.app")
 		let appPath = "/Applications/\(appName)"
-		_ = try capture(bash: "rm -rf \(appPath)")
-		_ = try capture(bash: "cp -rf \(tmpAppPath) \(appPath)")
+		_ = try Task.capture(bash: "rm -rf \(appPath)")
+		_ = try Task.capture(bash: "cp -rf \(tmpAppPath) \(appPath)")
 
 		Logger.step("Adding app to Script Menu")
-		_ = try capture(bash: "mkdir -p ~/Library/Scripts")
-		_ = try capture(bash: "mkdir -p ~/Library/Services")
-		_ = try capture(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
+		_ = try Task.capture(bash: "mkdir -p ~/Library/Scripts")
+		_ = try Task.capture(bash: "mkdir -p ~/Library/Services")
+		_ = try Task.capture(bash: "ln -nsf \(appPath) ~/Library/Scripts/\(appName)")
 		do {
-			_ = try capture(bash: "open '/System/Library/CoreServices/Script Menu.app'")
+			_ = try Task.capture(bash: "open '/System/Library/CoreServices/Script Menu.app'")
 		} catch {
 			Logger.info("App was added to the Script Menu, to show go to Script Editor.app -> Preferences -> Show Script menu in menu bar")
 		}
@@ -77,18 +77,18 @@ final class AppifyCommand: Command {
 		let serviceName = "Run Badonde"
 		let serviceFilename = "Run\\ Badonde.workflow"
 		let servicePath = "~/Library/Services/\(serviceFilename)"
-		_ = try capture(bash: "rm -rf \(servicePath)")
+		_ = try Task.capture(bash: "rm -rf \(servicePath)")
 		let tmpServicePath = "\(folderPath)/\(serviceFilename)"
-		_ = try capture(bash: "cp -rf \(tmpServicePath) \(servicePath)")
-		_ = try capture(bash: "/System/Library/CoreServices/pbs -flush")
+		_ = try Task.capture(bash: "cp -rf \(tmpServicePath) \(servicePath)")
+		_ = try Task.capture(bash: "/System/Library/CoreServices/pbs -flush")
 
 		Logger.step("Setting up shortcut CMD+ALT+CTRL+B")
 		let service = Service(bundleIdentifier: nil, menuItemName: serviceName, message: "runWorkflowAsService")
 		try Service.KeyEquivalentConfigurator().addKeyEquivalent("@~^b", for: service)
-		_ = try capture(bash: "defaults read pbs")
+		_ = try Task.capture(bash: "defaults read pbs")
 		Logger.info("Shortcut was set up but you might need to close currently active applications for it to work")
 
-		_ = try capture(bash: "open -R \(appPath)")
+		_ = try Task.capture(bash: "open -R \(appPath)")
 	}
 }
 
