@@ -8,7 +8,7 @@ public enum Badondefile {
 	public static func path(forRepositoryPath path: String) throws -> String {
 		let bash = "find '\(path)' -type f -iname 'Badondefile.swift' ! -path .git"
 		guard
-			let path = try capture(bash: bash).stdout.components(separatedBy: .newlines).first,
+			let path = try Task.capture(bash: bash).stdout.components(separatedBy: .newlines).first,
 			!path.isEmpty
 		else {
 			throw Error.badondefileNotFound

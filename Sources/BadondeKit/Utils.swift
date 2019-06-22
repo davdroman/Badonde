@@ -17,6 +17,6 @@ public enum Utils {
 	}
 
 	public func exec(_ bash: String) -> String {
-		return trySafely { try capture(bash: bash).stdout }
+		return trySafely { try Task.capture(bash: bash).stdout }
 	}
 }
