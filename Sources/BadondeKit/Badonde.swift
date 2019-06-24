@@ -157,8 +157,8 @@ extension Badonde.Error: LocalizedError {
 }
 
 extension Badonde {
-	/// Defines the way in which to derive a Jira ticket ID through the current
-	/// Git context.
+	/// Defines the way in which to derive a Jira ticket ID through the current Git
+	/// context.
 	public enum TicketNumberDerivationStrategy {
 		enum Constant {
 			static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
@@ -167,11 +167,11 @@ extension Badonde {
 		/// Use the official Jira regular expression to match a ticket ID:
 		/// `((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)`
 		case regex
-		/// Use a user-provided custom function with the current Git context
-		/// as a parameter to derive a ticket ID.
+		/// Use a user-provided custom function with the currently checked out branch
+		/// name as a parameter to derive a ticket ID.
 		///
 		/// If `nil` is returned, the property `Badonde.jira` becomes `nil`.
-		case custom((GitDSL) -> String?)
+		case custom((String) -> String?)
 
 		func ticketKey(for git: GitDSL) throws -> Ticket.Key? {
 			switch self {
@@ -184,7 +184,7 @@ extension Badonde {
 				}
 				return ticketKey
 			case .custom(let strategyClosure):
-				guard let rawTicketKey = strategyClosure(git) else {
+				guard let rawTicketKey = strategyClosure(git.currentBranch.name) else {
 					return nil
 				}
 				guard let ticketKey = Ticket.Key(rawValue: rawTicketKey) else {
@@ -219,9 +219,9 @@ extension Badonde {
 		/// branch is from all other branches, and selects the one with the smallest
 		/// non-zero amount.
 		case commitProximity
-		/// Use a user-provided custom function with the current Git context
-		/// as a parameter to derive the base branch.
-		case custom((GitDSL) -> String)
+		/// Use a user-provided custom function with the currently checked out branch
+		/// name as a parameter to derive the base branch.
+		case custom((String) -> String)
 
 		func baseBranch(for git: GitDSL) throws -> Branch {
 			switch self {
@@ -230,7 +230,7 @@ extension Badonde {
 			case .commitProximity:
 				return try git.currentBranch.parent(for: git.remote, atPath: "")
 			case .custom(let strategyClosure):
-				return try Branch(name: strategyClosure(git), source: .local)
+				return try Branch(name: strategyClosure(git.currentBranch.name), source: .local)
 			}
 		}
 	}
