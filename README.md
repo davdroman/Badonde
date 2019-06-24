@@ -10,7 +10,9 @@
 	<img src="https://img.shields.io/github/release/davdroman/Badonde.svg" alt="Latest stable release"/>
 </p>
 
-Badonde is a command line tool that combines the JIRA and GitHub APIs to make creating PRs a bliss.
+Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** to automate **PR** generation.
+
+Named after emblematic _bart_ critic [**Brian Badonde**](https://www.youtube.com/watch?v=W2bB7uIVopA).
 
 ## Installation
 
