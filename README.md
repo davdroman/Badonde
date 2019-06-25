@@ -1,6 +1,5 @@
 <p align="center">
 	<img width="250" src="https://imgur.com/download/qwCI0pa" alt="Badonde header"/>
-	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
 <p align="center">
@@ -9,6 +8,7 @@
 	    <img src="https://img.shields.io/travis/davdroman/Badonde/master.svg" alt="Travis status" />
 	</a>
 	<img src="https://img.shields.io/github/release/davdroman/Badonde.svg" alt="Latest stable release"/>
+	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
 Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** to automate **PR** generation. It is intended as a solution for GitHub projects to define and automate a PR creation etiquette.
