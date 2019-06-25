@@ -11,6 +11,8 @@ final class DefaultPrinter: Printer {
 	}
 }
 
+/// Attempts to execute a function without propagating thrown errors
+/// to the top level, and exiting the program safely instead.
 public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 	do {
 		return try throwingClosure()
@@ -20,21 +22,46 @@ public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 	}
 }
 
+/// A namespace collecting logging functions.
+///
+/// This class allows the user to print steps throughout Badondefile's
+/// evaluation for further insight on its execution.
 public enum Logger {
 	static var printer: Printer = DefaultPrinter()
 
+	/// Prints loading dots followed by the given description to
+	/// indicate an activity in progress.
+	///
+	/// - Parameter description: the log description.
 	public static func step(_ description: String) {
 		printLog(.step(description))
 	}
 
+	/// Prints an info sign followed by the given description.
+	///
+	/// If `Logger.step` was ocurring before this call, said output
+	/// will be ticked off as successfully completed.
+	///
+	/// - Parameter description: the log description.
 	public static func info(_ description: String) {
 		printLog(.info(description))
 	}
 
+	/// Prints a warning sign followed by the given description.
+	///
+	/// If `Logger.step` was ocurring before this call, said output
+	/// will be ticked off as successfully completed.
+	///
+	/// - Parameter description: the log description.
 	public static func warn(_ description: String) {
 		printLog(.warn(description))
 	}
 
+	/// Fails the previously executing step (if existing), and prints
+	/// the specified description of what went wrong in the following
+	/// line.
+	///
+	/// - Parameter description: the log description.
 	public static func fail(_ description: String) {
 		printLog(.fail(description))
 	}

@@ -13,6 +13,15 @@ import Jira
 final class PRCommand: Command {
 	let name = "pr"
 	let shortDescription = "Creates a PR from the current branch"
+	let longDescription = """
+	Creates a PR from the current branch by:
+
+	  • Reading your project's Git info (e.g. current branch, repo shorthand...).
+	  • Evaluating your Badondefile with the Git info to get the PR data.
+	  • Creating a PR with the PR data through the GitHub API.
+	  • Reporting performance + analytics data to the Firebase DB specified in config.
+	"""
+
 	let dryRun = Flag("--dry-run", description: "Print generated PR details instead of creating it")
 
 	let startDatePointer: UnsafeMutablePointer<Date>

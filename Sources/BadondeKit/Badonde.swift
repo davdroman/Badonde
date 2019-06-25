@@ -3,15 +3,32 @@ import Git
 import GitHub
 import Jira
 
+/// An object that represents Badonde's execution.
 public final class Badonde {
+	/// Git information fetched by Badonde.
 	public var git: GitDSL
+	/// GitHub information fetched by Badonde.
 	public var github: GitHubDSL
+	/// Jira information fetched by Badonde.
 	public var jira: JiraDSL?
 
+	/// The PR object at this point in the execution.
 	public var pullRequest: Output.PullRequest {
 		return output.pullRequest
 	}
 
+	/// Returns an instance of `Badonde` and kickstarts the execution by fetching
+	/// Git, GitHub, and Jira information.
+	///
+	/// By default, Badonde sets the head and base branches for the PR in
+	/// initialization time. The base branch is determined through the specified
+	/// `BaseBranchDerivationStrategy`.
+	///
+	/// - Parameters:
+	///   - ticketNumberDerivationStrategy: the preferred strategy to derive the
+	///     Jira ticket (defaults to `.regex`).
+	///   - baseBranchDerivationStrategy: the preferred strategy to derive the
+	///     Git base branch for the PR (defaults to `.defaultBranch`).
 	public init(
 		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy = .regex,
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
@@ -140,13 +157,21 @@ extension Badonde.Error: LocalizedError {
 }
 
 extension Badonde {
+	/// Defines the way in which to derive a Jira ticket ID through the current Git
+	/// context.
 	public enum TicketNumberDerivationStrategy {
 		enum Constant {
 			static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
 		}
 
+		/// Use the official Jira regular expression to match a ticket ID:
+		/// `((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)`
 		case regex
-		case custom((GitDSL) -> String?)
+		/// Use a user-provided custom function with the currently checked out branch
+		/// name as a parameter to derive a ticket ID.
+		///
+		/// If `nil` is returned, the property `Badonde.jira` becomes `nil`.
+		case custom((String) -> String?)
 
 		func ticketKey(for git: GitDSL) throws -> Ticket.Key? {
 			switch self {
@@ -159,7 +184,7 @@ extension Badonde {
 				}
 				return ticketKey
 			case .custom(let strategyClosure):
-				guard let rawTicketKey = strategyClosure(git) else {
+				guard let rawTicketKey = strategyClosure(git.currentBranch.name) else {
 					return nil
 				}
 				guard let ticketKey = Ticket.Key(rawValue: rawTicketKey) else {
@@ -172,10 +197,10 @@ extension Badonde {
 }
 
 extension Badonde.TicketNumberDerivationStrategy {
-	public enum Error: LocalizedError {
+	enum Error: LocalizedError {
 		case invalidTicketNumberByCustomStrategy
 
-		public var errorDescription: String? {
+		var errorDescription: String? {
 			switch self {
 			case .invalidTicketNumberByCustomStrategy:
 				return "The ticket number derived by custom strategy has invalid format"
@@ -185,10 +210,18 @@ extension Badonde.TicketNumberDerivationStrategy {
 }
 
 extension Badonde {
+	/// Defines the way in which to derive the Git base branch of the PR through the
+	/// current Git context.
 	public enum BaseBranchDerivationStrategy {
+		/// Use the default branch for the repo.
 		case defaultBranch
+		/// Use a derivation algorithm that compares how many commits away the current
+		/// branch is from all other branches, and selects the one with the smallest
+		/// non-zero amount.
 		case commitProximity
-		case custom((GitDSL) -> String)
+		/// Use a user-provided custom function with the currently checked out branch
+		/// name as a parameter to derive the base branch.
+		case custom((String) -> String)
 
 		func baseBranch(for git: GitDSL) throws -> Branch {
 			switch self {
@@ -197,7 +230,7 @@ extension Badonde {
 			case .commitProximity:
 				return try git.currentBranch.parent(for: git.remote, atPath: "")
 			case .custom(let strategyClosure):
-				return try Branch(name: strategyClosure(git), source: .local)
+				return try Branch(name: strategyClosure(git.currentBranch.name), source: .local)
 			}
 		}
 	}
