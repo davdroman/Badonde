@@ -11,7 +11,7 @@
 	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
-Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** to automate PR generation. It is intended as a solution for GitHub projects to define and automate a **PR creation etiquette**.
+Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** and offers as a solution for GitHub projects to define and automate a **PR creation workflow**.
 
 ## Installation
 
