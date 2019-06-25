@@ -141,16 +141,16 @@ $ badonde config --help
 
 ## Analytics
 
-It's possible to report useful team-wide performance analytics to your own privately owned Firebase DB after each Badonde execution.
+It's possible to report useful **team-wide performance analytics** to your own **privately owned Firebase DB** after each Badonde execution.
 
-In order to do this, each team member should configure the required credentials as such:
+In order to do this, **each team member** should configure the required credentials as such:
 
 ```sh
 $ badonde config firebase.projectId <YOUR_FIREBASE_DB_PROJECT_ID>
 $ badonde config firebase.secretToken <YOUR_FIREBASE_DB_SECRET_TOKEN>
 ```
 
-You can add custom information to the report in your Badondefile:
+You can add **custom information** to the report through your Badondefile:
 
 ```swift
 analytics([
