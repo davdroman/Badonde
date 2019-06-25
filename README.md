@@ -11,6 +11,10 @@
 	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
+<p align="center">
+	<img src="https://imgur.com/download/2iG4ODD" alt="Badonde usage GIF"/>
+</p>
+
 Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** and offers as a solution for GitHub projects to define and automate a **PR creation workflow**.
 
 ## Installation
