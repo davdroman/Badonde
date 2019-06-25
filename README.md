@@ -10,11 +10,9 @@
 	<img src="https://img.shields.io/github/release/davdroman/Badonde.svg" alt="Latest stable release"/>
 </p>
 
-Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** to automate **PR** generation.
+Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** to automate **PR** generation. It is intended as a solution for GitHub projects to define and automate a PR creation etiquette.
 
-Named after emblematic _bart_ critic [**Brian Badonde**](https://www.youtube.com/watch?v=W2bB7uIVopA).
-
-Badonde is intended as a solution for GitHub projects to define and automate a PR creation workflow in the form of code.
+###### Named after emblematic _bart_ critic [**Brian Badonde**](https://www.youtube.com/watch?v=W2bB7uIVopA).
 
 ## Installation
 
@@ -48,7 +46,7 @@ Observe the `.badonde` folder is created to host Badonde's local user configurat
 
 ### Badondefile
 
-Additionally, a `Badondefile.swift` file is created with a basic template. `Badondefile` defines the rules by which Badonde derives data and outputs PR information (think of it as a Dangerfile).
+Additionally, a `Badondefile.swift` file is created with a basic template. A Badondefile defines the rules by which Badonde derives data and outputs PR information.
 
 In order to edit Badondefile with full autocompletion support, run:
 
@@ -84,7 +82,7 @@ if badonde.git.currentBranch.name.hasPrefix("fix/") {
 }
 ```
 
-Here's a more advanced example of an automation where we match the JIRA ticket's epic to a label in your GitHub repo:
+Here's a more advanced (but just as easily expressed) case of an automation where we match the JIRA ticket's epic to a label in your GitHub repo:
 
 ```swift
 if let epicName = ticket.fields.epicSummary {
