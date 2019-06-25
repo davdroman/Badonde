@@ -1,6 +1,6 @@
 <p align="center">
 	<img width="250" src="https://imgur.com/download/qwCI0pa" alt="Badonde header"/>
-	<h6>Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
+	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
 <p align="center">
