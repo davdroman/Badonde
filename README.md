@@ -14,7 +14,7 @@
 Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** and offers as a solution for GitHub projects to define and automate a **PR creation workflow**.
 
 <p align="center">
-	<img src="https://imgur.com/download/2iG4ODD" alt="Badonde usage GIF"/>
+	<img src="https://imgur.com/download/iv1MZXt" alt="Badonde usage GIF"/>
 </p>
 
 ## Installation
