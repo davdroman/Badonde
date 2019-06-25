@@ -8,7 +8,6 @@ public final class CommandLineTool {
 	enum Constant {
 		static let name = "badonde"
 		static let version = "2.0.0-beta.3"
-		static let description = "Painless PR-ing"
 	}
 
 	var startDate = Date()
@@ -24,7 +23,6 @@ public final class CommandLineTool {
 		let cli = CLI(
 			name: Constant.name,
 			version: Constant.version,
-			description: Constant.description,
 			commands: [
 				AppifyCommand(),
 				ConfigCommand(),

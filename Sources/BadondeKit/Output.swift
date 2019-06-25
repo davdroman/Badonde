@@ -76,34 +76,42 @@ extension Output {
 
 var output: Output!
 
+/// Sets the title of the PR.
 public func title(_ title: String) {
 	output.pullRequest.title = title
 }
 
+/// Sets the body of the PR.
 public func body(_ body: String) {
 	output.pullRequest.body = body
 }
 
+/// Adds a reviewer to the PR.
 public func reviewer(_ reviewer: User) {
 	BadondeKit.reviewer(reviewer.login)
 }
 
-public func reviewer(_ name: String) {
-	output.pullRequest.reviewers.append(name)
+/// Adds a reviewer by login handle to the PR.
+public func reviewer(_ login: String) {
+	output.pullRequest.reviewers.append(login)
 }
 
+/// Adds an assignee to the PR.
 public func assignee(_ assignee: User) {
 	BadondeKit.assignee(assignee.login)
 }
 
-public func assignee(_ name: String) {
-	output.pullRequest.assignees.append(name)
+/// Adds an assignee by login handle to the PR.
+public func assignee(_ login: String) {
+	output.pullRequest.assignees.append(login)
 }
 
+/// Adds a label to the PR.
 public func label(_ label: Label) {
 	output.pullRequest.labels.append(label)
 }
 
+/// Adds a label that matches the specified predicate to the PR.
 public func label(where labelMatcher: (Label) -> Bool) {
 	guard let label = badonde.github.labels.first(where: labelMatcher) else {
 		return
@@ -111,18 +119,22 @@ public func label(where labelMatcher: (Label) -> Bool) {
 	BadondeKit.label(label)
 }
 
+/// Adds a label, by name, to the PR.
 public func label(named name: String) {
 	label(where: { $0.name == name })
 }
 
+/// Adds a label, roughly matching the specified name, to the PR.
 public func label(roughlyNamed name: String) {
 	label(where: { $0.name ~= name })
 }
 
+/// Sets the milestone of the PR.
 public func milestone(_ milestone: Milestone) {
 	output.pullRequest.milestone = milestone
 }
 
+/// Sets the milestone, matching the specified predicate, for the PR.
 public func milestone(where milestoneMatcher: (Milestone) -> Bool) {
 	guard let milestone = badonde.github.milestones.first(where: milestoneMatcher) else {
 		return
@@ -130,18 +142,22 @@ public func milestone(where milestoneMatcher: (Milestone) -> Bool) {
 	BadondeKit.milestone(milestone)
 }
 
+/// Sets the milestone, by name, for the PR.
 public func milestone(named name: String) {
 	milestone(where: { $0.title == name })
 }
 
+/// Sets the milestone, roughly matching the specified name, for the PR.
 public func milestone(roughlyNamed name: String) {
 	milestone(where: { $0.title ~= name })
 }
 
+/// Sets the draft status for the PR.
 public func draft(_ isDraft: Bool) {
 	output.pullRequest.isDraft = isDraft
 }
 
+/// Specifies analytics data to be reported after the PR is created.
 public func analytics<T>(_ dictionary: [String: T]) {
 	let info = dictionary.mapValues { AnyCodable($0) }
 	output.analyticsData.info.merge(info, uniquingKeysWith: { _, new in new })
