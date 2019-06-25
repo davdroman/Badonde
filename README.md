@@ -126,7 +126,7 @@ $ badonde config git.remote origin
 **Global options** are also available:
 
 ```sh
-$ badonde config -g git.autopush true
+$ badonde config --global git.autopush true
 ```
 
 To list **all available options**, run:
