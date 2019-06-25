@@ -34,6 +34,8 @@ make install
 
 ## Usage
 
+### Setup
+
 First, in a terminal window, you want to navigate to the root of your repository and run:
 
 ```sh
@@ -44,12 +46,14 @@ This will create all the required files for Badonde to work and prompt for GitHu
 
 Observe the `.badonde` folder is created to host Badonde's local user configuration (e.g. credentials). Such folder is also added to `.gitignore` because per-user configuration must not be commited.
 
+### Badondefile
+
 Additionally, a `Badondefile.swift` file is created with a basic template. `Badondefile` defines the rules by which Badonde derives data and outputs PR information (think of it as a Dangerfile).
 
 In order to edit Badondefile with full autocompletion support, run:
 
 ```sh
-badonde edit
+$ badonde edit
 ```
 
 This will open an Xcode project where you can make any modifications to this file. When you're done, go back to the terminal and press the return key to save the file.
@@ -75,7 +79,8 @@ if let ticket = badonde.jira?.ticket {
 // If the current branch has the prefix 'fix/' it means we're dealing with a
 // bugfix PR, so we attach the Bug label.
 if badonde.git.currentBranch.name.hasPrefix("fix/") {
-	label(named: "Bug") // Sets the "Bug" label defined in your GitHub repo.
+	// Sets the "Bug" label defined in your GitHub repo.
+	label(named: "Bug")
 }
 ```
 
@@ -97,6 +102,8 @@ draft(false)
 
 ---
 
+### Generating a PR
+
 Finally, when you're ready to generate a PR, run:
 
 ```sh
@@ -107,6 +114,28 @@ Or perform a dry run first to see what the output would be:
 
 ```sh
 $ badonde pr --dry-run
+```
+
+### Configuration
+
+As said, Badonde stores its local user configuration in `.badonde/config.json`.
+
+Badonde offers an interface similar to `git config` to modify this options. For instance:
+
+```sh
+$ badonde config git.remote origin
+```
+
+Global options are also available:
+
+```sh
+$ badonde config -g git.autopush true
+```
+
+To list all available options, run:
+
+```sh
+$ badonde config --help
 ```
 
 ## Special thanks
