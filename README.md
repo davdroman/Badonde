@@ -117,7 +117,7 @@ Or perform a **dry run** first to see what the output would be:
 $ badonde pr --dry-run
 ```
 
-### Configuration
+## Configuration
 
 As said above, Badonde stores its **local user configuration** in `.badonde/config.json`.
 
@@ -137,6 +137,27 @@ To list **all available options**, run:
 
 ```sh
 $ badonde config --help
+```
+
+## Analytics
+
+It's possible to report useful team-wide performance analytics to your own privately owned Firebase DB after each Badonde execution.
+
+In order to do this, each team member should configure the required credentials as such:
+
+```sh
+$ badonde config firebase.projectId <YOUR_FIREBASE_DB_PROJECT_ID>
+$ badonde config firebase.secretToken <YOUR_FIREBASE_DB_SECRET_TOKEN>
+```
+
+You can add custom information to the report in your Badondefile:
+
+```swift
+analytics([
+	"author": badonde.github.me.login,
+	"labelCount": badonde.pullRequest.labels.count,
+	"hasMilestone": badonde.pullRequest.milestone != nil
+])
 ```
 
 ## Special thanks
