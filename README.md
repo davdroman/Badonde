@@ -123,7 +123,7 @@ Badonde offers an **interface** similar to `git config` to modify this options. 
 $ badonde config git.remote origin
 ```
 
-**Global options** are also available:
+**Global options** are also available (and stored in `~/.config/badonde/config.json`):
 
 ```sh
 $ badonde config --global git.autopush true
