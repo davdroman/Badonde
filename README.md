@@ -154,9 +154,9 @@ You can add custom information to the report in your Badondefile:
 
 ```swift
 analytics([
-	"author": badonde.github.me.login,
-	"labelCount": badonde.pullRequest.labels.count,
-	"hasMilestone": badonde.pullRequest.milestone != nil
+    "author": badonde.github.me.login,
+    "labelCount": badonde.pullRequest.labels.count,
+    "hasMilestone": badonde.pullRequest.milestone != nil
 ])
 ```
 
