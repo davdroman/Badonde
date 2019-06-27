@@ -73,7 +73,8 @@ let badonde = Badonde(ticketType: .jira(derivationStrategy: .regex))
 // If a ticket was successfully derived and fetched, its info is available
 // through the `badonde.jira` property.
 if let ticket = badonde.jira?.ticket {
-    // Sets the PR title to something like
+    // Sets the PR title to something like:
+    // [IOS-1234] Fix all the things
     title("[\(ticket.key)] \(ticket.fields.summary)")
 }
 
