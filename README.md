@@ -11,7 +11,7 @@
 	<h6 align="center">Named after emblematic <i>bart</i> critic <a href="https://www.youtube.com/watch?v=W2bB7uIVopA"><b>Brian Badonde</b></a>.</h6>
 </p>
 
-Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA** and offers as a solution for GitHub projects to define and automate a **PR creation workflow**.
+Badonde is a **command line** tool that combines **Git**, **GitHub**, and **JIRA**, offering as a solution for GitHub projects to define an automatic **PR creation workflow**.
 
 <p align="center">
 	<img src="https://imgur.com/download/iv1MZXt" alt="Badonde usage GIF"/>
@@ -49,7 +49,9 @@ Observe the `.badonde` folder is created to host Badonde's **local user configur
 
 ### Badondefile
 
-Additionally, a `Badondefile.swift` file is created with a **basic template**. A Badondefile defines the **rules** by which Badonde **derives data and outputs PR information**.
+Additionally, a `Badondefile.swift` file is created with a **basic template**.
+
+Badondefile defines the **rules** by which Badonde **derives data and outputs PR information**, all through declarative Swift syntax.
 
 In order to edit Badondefile with **full autocompletion support**, run:
 
@@ -96,13 +98,24 @@ if let epicName = ticket.fields.epicSummary {
 }
 ```
 
+---
+
 By default, Badonde generates **draft PRs**. To disable this, simply add this to your Badondefile:
 
 ```swift
 draft(false)
 ```
 
----
+Here's a list of supported PR properties:
+
+- base branch
+- title
+- body
+- reviewers
+- assignees
+- labels
+- milestone
+- draft
 
 ### Generating a PR
 
