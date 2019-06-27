@@ -88,7 +88,8 @@ final class PRCommand: Command {
 				at: repositoryShorthand,
 				issueNumber: issueNumber,
 				headBranch: badondefileOutput.pullRequest.headBranch,
-				baseBranch: badondefileOutput.pullRequest.baseBranch
+				baseBranch: badondefileOutput.pullRequest.baseBranch,
+				isDraft: badondefileOutput.pullRequest.isDraft
 			)
 		} else {
 			pullRequest = try pullRequestAPI.createPullRequest(
