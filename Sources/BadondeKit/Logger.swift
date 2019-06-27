@@ -17,9 +17,13 @@ public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 	do {
 		return try throwingClosure()
 	} catch {
-		Logger.fail(error.localizedDescription)
-		exit(EXIT_FAILURE)
+		failAndExit(error.localizedDescription)
 	}
+}
+
+func failAndExit(_ errorMessage: String) -> Never {
+	Logger.fail(errorMessage)
+	exit(EXIT_FAILURE)
 }
 
 /// A namespace collecting logging functions.
