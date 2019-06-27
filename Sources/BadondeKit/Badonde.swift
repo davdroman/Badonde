@@ -26,11 +26,11 @@ public final class Badonde {
 	///
 	/// - Parameters:
 	///   - ticketType: the ticket type and preferred strategy to derive it
-	///     (defaults to `.jira(derivationStrategy: .regex)`).
+	///     (defaults to `nil`).
 	///   - baseBranchDerivationStrategy: the preferred strategy to derive the
 	///     Git base branch for the PR (defaults to `.defaultBranch`).
 	public init(
-		ticketType: TicketType = .jira(derivationStrategy: .regex),
+		ticketType: TicketType? = nil,
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
 	) {
 		let (gitDSL, githubDSL, jiraDSL) = trySafely { () -> (GitDSL, GitHubDSL, JiraDSL?) in
@@ -75,7 +75,7 @@ public final class Badonde {
 				},
 				{ () -> (Jira.Ticket?, GitHub.Issue?) in
 					switch ticketType {
-					case .jira(let strategy):
+					case .jira(let strategy)?:
 						guard let ticketKey = try strategy.ticketKey(forCurrentBranch: headBranch) else {
 							Logger.warn("No JIRA ticket number found for branch")
 							return (nil, nil)
@@ -91,7 +91,7 @@ public final class Badonde {
 						let ticketAPI = Ticket.API(email: jira.email, apiToken: jira.apiToken)
 						let ticket = try ticketAPI.getTicket(with: ticketKey)
 						return (ticket, nil)
-					case .githubIssue(let strategy):
+					case .githubIssue(let strategy)?:
 						guard
 							let issueNumberRaw = try strategy.issueNumber(forCurrentBranch: headBranch),
 							let issueNumber = Int(issueNumberRaw)
@@ -102,6 +102,8 @@ public final class Badonde {
 						let issueAPI = Issue.API(accessToken: payload.github.accessToken)
 						let issue = try issueAPI.get(at: repositoryShorthand, issueNumber: issueNumber)
 						return (nil, issue)
+					case .none:
+						return (nil, nil)
 					}
 				}
 			)
