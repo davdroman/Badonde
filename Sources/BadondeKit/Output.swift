@@ -5,6 +5,7 @@ import Sugar
 
 public struct Output: Codable {
 	public struct PullRequest: Codable {
+		public var issueNumber: Int?
 		public var title: String
 		public var headBranch: String
 		public var baseBranch: String
@@ -35,6 +36,7 @@ extension Output: CustomStringConvertible {
 
 		let pullRequestDescription = """
 		Pull request:
+		   converted from issue: \(pullRequest.issueNumber.map { "#\($0)" } ?? "<none>")
 		   title: \(pullRequest.title)
 		   headBranch: \(pullRequest.headBranch)
 		   baseBranch: \(pullRequest.baseBranch)
@@ -155,6 +157,19 @@ public func milestone(roughlyNamed name: String) {
 /// Sets the draft status for the PR.
 public func draft(_ isDraft: Bool) {
 	output.pullRequest.isDraft = isDraft
+}
+
+/// Specifies the issue number to convert into a PR.
+public func issue(_ issueNumber: Int) {
+	output.pullRequest.issueNumber = issueNumber
+
+	if let issue = badonde.github.issue, issue.number == issueNumber {
+		title(issue.title)
+		issue.body.map { body($0) }
+		issue.assignees.forEach { assignee($0) }
+		issue.labels.forEach { label($0) }
+		issue.milestone.map { milestone($0) }
+	}
 }
 
 /// Specifies analytics data to be reported after the PR is created.

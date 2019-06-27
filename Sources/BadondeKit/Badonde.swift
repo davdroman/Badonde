@@ -25,12 +25,12 @@ public final class Badonde {
 	/// `BaseBranchDerivationStrategy`.
 	///
 	/// - Parameters:
-	///   - ticketNumberDerivationStrategy: the preferred strategy to derive the
-	///     Jira ticket (defaults to `.regex`).
+	///   - ticketType: the ticket type and preferred strategy to derive it
+	///     (defaults to `.jira(derivationStrategy: .regex)`).
 	///   - baseBranchDerivationStrategy: the preferred strategy to derive the
 	///     Git base branch for the PR (defaults to `.defaultBranch`).
 	public init(
-		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy = .regex,
+		ticketType: TicketType = .jira(derivationStrategy: .regex),
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
 	) {
 		let (gitDSL, githubDSL, jiraDSL) = trySafely { () -> (GitDSL, GitHubDSL, JiraDSL?) in
@@ -45,12 +45,13 @@ public final class Badonde {
 			let headBranch = payload.git.headBranch
 			let defaultBranch = try payload.git.remote.defaultBranch(atPath: payload.git.path)
 
-			let ((baseBranch, diff), me, labels, milestones, openPullRequests, ticket) = DispatchGroup().asyncExecuteAndWait(
+			let ((baseBranch, diff), me, labels, milestones, openPullRequests, (jiraTicket, githubIssue)) = DispatchGroup().asyncExecuteAndWait(
 				{ () -> (Branch, [Diff]) in
 					var baseBranch = try baseBranchDerivationStrategy.baseBranch(
 						forDefaultBranch: defaultBranch,
 						remote: remote,
-						currentBranch: headBranch
+						currentBranch: headBranch,
+						repositoryPath: payload.git.path
 					)
 					baseBranch.source = .remote(remote)
 					let diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch, atPath: payload.git.path)
@@ -72,14 +73,29 @@ public final class Badonde {
 					let pullRequestAPI = PullRequest.API(accessToken: payload.github.accessToken)
 					return try pullRequestAPI.allPullRequests(for: repositoryShorthand, state: .open)
 				},
-				{ () -> Jira.Ticket? in
-					guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(forCurrentBranch: headBranch) else {
-						return nil
+				{ () -> (Jira.Ticket?, GitHub.Issue?) in
+					switch ticketType {
+					case .jira(let strategy):
+						guard let ticketKey = try strategy.ticketKey(forCurrentBranch: headBranch) else {
+							return (nil, nil)
+						}
+						let jiraEmail = payload.jira.email
+						let jiraApiToken = payload.jira.apiToken
+						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
+						let ticket = try ticketAPI.getTicket(with: ticketKey)
+						return (ticket, nil)
+					case .githubIssue(let strategy):
+						guard
+							let issueNumberRaw = try strategy.issueNumber(forCurrentBranch: headBranch),
+							let issueNumber = Int(issueNumberRaw)
+						else {
+							return (nil, nil)
+						}
+						let issueAPI = Issue.API(accessToken: payload.github.accessToken)
+						let issue = try issueAPI.get(at: repositoryShorthand, issueNumber: issueNumber)
+						return (nil, issue)
 					}
-					let jiraEmail = payload.jira.email
-					let jiraApiToken = payload.jira.apiToken
-					let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
-					return try ticketAPI.getTicket(with: ticketKey)
+
 				}
 			)
 
@@ -92,22 +108,18 @@ public final class Badonde {
 
 			let githubDSL = GitHubDSL(
 				me: me,
+				issue: githubIssue,
 				labels: labels,
 				milestones: milestones,
 				openPullRequests: openPullRequests
 			)
 
-			let jiraDSL: JiraDSL?
-
-			if let ticket = ticket {
-				jiraDSL = JiraDSL(ticket: ticket)
-			} else {
-				jiraDSL = nil
-			}
+			let jiraDSL = jiraTicket.map(JiraDSL.init(ticket:))
 
 			output = Output(
 				pullRequest: .init(
-					title: jiraDSL?.ticket.key.rawValue ?? headBranch.name,
+					issueNumber: nil,
+					title: jiraDSL?.ticket.key.rawValue ?? githubDSL.issue?.title ?? headBranch.name,
 					headBranch: headBranch.name,
 					baseBranch: baseBranch.name,
 					body: nil,
@@ -156,46 +168,80 @@ extension Badonde.Error: LocalizedError {
 }
 
 extension Badonde {
-	/// Defines the way in which to derive a Jira ticket ID through the current Git
-	/// context.
-	public enum TicketNumberDerivationStrategy {
-		enum Constant {
-			static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
-		}
+	/// Defines a type of issue and how it's derived.
+	public enum TicketType {
+		/// Defines the way in which to derive a Jira ticket ID through the current Git
+		/// context.
+		public enum JiraDerivationStrategy {
+			enum Constant {
+				static let regex = #"((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)"#
+			}
 
-		/// Use the official Jira regular expression to match a ticket ID:
-		/// `((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)`
-		case regex
-		/// Use a user-provided custom function with the currently checked out branch
-		/// name as a parameter to derive a ticket ID.
-		///
-		/// If `nil` is returned, the property `Badonde.jira` becomes `nil`.
-		case custom((String) -> String?)
+			/// Use the official Jira regular expression to match a ticket ID:
+			/// `((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)`
+			case regex
+			/// Use a user-provided custom function with the currently checked out branch
+			/// name as a parameter to derive the ticket ID.
+			///
+			/// If `nil` is returned, the property `Badonde.jira` becomes `nil`.
+			case custom((String) -> String?)
 
-		func ticketKey(forCurrentBranch currentBranch: Branch) throws -> Ticket.Key? {
-			switch self {
-			case .regex:
-				guard
-					let rawTicketKey = currentBranch.name.firstMatch(forRegex: Constant.regex, options: .caseInsensitive),
-					let ticketKey = Ticket.Key(rawValue: rawTicketKey.uppercased())
-				else {
-					return nil
+			func ticketKey(forCurrentBranch currentBranch: Branch) throws -> Ticket.Key? {
+				switch self {
+				case .regex:
+					guard
+						let rawTicketKey = currentBranch.name.firstMatch(forRegex: Constant.regex, options: .caseInsensitive),
+						let ticketKey = Ticket.Key(rawValue: rawTicketKey.uppercased())
+					else {
+						return nil
+					}
+					return ticketKey
+				case .custom(let strategyClosure):
+					guard let rawTicketKey = strategyClosure(currentBranch.name) else {
+						return nil
+					}
+					guard let ticketKey = Ticket.Key(rawValue: rawTicketKey) else {
+						throw Error.invalidTicketNumberByCustomStrategy
+					}
+					return ticketKey
 				}
-				return ticketKey
-			case .custom(let strategyClosure):
-				guard let rawTicketKey = strategyClosure(currentBranch.name) else {
-					return nil
-				}
-				guard let ticketKey = Ticket.Key(rawValue: rawTicketKey) else {
-					throw Error.invalidTicketNumberByCustomStrategy
-				}
-				return ticketKey
 			}
 		}
+
+		/// Defines the way in which to derive a GitHub Issue number through the current Git
+		/// context.
+		public enum GitHubIssueDerivationStrategy {
+			enum Constant {
+				static let regex = #"\d+"#
+			}
+
+			/// Match the first occurrence of a number in the current branch with regex
+			/// `\d+`
+			case regex
+			/// Use a user-provided custom function with the currently checked out branch
+			/// name as a parameter to derive the issue number.
+			///
+			/// If `nil` is returned, the property `Badonde.githubDSL.issue` becomes `nil`.
+			case custom((String) -> String?)
+
+			func issueNumber(forCurrentBranch currentBranch: Branch) throws -> String? {
+				switch self {
+				case .regex:
+					return currentBranch.name.firstMatch(forRegex: Constant.regex, options: .caseInsensitive)
+				case .custom(let strategyClosure):
+					return strategyClosure(currentBranch.name)
+				}
+			}
+		}
+
+		/// A JIRA Issue.
+		case jira(derivationStrategy: JiraDerivationStrategy)
+		/// A GitHub Issue.
+		case githubIssue(derivationStrategy: GitHubIssueDerivationStrategy)
 	}
 }
 
-extension Badonde.TicketNumberDerivationStrategy {
+extension Badonde.TicketType.JiraDerivationStrategy {
 	enum Error: LocalizedError {
 		case invalidTicketNumberByCustomStrategy
 
@@ -222,12 +268,12 @@ extension Badonde {
 		/// name as a parameter to derive the base branch.
 		case custom((String) -> String)
 
-		func baseBranch(forDefaultBranch defaultBranch: Branch, remote: Remote, currentBranch: Branch) throws -> Branch {
+		func baseBranch(forDefaultBranch defaultBranch: Branch, remote: Remote, currentBranch: Branch, repositoryPath: String) throws -> Branch {
 			switch self {
 			case .defaultBranch:
 				return defaultBranch
 			case .commitProximity:
-				return try currentBranch.parent(for: remote, atPath: "")
+				return try currentBranch.parent(for: remote, atPath: repositoryPath)
 			case .custom(let strategyClosure):
 				return try Branch(name: strategyClosure(currentBranch.name), source: .local)
 			}
