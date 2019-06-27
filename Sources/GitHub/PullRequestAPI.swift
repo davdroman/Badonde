@@ -80,40 +80,88 @@ extension PullRequest {
 				responseType: [PullRequest].self
 			)
 		}
+	}
+}
 
-		public func createPullRequest(
-			at shorthand: Repository.Shorthand,
-			title: String,
-			headBranch: String,
-			baseBranch: String,
-			body: String?,
-			isDraft: Bool
-		) throws -> PullRequest {
-			struct Body: Encodable {
-				var title: String
-				var head: String
-				var base: String
-				var body: String?
-				var draft: Bool
-			}
-
-			return try post(
-				endpoint: "/repos/\(shorthand.rawValue)/pulls",
-				body: Body(title: title, head: headBranch, base: baseBranch, body: body, draft: isDraft),
-				responseType: PullRequest.self
-			)
+extension PullRequest.API {
+	public func createPullRequest(
+		at shorthand: Repository.Shorthand,
+		title: String,
+		headBranch: String,
+		baseBranch: String,
+		body: String?,
+		isDraft: Bool
+	) throws -> PullRequest {
+		struct Body: Encodable {
+			var title: String
+			var head: String
+			var base: String
+			var body: String?
+			var draft: Bool
 		}
 
-		public func requestReviewers(at shorthand: Repository.Shorthand, pullRequestNumber: Int, reviewers: [String]) throws -> PullRequest {
-			struct Body: Encodable {
-				var reviewers: [String]
-			}
+		return try post(
+			endpoint: "/repos/\(shorthand.rawValue)/pulls",
+			body: Body(title: title, head: headBranch, base: baseBranch, body: body, draft: isDraft),
+			responseType: PullRequest.self
+		)
+	}
 
-			return try post(
-				endpoint: "/repos/\(shorthand.rawValue)/pulls/\(pullRequestNumber)/requested_reviewers",
-				body: Body(reviewers: reviewers),
-				responseType: PullRequest.self
-			)
+	public func createPullRequest(
+		at shorthand: Repository.Shorthand,
+		issueNumber: Int
+	) throws -> PullRequest {
+		struct Body: Encodable {
+			var issue: Int
 		}
+
+		return try post(
+			endpoint: "/repos/\(shorthand.rawValue)/pulls",
+			body: Body(issue: issueNumber),
+			responseType: PullRequest.self
+		)
+	}
+}
+
+extension PullRequest.API {
+	public func edit(
+		at shorthand: Repository.Shorthand,
+		pullRequestNumber: Int,
+		title: String? = nil,
+		body: String? = nil,
+		state: String? = nil,
+		base: String? = nil,
+		maintainersCanModify: Bool? = nil
+	) throws -> PullRequest {
+		struct Body: Encodable {
+			var title: String?
+			var body: String?
+			var state: String?
+			var base: String?
+			var maintainersCanModify: Bool?
+
+			enum CodingKeys: String, CodingKey {
+				case title, body, state, base
+				case maintainersCanModify = "maintainer_can_modify"
+			}
+		}
+
+		return try patch(
+			endpoint: "/repos/\(shorthand.rawValue)/pulls/\(pullRequestNumber)",
+			body: Body(title: title, body: body, state: state, base: base, maintainersCanModify: maintainersCanModify),
+			responseType: PullRequest.self
+		)
+	}
+
+	public func requestReviewers(at shorthand: Repository.Shorthand, pullRequestNumber: Int, reviewers: [String]) throws -> PullRequest {
+		struct Body: Encodable {
+			var reviewers: [String]
+		}
+
+		return try post(
+			endpoint: "/repos/\(shorthand.rawValue)/pulls/\(pullRequestNumber)/requested_reviewers",
+			body: Body(reviewers: reviewers),
+			responseType: PullRequest.self
+		)
 	}
 }
