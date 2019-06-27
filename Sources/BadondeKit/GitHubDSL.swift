@@ -5,6 +5,8 @@ import GitHub
 public struct GitHubDSL {
 	/// The GitHub user who's running Badonde.
 	public var me: User
+	/// The GitHub Issue for the current branch.
+	public var issue: Issue?
 	/// All available repo labels.
 	public var labels: [Label]
 	/// All active repo milestones.
