@@ -103,7 +103,6 @@ public final class Badonde {
 						let issue = try issueAPI.get(at: repositoryShorthand, issueNumber: issueNumber)
 						return (nil, issue)
 					}
-
 				}
 			)
 
