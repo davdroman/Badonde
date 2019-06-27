@@ -111,17 +111,19 @@ extension PullRequest.API {
 		at shorthand: Repository.Shorthand,
 		issueNumber: Int,
 		headBranch: String,
-		baseBranch: String
+		baseBranch: String,
+		isDraft: Bool
 	) throws -> PullRequest {
 		struct Body: Encodable {
 			var issue: Int
 			var head: String
 			var base: String
+			var draft: Bool
 		}
 
 		return try post(
 			endpoint: "/repos/\(shorthand.rawValue)/pulls",
-			body: Body(issue: issueNumber, head: headBranch, base: baseBranch),
+			body: Body(issue: issueNumber, head: headBranch, base: baseBranch, draft: isDraft),
 			responseType: PullRequest.self
 		)
 	}
