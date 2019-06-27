@@ -109,50 +109,25 @@ extension PullRequest.API {
 
 	public func createPullRequest(
 		at shorthand: Repository.Shorthand,
-		issueNumber: Int
+		issueNumber: Int,
+		headBranch: String,
+		baseBranch: String
 	) throws -> PullRequest {
 		struct Body: Encodable {
 			var issue: Int
+			var head: String
+			var base: String
 		}
 
 		return try post(
 			endpoint: "/repos/\(shorthand.rawValue)/pulls",
-			body: Body(issue: issueNumber),
+			body: Body(issue: issueNumber, head: headBranch, base: baseBranch),
 			responseType: PullRequest.self
 		)
 	}
 }
 
 extension PullRequest.API {
-	public func edit(
-		at shorthand: Repository.Shorthand,
-		pullRequestNumber: Int,
-		title: String? = nil,
-		body: String? = nil,
-		state: String? = nil,
-		base: String? = nil,
-		maintainersCanModify: Bool? = nil
-	) throws -> PullRequest {
-		struct Body: Encodable {
-			var title: String?
-			var body: String?
-			var state: String?
-			var base: String?
-			var maintainersCanModify: Bool?
-
-			enum CodingKeys: String, CodingKey {
-				case title, body, state, base
-				case maintainersCanModify = "maintainer_can_modify"
-			}
-		}
-
-		return try patch(
-			endpoint: "/repos/\(shorthand.rawValue)/pulls/\(pullRequestNumber)",
-			body: Body(title: title, body: body, state: state, base: base, maintainersCanModify: maintainersCanModify),
-			responseType: PullRequest.self
-		)
-	}
-
 	public func requestReviewers(at shorthand: Repository.Shorthand, pullRequestNumber: Int, reviewers: [String]) throws -> PullRequest {
 		struct Body: Encodable {
 			var reviewers: [String]

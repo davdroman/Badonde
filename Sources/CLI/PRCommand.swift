@@ -86,7 +86,9 @@ final class PRCommand: Command {
 		if let issueNumber = badondefileOutput.pullRequest.issueNumber {
 			pullRequest = try pullRequestAPI.createPullRequest(
 				at: repositoryShorthand,
-				issueNumber: issueNumber
+				issueNumber: issueNumber,
+				headBranch: badondefileOutput.pullRequest.headBranch,
+				baseBranch: badondefileOutput.pullRequest.baseBranch
 			)
 		} else {
 			pullRequest = try pullRequestAPI.createPullRequest(
@@ -111,13 +113,6 @@ final class PRCommand: Command {
 					assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
 					labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
 					milestone: badondefileOutput.pullRequest.milestone?.number
-				)
-			},
-			{
-				_ = try pullRequestAPI.edit(
-					at: repositoryShorthand,
-					pullRequestNumber: pullRequest.number,
-					base: badondefileOutput.pullRequest.baseBranch
 				)
 			},
 			{
