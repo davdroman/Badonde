@@ -1,8 +1,6 @@
 import Foundation
 import SwiftCLI
-import struct BadondeKit.Payload
-import struct BadondeKit.Output
-import func BadondeKit.trySafely
+import BadondeKit
 import Configuration
 import Core
 import Firebase
@@ -98,48 +96,42 @@ final class PRCommand: Command {
 				else {
 					return
 				}
-				trySafely {
-					_ = try issueAPI.edit(
-						at: repositoryShorthand,
-						issueNumber: pullRequest.number,
-						assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
-						labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
-						milestone: badondefileOutput.pullRequest.milestone?.number
-					)
-				}
+				_ = try issueAPI.edit(
+					at: repositoryShorthand,
+					issueNumber: pullRequest.number,
+					assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
+					labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
+					milestone: badondefileOutput.pullRequest.milestone?.number
+				)
 			},
 			{
 				guard !badondefileOutput.pullRequest.reviewers.isEmpty else {
 					return
 				}
-				trySafely {
-					_ = try pullRequestAPI.requestReviewers(
-						at: repositoryShorthand,
-						pullRequestNumber: pullRequest.number,
-						reviewers: badondefileOutput.pullRequest.reviewers
-					)
-				}
+				_ = try pullRequestAPI.requestReviewers(
+					at: repositoryShorthand,
+					pullRequestNumber: pullRequest.number,
+					reviewers: badondefileOutput.pullRequest.reviewers
+				)
 			},
 			{
 				#if !DEBUG
-				trySafely {
-					guard
-						let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
-						let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
-					else {
-						return
-					}
-					Logger.step("Reporting analytics data")
-					let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
-					try reporter.post(
-						documentName: "pull-requests",
-						body: PullRequestAnalyticsData(
-							outputAnalyticsData: badondefileOutput.analyticsData,
-							startDate: self.startDatePointer.pointee,
-							version: CommandLineTool.Constant.version
-						)
-					)
+				guard
+					let firebaseProjectId = try configuration.getRawValue(forKeyPath: .firebaseProjectId),
+					let firebaseSecretToken = try configuration.getRawValue(forKeyPath: .firebaseSecretToken)
+				else {
+					return
 				}
+				Logger.step("Reporting analytics data")
+				let reporter = Firebase.DatabaseAPI(firebaseProjectId: firebaseProjectId, firebaseSecretToken: firebaseSecretToken)
+				try reporter.post(
+					documentName: "pull-requests",
+					body: PullRequestAnalyticsData(
+						outputAnalyticsData: badondefileOutput.analyticsData,
+						startDate: self.startDatePointer.pointee,
+						version: CommandLineTool.Constant.version
+					)
+				)
 				#endif
 			}
 		)
