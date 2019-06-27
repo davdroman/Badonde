@@ -40,7 +40,7 @@ enum Prompter {
 
 			return authorization.token
 		case .jiraEmail:
-			return Input.readLine(prompt: "Enter JIRA email address:")
+			return Input.readLine(prompt: "Enter JIRA email address (skip if blank):")
 		case .jiraApiToken:
 			#if !DEBUG
 			open(.jiraApiTokenUrl, delay: URL.jiraApiTokenUrlOpeningDelay)

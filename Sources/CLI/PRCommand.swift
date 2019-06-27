@@ -35,9 +35,7 @@ final class PRCommand: Command {
 
 		guard
 			let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global]),
-			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken),
-			let jiraEmail = try configuration.getRawValue(forKeyPath: .jiraEmail),
-			let jiraApiToken = try configuration.getRawValue(forKeyPath: .jiraApiToken)
+			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken)
 		else {
 			throw Error.configMissing
 		}
@@ -61,7 +59,15 @@ final class PRCommand: Command {
 					remote: remote
 				),
 				github: .init(accessToken: githubAccessToken),
-				jira: .init(email: jiraEmail, apiToken: jiraApiToken)
+				jira: {
+					guard
+						let jiraEmail = try configuration.getRawValue(forKeyPath: .jiraEmail),
+						let jiraApiToken = try configuration.getRawValue(forKeyPath: .jiraApiToken)
+					else {
+						return nil
+					}
+					return .init(email: jiraEmail, apiToken: jiraApiToken)
+				}()
 			),
 			logCapture: { Logger.logBadondefileLog($0) },
 			stderrCapture: { Logger.fail($0) }
@@ -76,29 +82,35 @@ final class PRCommand: Command {
 		let issueAPI = Issue.API(accessToken: githubAccessToken)
 
 		Logger.step("Creating PR")
-		let pullRequest = try pullRequestAPI.createPullRequest(
-			at: repositoryShorthand,
-			title: badondefileOutput.pullRequest.title,
-			headBranch: badondefileOutput.pullRequest.headBranch,
-			baseBranch: badondefileOutput.pullRequest.baseBranch,
-			body: badondefileOutput.pullRequest.body,
-			isDraft: badondefileOutput.pullRequest.isDraft
-		)
+		let pullRequest: PullRequest
+		if let issueNumber = badondefileOutput.pullRequest.issueNumber {
+			pullRequest = try pullRequestAPI.createPullRequest(
+				at: repositoryShorthand,
+				issueNumber: issueNumber,
+				headBranch: badondefileOutput.pullRequest.headBranch,
+				baseBranch: badondefileOutput.pullRequest.baseBranch,
+				isDraft: badondefileOutput.pullRequest.isDraft
+			)
+		} else {
+			pullRequest = try pullRequestAPI.createPullRequest(
+				at: repositoryShorthand,
+				title: badondefileOutput.pullRequest.title,
+				headBranch: badondefileOutput.pullRequest.headBranch,
+				baseBranch: badondefileOutput.pullRequest.baseBranch,
+				body: badondefileOutput.pullRequest.body,
+				isDraft: badondefileOutput.pullRequest.isDraft
+			)
+		}
 
 		try open(pullRequest.url)
 
 		DispatchGroup().asyncExecuteAndWait(
 			{
-				guard
-					!badondefileOutput.pullRequest.assignees.isEmpty ||
-					!badondefileOutput.pullRequest.labels.isEmpty ||
-					badondefileOutput.pullRequest.milestone != nil
-				else {
-					return
-				}
 				_ = try issueAPI.edit(
 					at: repositoryShorthand,
 					issueNumber: pullRequest.number,
+					title: badondefileOutput.pullRequest.title,
+					body: badondefileOutput.pullRequest.body,
 					assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
 					labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
 					milestone: badondefileOutput.pullRequest.milestone?.number

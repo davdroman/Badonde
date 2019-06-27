@@ -7,6 +7,13 @@ extension Issue {
 			super.init(authorization: .token(accessToken))
 		}
 
+		public func get(at shorthand: Repository.Shorthand, issueNumber: Int) throws -> Issue {
+			return try get(
+				endpoint: "/repos/\(shorthand.rawValue)/issues/\(issueNumber)",
+				responseType: Issue.self
+			)
+		}
+
 		public func edit(
 			at shorthand: Repository.Shorthand,
 			issueNumber: Int,

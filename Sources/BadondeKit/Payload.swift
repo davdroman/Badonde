@@ -41,9 +41,9 @@ public struct Payload: Codable {
 
 	public var git: Git
 	public var github: GitHub
-	public var jira: Jira
+	public var jira: Jira?
 
-	public init(git: Git, github: GitHub, jira: Jira) {
+	public init(git: Git, github: GitHub, jira: Jira?) {
 		self.git = git
 		self.github = github
 		self.jira = jira

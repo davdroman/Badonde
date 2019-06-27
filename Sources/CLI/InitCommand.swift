@@ -32,11 +32,10 @@ final class InitCommand: Command {
 		let repositoryPath = try Repository(atPath: fileManager.currentDirectoryPath).topLevelPath
 
 		let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: repositoryPath), .global])
-		let credentials = try Initializer.Credentials(
-			githubAccessToken: configuration?.getRawValue(forKeyPath: .githubAccessToken) ?? Prompter.prompt(.githubAccessToken),
-			jiraEmail: configuration?.getRawValue(forKeyPath: .jiraEmail) ?? Prompter.prompt(.jiraEmail),
-			jiraApiToken: configuration?.getRawValue(forKeyPath: .jiraApiToken) ?? Prompter.prompt(.jiraApiToken)
-		)
+		let githubAccessToken = try configuration?.getRawValue(forKeyPath: .githubAccessToken) ?? Prompter.prompt(.githubAccessToken)
+		let jiraEmail = try (configuration?.getRawValue(forKeyPath: .jiraEmail) ?? Prompter.prompt(.jiraEmail)).nilIfEmpty
+		let jiraApiToken = try jiraEmail != nil ? configuration?.getRawValue(forKeyPath: .jiraApiToken) ?? Prompter.prompt(.jiraApiToken) : nil
+		let credentials = Initializer.Credentials(githubAccessToken: githubAccessToken, jiraEmail: jiraEmail, jiraApiToken: jiraApiToken)
 
 		// Reset start date because credentials might've been prompted
 		// and analytics data about tool performance might be skewed as a result.
