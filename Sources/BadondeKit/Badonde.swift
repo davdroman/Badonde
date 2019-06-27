@@ -33,7 +33,7 @@ public final class Badonde {
 		ticketNumberDerivationStrategy: TicketNumberDerivationStrategy = .regex,
 		baseBranchDerivationStrategy: BaseBranchDerivationStrategy = .defaultBranch
 	) {
-		let dsl: (git: GitDSL, github: GitHubDSL, jira: JiraDSL?) = trySafely {
+		let (gitDSL, githubDSL, jiraDSL) = trySafely { () -> (GitDSL, GitHubDSL, JiraDSL?) in
 			guard let payloadPath = CommandLine.arguments.first(where: { $0.hasPrefix(FileManager.default.temporaryDirectory.path) }) else {
 				throw Error.payloadMissing
 			}
@@ -43,68 +43,67 @@ public final class Badonde {
 			let repositoryShorthand = payload.git.shorthand
 			let remote = payload.git.remote
 			let headBranch = payload.git.headBranch
-			var baseBranch: Branch!
+			let defaultBranch = try payload.git.remote.defaultBranch(atPath: payload.git.path)
 
-			var gitDSL = try GitDSL(
-				remote: remote,
-				defaultBranch: payload.git.remote.defaultBranch(atPath: payload.git.path),
-				currentBranch: headBranch,
-				diff: []
-			)
-			var githubDSL = GitHubDSL(
-				me: nil,
-				labels: [],
-				milestones: [],
-				openPullRequests: []
-			)
-			var jiraDSL: JiraDSL?
-
-			DispatchGroup().asyncExecuteAndWait(
-				{
-					trySafely {
-						baseBranch = try baseBranchDerivationStrategy.baseBranch(for: gitDSL)
-						baseBranch.source = .remote(remote)
-
-						gitDSL.diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch, atPath: payload.git.path)
-					}
+			let ((baseBranch, diff), me, labels, milestones, openPullRequests, ticket) = DispatchGroup().asyncExecuteAndWait(
+				{ () -> (Branch, [Diff]) in
+					var baseBranch = try baseBranchDerivationStrategy.baseBranch(
+						forDefaultBranch: defaultBranch,
+						remote: remote,
+						currentBranch: headBranch
+					)
+					baseBranch.source = .remote(remote)
+					let diff = try [Diff](baseBranch: baseBranch, targetBranch: headBranch, atPath: payload.git.path)
+					return (baseBranch, diff)
 				},
-				{
-					trySafely {
-						let userAPI = User.API(accessToken: payload.github.accessToken)
-						githubDSL.me = try userAPI.authenticatedUser()
-					}
+				{ () -> User in
+					let userAPI = User.API(accessToken: payload.github.accessToken)
+					return try userAPI.authenticatedUser()
 				},
-				{
-					trySafely {
-						let labelAPI = Label.API(accessToken: payload.github.accessToken)
-						githubDSL.labels = try labelAPI.allLabels(for: repositoryShorthand)
-					}
+				{ () -> [Label] in
+					let labelAPI = Label.API(accessToken: payload.github.accessToken)
+					return try labelAPI.allLabels(for: repositoryShorthand)
 				},
-				{
-					trySafely {
-						let milestoneAPI = Milestone.API(accessToken: payload.github.accessToken)
-						githubDSL.milestones = try milestoneAPI.getMilestones(for: repositoryShorthand)
-					}
+				{ () -> [Milestone] in
+					let milestoneAPI = Milestone.API(accessToken: payload.github.accessToken)
+					return try milestoneAPI.getMilestones(for: repositoryShorthand)
 				},
-				{
-					trySafely {
-						let pullRequestAPI = PullRequest.API(accessToken: payload.github.accessToken)
-						githubDSL.openPullRequests = try pullRequestAPI.allPullRequests(for: repositoryShorthand, state: .open)
-					}
+				{ () -> [PullRequest] in
+					let pullRequestAPI = PullRequest.API(accessToken: payload.github.accessToken)
+					return try pullRequestAPI.allPullRequests(for: repositoryShorthand, state: .open)
 				},
-				{
-					trySafely {
-						guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(for: gitDSL) else {
-							return
-						}
-						let jiraEmail = payload.jira.email
-						let jiraApiToken = payload.jira.apiToken
-						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
-						let ticket = try ticketAPI.getTicket(with: ticketKey)
-						jiraDSL = JiraDSL(ticket: ticket)
+				{ () -> Jira.Ticket? in
+					guard let ticketKey = try ticketNumberDerivationStrategy.ticketKey(forCurrentBranch: headBranch) else {
+						return nil
 					}
+					let jiraEmail = payload.jira.email
+					let jiraApiToken = payload.jira.apiToken
+					let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
+					return try ticketAPI.getTicket(with: ticketKey)
 				}
 			)
+
+			let gitDSL = GitDSL(
+				remote: remote,
+				defaultBranch: defaultBranch,
+				currentBranch: headBranch,
+				diff: diff
+			)
+
+			let githubDSL = GitHubDSL(
+				me: me,
+				labels: labels,
+				milestones: milestones,
+				openPullRequests: openPullRequests
+			)
+
+			let jiraDSL: JiraDSL?
+
+			if let ticket = ticket {
+				jiraDSL = JiraDSL(ticket: ticket)
+			} else {
+				jiraDSL = nil
+			}
 
 			output = Output(
 				pullRequest: .init(
@@ -121,12 +120,12 @@ public final class Badonde {
 				analyticsData: .init(info: [:])
 			)
 
-			return (git: gitDSL, github: githubDSL, jira: jiraDSL)
+			return (gitDSL, githubDSL, jiraDSL)
 		}
 
-		self.git = dsl.git
-		self.github = dsl.github
-		self.jira = dsl.jira
+		self.git = gitDSL
+		self.github = githubDSL
+		self.jira = jiraDSL
 
 		badonde = self
 
@@ -173,18 +172,18 @@ extension Badonde {
 		/// If `nil` is returned, the property `Badonde.jira` becomes `nil`.
 		case custom((String) -> String?)
 
-		func ticketKey(for git: GitDSL) throws -> Ticket.Key? {
+		func ticketKey(forCurrentBranch currentBranch: Branch) throws -> Ticket.Key? {
 			switch self {
 			case .regex:
 				guard
-					let rawTicketKey = git.currentBranch.name.firstMatch(forRegex: Constant.regex, options: .caseInsensitive),
+					let rawTicketKey = currentBranch.name.firstMatch(forRegex: Constant.regex, options: .caseInsensitive),
 					let ticketKey = Ticket.Key(rawValue: rawTicketKey.uppercased())
 				else {
 					return nil
 				}
 				return ticketKey
 			case .custom(let strategyClosure):
-				guard let rawTicketKey = strategyClosure(git.currentBranch.name) else {
+				guard let rawTicketKey = strategyClosure(currentBranch.name) else {
 					return nil
 				}
 				guard let ticketKey = Ticket.Key(rawValue: rawTicketKey) else {
@@ -223,14 +222,14 @@ extension Badonde {
 		/// name as a parameter to derive the base branch.
 		case custom((String) -> String)
 
-		func baseBranch(for git: GitDSL) throws -> Branch {
+		func baseBranch(forDefaultBranch defaultBranch: Branch, remote: Remote, currentBranch: Branch) throws -> Branch {
 			switch self {
 			case .defaultBranch:
-				return git.defaultBranch
+				return defaultBranch
 			case .commitProximity:
-				return try git.currentBranch.parent(for: git.remote, atPath: "")
+				return try currentBranch.parent(for: remote, atPath: "")
 			case .custom(let strategyClosure):
-				return try Branch(name: strategyClosure(git.currentBranch.name), source: .local)
+				return try Branch(name: strategyClosure(currentBranch.name), source: .local)
 			}
 		}
 	}
