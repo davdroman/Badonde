@@ -68,7 +68,7 @@ import BadondeKit
 
 // Reads the current Git context and derives a JIRA ticket number from the
 // current branch's name.
-let badonde = Badonde()
+let badonde = Badonde(ticketType: .jira(derivationStrategy: .regex))
 
 // If a ticket was successfully derived and fetched, its info is available
 // through the `badonde.jira` property.
