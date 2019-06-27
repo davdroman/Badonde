@@ -77,11 +77,18 @@ public final class Badonde {
 					switch ticketType {
 					case .jira(let strategy):
 						guard let ticketKey = try strategy.ticketKey(forCurrentBranch: headBranch) else {
+							Logger.warn("No JIRA ticket number found for branch")
 							return (nil, nil)
 						}
-						let jiraEmail = payload.jira.email
-						let jiraApiToken = payload.jira.apiToken
-						let ticketAPI = Ticket.API(email: jiraEmail, apiToken: jiraApiToken)
+						guard let jira = payload.jira else {
+							failAndExit(
+								"""
+								JIRA is used in Badondefile, but credentials are not configured.
+								Please run 'badonde init'.
+								"""
+							)
+						}
+						let ticketAPI = Ticket.API(email: jira.email, apiToken: jira.apiToken)
 						let ticket = try ticketAPI.getTicket(with: ticketKey)
 						return (ticket, nil)
 					case .githubIssue(let strategy):
@@ -89,6 +96,7 @@ public final class Badonde {
 							let issueNumberRaw = try strategy.issueNumber(forCurrentBranch: headBranch),
 							let issueNumber = Int(issueNumberRaw)
 						else {
+							Logger.warn("No GitHub Issue number found for branch")
 							return (nil, nil)
 						}
 						let issueAPI = Issue.API(accessToken: payload.github.accessToken)

@@ -35,9 +35,7 @@ final class PRCommand: Command {
 
 		guard
 			let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: projectPath), .global]),
-			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken),
-			let jiraEmail = try configuration.getRawValue(forKeyPath: .jiraEmail),
-			let jiraApiToken = try configuration.getRawValue(forKeyPath: .jiraApiToken)
+			let githubAccessToken = try configuration.getRawValue(forKeyPath: .githubAccessToken)
 		else {
 			throw Error.configMissing
 		}
@@ -61,7 +59,15 @@ final class PRCommand: Command {
 					remote: remote
 				),
 				github: .init(accessToken: githubAccessToken),
-				jira: .init(email: jiraEmail, apiToken: jiraApiToken)
+				jira: {
+					guard
+						let jiraEmail = try configuration.getRawValue(forKeyPath: .jiraEmail),
+						let jiraApiToken = try configuration.getRawValue(forKeyPath: .jiraApiToken)
+					else {
+						return nil
+					}
+					return .init(email: jiraEmail, apiToken: jiraApiToken)
+				}()
 			),
 			logCapture: { Logger.logBadondefileLog($0) },
 			stderrCapture: { Logger.fail($0) }

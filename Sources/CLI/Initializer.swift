@@ -26,8 +26,8 @@ extension FileManager: FileInteractor {
 final class Initializer {
 	struct Credentials {
 		var githubAccessToken: String
-		var jiraEmail: String
-		var jiraApiToken: String
+		var jiraEmail: String?
+		var jiraApiToken: String?
 	}
 
 	private let fileInteractor: FileInteractor
@@ -52,9 +52,11 @@ final class Initializer {
 	}
 
 	private func saveCredentials(_ credentials: Credentials, to configuration: KeyValueInteractive) throws {
-		try configuration.setValue(credentials.githubAccessToken, forKeyPath: .githubAccessToken)
-		try configuration.setValue(credentials.jiraApiToken, forKeyPath: .jiraApiToken)
-		try configuration.setValue(credentials.jiraEmail, forKeyPath: .jiraEmail)
+		try configuration.setRawValue(credentials.githubAccessToken, forKeyPath: .githubAccessToken)
+		if let jiraEmail = credentials.jiraEmail, let jiraApiToken = credentials.jiraApiToken {
+			try configuration.setRawValue(jiraEmail, forKeyPath: .jiraEmail)
+			try configuration.setRawValue(jiraApiToken, forKeyPath: .jiraApiToken)
+		}
 	}
 
 	private func updateGitignore(forRepositoryPath path: String) throws {
