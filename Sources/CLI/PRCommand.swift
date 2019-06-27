@@ -76,32 +76,42 @@ final class PRCommand: Command {
 		let issueAPI = Issue.API(accessToken: githubAccessToken)
 
 		Logger.step("Creating PR")
-		let pullRequest = try pullRequestAPI.createPullRequest(
-			at: repositoryShorthand,
-			title: badondefileOutput.pullRequest.title,
-			headBranch: badondefileOutput.pullRequest.headBranch,
-			baseBranch: badondefileOutput.pullRequest.baseBranch,
-			body: badondefileOutput.pullRequest.body,
-			isDraft: badondefileOutput.pullRequest.isDraft
-		)
+		let pullRequest: PullRequest
+		if let issueNumber = badondefileOutput.pullRequest.issueNumber {
+			pullRequest = try pullRequestAPI.createPullRequest(
+				at: repositoryShorthand,
+				issueNumber: issueNumber
+			)
+		} else {
+			pullRequest = try pullRequestAPI.createPullRequest(
+				at: repositoryShorthand,
+				title: badondefileOutput.pullRequest.title,
+				headBranch: badondefileOutput.pullRequest.headBranch,
+				baseBranch: badondefileOutput.pullRequest.baseBranch,
+				body: badondefileOutput.pullRequest.body,
+				isDraft: badondefileOutput.pullRequest.isDraft
+			)
+		}
 
 		try open(pullRequest.url)
 
 		DispatchGroup().asyncExecuteAndWait(
 			{
-				guard
-					!badondefileOutput.pullRequest.assignees.isEmpty ||
-					!badondefileOutput.pullRequest.labels.isEmpty ||
-					badondefileOutput.pullRequest.milestone != nil
-				else {
-					return
-				}
 				_ = try issueAPI.edit(
 					at: repositoryShorthand,
 					issueNumber: pullRequest.number,
+					title: badondefileOutput.pullRequest.title,
+					body: badondefileOutput.pullRequest.body,
 					assignees: badondefileOutput.pullRequest.assignees.nilIfEmpty,
 					labels: badondefileOutput.pullRequest.labels.map { $0.name }.nilIfEmpty,
 					milestone: badondefileOutput.pullRequest.milestone?.number
+				)
+			},
+			{
+				_ = try pullRequestAPI.edit(
+					at: repositoryShorthand,
+					pullRequestNumber: pullRequest.number,
+					base: badondefileOutput.pullRequest.baseBranch
 				)
 			},
 			{
