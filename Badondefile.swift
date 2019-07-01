@@ -8,6 +8,13 @@ let badonde = Badonde(
 // Set issue to convert to PR (if found).
 if let githubIssue = badonde.github.issue {
 	issue(githubIssue.number)
+} else {
+	// If issue not found, prettify PR title as follows:
+	// "implement-something-cool" ~> "Implement something cool"
+	title({
+		let temp = badonde.git.currentBranch.name.replacingOccurrences(of: "-", with: " ")
+		return temp.prefix(1).localizedCapitalized + temp.dropFirst()
+	}())
 }
 
 // Add a cheeky little watermark at the end :)
