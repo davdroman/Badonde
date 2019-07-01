@@ -7,7 +7,7 @@ import Git
 public final class CommandLineTool {
 	enum Constant {
 		static let name = "badonde"
-		static let version = "2.0.0-beta.6"
+		static let version = "2.0.0-beta.7"
 	}
 
 	var startDate = Date()
