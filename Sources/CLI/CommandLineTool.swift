@@ -24,10 +24,10 @@ public final class CommandLineTool {
 			name: Constant.name,
 			version: Constant.version,
 			commands: [
-				ConfigCommand(),
-				EditCommand(startDatePointer: startDatePointer),
 				InitCommand(startDatePointer: startDatePointer),
+				EditCommand(startDatePointer: startDatePointer),
 				PRCommand(startDatePointer: startDatePointer),
+				ConfigCommand(),
 			]
 		)
 
