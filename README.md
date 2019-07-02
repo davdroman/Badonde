@@ -63,14 +63,14 @@ This will open an Xcode project where you can make any modifications to this fil
 
 ---
 
-Consider a **scenario** where you want to generate a PR from a local branch named `fix/IOS-1234-fix-all-the-things` where `IOS-1234` is a **JIRA ticket id**. Here's an example of a Badondefile that would generate a PR automatically adding things like a **standarised PR title** and a `Bug` **label** for bugfix branches:
+Consider a **scenario** where you want to generate a PR from a local branch named `fix/IOS-1234-fix-all-the-things` where `IOS-1234` is a **JIRA ticket id** belonging to your organization **myamazingiosapp.atlassian.net**. Here's an example of a Badondefile that would generate a PR automatically adding things like a **standarised PR title** and a `Bug` **label** for bugfix branches:
 
 ```swift
 import BadondeKit
 
 // Reads the current Git context and derives a JIRA ticket number from the
 // current branch's name.
-let badonde = Badonde(ticketType: .jira(derivationStrategy: .regex))
+let badonde = Badonde(ticketType: .jira(organization: "myamazingiosapp", derivationStrategy: .regex))
 
 // If a ticket was successfully derived and fetched, its info is available
 // through the `badonde.jira` property.
