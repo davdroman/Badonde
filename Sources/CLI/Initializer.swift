@@ -43,12 +43,17 @@ final class Initializer {
 	}
 
 	private func configuration(forRepositoryPath path: String) throws -> Configuration {
-		let scope = Configuration.Scope.local(path: path)
-		let fullPath = scope.fullPath
-		if !fileInteractor.fileExists(atPath: fullPath) {
-			try fileInteractor.createFile(atPath: fullPath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
+		let globalScopePath = Configuration.Scope.global.fullPath
+		if !fileInteractor.fileExists(atPath: globalScopePath) {
+			try fileInteractor.createFile(atPath: globalScopePath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
 		}
-		return try Configuration(scope: scope)
+
+		let localScope = Configuration.Scope.local(path: path)
+		let localScopePath = localScope.fullPath
+		if !fileInteractor.fileExists(atPath: localScopePath) {
+			try fileInteractor.createFile(atPath: localScopePath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
+		}
+		return try Configuration(scope: localScope)
 	}
 
 	private func saveCredentials(_ credentials: Credentials, to configuration: KeyValueInteractive) throws {
