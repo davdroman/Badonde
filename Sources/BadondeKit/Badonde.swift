@@ -75,7 +75,7 @@ public final class Badonde {
 				},
 				{ () -> (Jira.Ticket?, GitHub.Issue?) in
 					switch ticketType {
-					case .jira(let strategy)?:
+					case let .jira(organization, strategy)?:
 						guard let ticketKey = try strategy.ticketKey(forCurrentBranch: headBranch) else {
 							Logger.warn("No JIRA ticket number found for branch")
 							return (nil, nil)
@@ -88,7 +88,7 @@ public final class Badonde {
 								"""
 							)
 						}
-						let ticketAPI = Ticket.API(email: jira.email, apiToken: jira.apiToken)
+						let ticketAPI = Ticket.API(organization: organization, email: jira.email, apiToken: jira.apiToken)
 						let ticket = try ticketAPI.getTicket(with: ticketKey)
 						return (ticket, nil)
 					case .githubIssue(let strategy)?:
@@ -244,7 +244,7 @@ extension Badonde {
 		}
 
 		/// A JIRA Issue.
-		case jira(derivationStrategy: JiraDerivationStrategy)
+		case jira(organization: String, derivationStrategy: JiraDerivationStrategy)
 		/// A GitHub Issue.
 		case githubIssue(derivationStrategy: GitHubIssueDerivationStrategy)
 	}
