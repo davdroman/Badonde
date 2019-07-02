@@ -3,13 +3,15 @@ import Sugar
 
 extension Ticket {
 	public final class API {
+		let organization: String
 		let email: String
 		let apiToken: String
 		var authorizationValue: String {
 			return [email, apiToken].joined(separator: ":").base64()
 		}
 
-		public init(email: String, apiToken: String) {
+		public init(organization: String, email: String, apiToken: String) {
+			self.organization = organization
 			self.email = email
 			self.apiToken = apiToken
 		}
@@ -21,7 +23,7 @@ extension Ticket {
 		private func getTicket(with key: Key, expanded: Bool) throws -> Ticket {
 			let url = try URL(
 				scheme: "https",
-				host: "asosmobile.atlassian.net",
+				host: "\(organization).atlassian.net",
 				path: "/rest/api/2/issue/\(key.rawValue)",
 				queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 			)
