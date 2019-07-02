@@ -42,7 +42,14 @@ final class LegacyConfigurationStore {
 
 		Logger.step("Legacy configuration detected, migrating...")
 
-		let configuration = try Configuration(scope: .local(path: projectPath))
+		let fileManager = FileManager.default
+		let localScope = Configuration.Scope.local(path: projectPath)
+		let localScopePath = localScope.fullPath
+		if !fileManager.fileExists(atPath: localScopePath) {
+			try fileManager.createFile(atPath: localScopePath, withIntermediateDirectories: true, contents: Data(), attributes: nil)
+		}
+
+		let configuration = try Configuration(scope: localScope)
 
 		if let legacyConfiguration = store.configuration {
 			try configuration.setValue(legacyConfiguration.githubAccessToken, forKeyPath: .githubAccessToken)
@@ -58,7 +65,7 @@ final class LegacyConfigurationStore {
 			try configuration.setValue(firebaseSecretToken, forKeyPath: .firebaseSecretToken)
 		}
 
-		try FileManager.default.removeItem(at: LegacyConfigurationStore.folderPath)
+		try fileManager.removeItem(at: LegacyConfigurationStore.folderPath)
 	}
 
 	func setConfiguration(_ configuration: LegacyConfiguration) throws {
