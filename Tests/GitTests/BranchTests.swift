@@ -14,11 +14,11 @@ final class BranchInteractorMock: BranchInteractor {
 		case allSshOriginRemoteBranches = "all_ssh_origin_remote_branches"
 	}
 
-	func getCurrentBranch() throws -> String {
+	func getCurrentBranch(atPath path: String) throws -> String {
 		return try Fixture.currentBranch.load(as: String.self)
 	}
 
-	func getAllBranches(from source: Branch.Source) throws -> String {
+	func getAllBranches(from source: Branch.Source, atPath path: String) throws -> String {
 		switch source {
 		case .local:
 			return try Fixture.allLocalBranches.load(as: String.self)
@@ -36,6 +36,11 @@ extension BranchTests {
 }
 
 final class BranchTests: XCTestCase {
+	override func setUp() {
+		super.setUp()
+		Branch.interactor = BranchInteractorMock()
+	}
+
 	func testBranchInit_withLocalSource_normalName() throws {
 		let branch = try Branch(name: "my-branch", source: .local)
 		XCTAssertEqual(branch.name, "my-branch")
@@ -97,9 +102,60 @@ final class BranchTests: XCTestCase {
 }
 
 extension BranchTests {
+	func testBranchSourceInit_withEmptyRawValue() {
+		let source = Branch.Source(rawValue: "")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withInvalidRawValueContainingLocal() {
+		let source = Branch.Source(rawValue: "localandsomething origin https://github.com/user/repo.git")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withInvalidRawValueContainingRemote() {
+		let source = Branch.Source(rawValue: "remoteandsomething origin https://github.com/user/repo.git")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValueWithFieldsSwapped() {
+		let source = Branch.Source(rawValue: "origin https://github.com/user/repo.git remote")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValueWithoutAllFields() {
+		let source = Branch.Source(rawValue: "remote origin")
+		XCTAssertNil(source)
+	}
+
+	func testBranchSourceInit_withRemoteRawValue() {
+		let source = Branch.Source(rawValue: "remote origin https://github.com/user/repo.git")
+		XCTAssertEqual(source, .remote(Remote(name: "origin", url: URL(string: "https://github.com/user/repo.git")!)))
+	}
+
+	func testBranchSourceInit_withLocalRawValue() {
+		let source = Branch.Source(rawValue: "local")
+		XCTAssertEqual(source, .local)
+	}
+
+	func testBranchSourceInit_withLocalRawValueWithAdditionalFields() {
+		let source = Branch.Source(rawValue: "local origin https://github.com/user/repo.git")
+		XCTAssertEqual(source, .local)
+	}
+
+	func testRemoteBranchSourceRawValue_isInCorrectFormat() {
+		let source = Branch.Source.remote(Remote(name: "origin", url: URL(string: "https://github.com/user/repo.git")!))
+		XCTAssertEqual(source.rawValue, "remote origin https://github.com/user/repo.git")
+	}
+
+	func testLocalBranchSourceRawValue_isInCorrectFormat() {
+		let source = Branch.Source.local
+		XCTAssertEqual(source.rawValue, "local")
+	}
+}
+
+extension BranchTests {
 	func testBranchGetCurrent() throws {
-		let interactor = BranchInteractorMock()
-		let currentBranch = try Branch.current(interactor: interactor)
+		let currentBranch = try Branch.current(atPath: "")
 
 		XCTAssertEqual(currentBranch.name, "standalone-git-module")
 	}
@@ -107,8 +163,7 @@ extension BranchTests {
 
 extension BranchTests {
 	func testBranchGetAll_Local() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: .local, interactor: interactor)
+		let allBranches = try Branch.getAll(from: .local, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -131,8 +186,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_OriginRemote() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: Constant.originRemoteSource, interactor: interactor)
+		let allBranches = try Branch.getAll(from: Constant.originRemoteSource, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -155,8 +209,7 @@ extension BranchTests {
 	}
 
 	func testBranchGetAll_SshOriginRemote() throws {
-		let interactor = BranchInteractorMock()
-		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource, interactor: interactor)
+		let allBranches = try Branch.getAll(from: Constant.sshOriginRemoteSource, atPath: "")
 
 		XCTAssertEqual(allBranches.count, 4)
 
@@ -181,10 +234,11 @@ extension BranchTests {
 
 extension BranchTests {
 	func testBranchIsAheadOfRemote() throws {
-		let interactor = CommitInteractorMock()
+		Commit.interactor = CommitInteractorMock()
+
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+		let isAhead = try branch.isAhead(of: remote, atPath: "")
 
 		XCTAssertTrue(isAhead)
 	}
@@ -192,9 +246,11 @@ extension BranchTests {
 	func testBranchIsNotAheadOfRemote() throws {
 		let interactor = CommitInteractorMock()
 		interactor.returnCommitCountZero = true
+		Commit.interactor = interactor
+
 		let branch = try Branch(name: "develop", source: .local)
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let isAhead = try branch.isAhead(of: remote, interactor: interactor)
+		let isAhead = try branch.isAhead(of: remote, atPath: "")
 
 		XCTAssertFalse(isAhead)
 	}
@@ -212,40 +268,30 @@ extension BranchTests {
 	}
 
 	func testBranchParent() throws {
-		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultiple
 		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
-		let remoteInteractor = RemoteInteractorMock()
+		Commit.interactor = commitInteractor
+		Remote.interactor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(
-			for: remote,
-			branchInteractor: branchInteractor,
-			commitInteractor: commitInteractor,
-			remoteInteractor: remoteInteractor
-		)
+		let parentBranch = try branch.parent(for: remote, atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "swift-5")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
 	}
 
 	func testBranchParent_fallsBackToDefaultBranch() throws {
-		let branchInteractor = BranchInteractorMock()
 		let commitInteractor = CommitInteractorMock()
 		commitInteractor.multipleCommitCountFixture = Fixture.commitCountMultipleEqual
 		commitInteractor.latestCommitHashesFixture = Fixture.latestCommitHashes
-		let remoteInteractor = RemoteInteractorMock()
+		Commit.interactor = commitInteractor
+		Remote.interactor = RemoteInteractorMock()
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(
-			for: remote,
-			branchInteractor: branchInteractor,
-			commitInteractor: commitInteractor,
-			remoteInteractor: remoteInteractor
-		)
+		let parentBranch = try branch.parent(for: remote, atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "develop")
 		XCTAssertEqual(parentBranch.source, .remote(remote))

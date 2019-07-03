@@ -1,13 +1,32 @@
 import Foundation
 
-public protocol DiffInteractor {
-	func diff(baseBranch: String, targetBranch: String) throws -> String
+protocol DiffInteractor {
+	func diff(baseBranch: String, targetBranch: String, atPath path: String) throws -> String
 }
 
 public struct Diff: Equatable, CustomStringConvertible {
-	public var addedFilePath: String
-	public var removedFilePath: String
+	public var addedFilePath: String? {
+		return rawAddedFilePath != "/dev/null" ? rawAddedFilePath : nil
+	}
+
+	public var removedFilePath: String? {
+		return rawRemovedFilePath != "/dev/null" ? rawRemovedFilePath : nil
+	}
+
+	var rawAddedFilePath: String
+	var rawRemovedFilePath: String
+
 	public var hunks: [Hunk]
+
+	public var description: String {
+		let header = """
+		--- \(rawRemovedFilePath)
+		+++ \(rawAddedFilePath)
+		"""
+		return hunks.reduce(into: header) {
+			$0 += "\n\($1.description)"
+		}
+	}
 
 	public init(rawDiffContent: String) throws {
 		let parsingResults = try Diff.Parser(rawDiffContent: rawDiffContent).parse()
@@ -19,19 +38,9 @@ public struct Diff: Equatable, CustomStringConvertible {
 	}
 
 	init(addedFile: String, removedFile: String, hunks: [Hunk]) {
-		self.addedFilePath = addedFile
-		self.removedFilePath = removedFile
+		self.rawAddedFilePath = addedFile
+		self.rawRemovedFilePath = removedFile
 		self.hunks = hunks
-	}
-
-	public var description: String {
-		let header = """
-		--- \(removedFilePath)
-		+++ \(addedFilePath)
-		"""
-		return hunks.reduce(into: header) {
-			$0 += "\n\($1.description)"
-		}
 	}
 }
 
@@ -99,24 +108,24 @@ extension Array where Element == Diff {
 }
 
 extension Diff {
-	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
-		let interactor = interactor ?? SwiftCLI()
+	static var interactor: DiffInteractor = SwiftCLI()
 
-		let rawDiffContent = try interactor.diff(
+	public init(baseBranch: Branch, targetBranch: Branch, atPath path: String) throws {
+		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
-			targetBranch: targetBranch.fullName
+			targetBranch: targetBranch.fullName,
+			atPath: path
 		)
 		self = try Diff(rawDiffContent: rawDiffContent)
 	}
 }
 
 extension Array where Element == Diff {
-	public init(baseBranch: Branch, targetBranch: Branch, interactor: DiffInteractor? = nil) throws {
-		let interactor = interactor ?? SwiftCLI()
-
-		let rawDiffContent = try interactor.diff(
+	public init(baseBranch: Branch, targetBranch: Branch, atPath path: String) throws {
+		let rawDiffContent = try Diff.interactor.diff(
 			baseBranch: baseBranch.fullName,
-			targetBranch: targetBranch.fullName
+			targetBranch: targetBranch.fullName,
+			atPath: path
 		)
 		self = try [Diff](rawDiffContent: rawDiffContent)
 	}

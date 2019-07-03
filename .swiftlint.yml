@@ -1,60 +1,74 @@
 # rule identifiers to exclude from running.
 disabled_rules:
-  - file_length
   - line_length
-  - function_body_length
+  - trailing_comma
+  - file_length
   - identifier_name
-  - type_body_length
+  - cyclomatic_complexity
+  - todo
   - force_cast
   - force_try
-  - cyclomatic_complexity
-  - function_parameter_count
-  - force_unwrapping
-  - todo
-  - operator_whitespace
-  - type_name
   - large_tuple
-  - trailing_comma
-  - shorthand_operator
+  - function_body_length
+  - nesting
   - opening_brace
-  - generic_type_name
+  - function_parameter_count
 
 # rules required to opt-in that are not by default.
 opt_in_rules:
   - empty_count
+  - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
+  - unused_optional_binding
+  - unused_private_declaration
+  - unused_enumerated
+  - unused_import
+  - vertical_parameter_alignment_on_call
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+  - yoda_condition
+  - unavailable_function
+  - type_contents_order
+  - strict_fileprivate
+  - static_operator
+  - single_test_class
+  - redundant_type_annotation
+  - redundant_nil_coalescing
+  - prohibited_super_call
+  - pattern_matching_keywords
+  - overridden_super_call
+  - operator_usage_whitespace
+  - object_literal
+  - number_separator
+  - multiline_parameters_brackets
+  - multiline_parameters
+  - multiline_literal_brackets
+  - multiline_function_chains
+  - multiline_arguments
+  - modifier_order
+  - lower_acl_than_parent
+  - literal_expression_end_indentation
+  - let_var_whitespace
+  - legacy_random
+  - first_where
+  - last_where
+  - joined_default_parameter
+  - implicit_return
+  - identical_operands
+  - fatal_error_message
+  - explicit_init
+  - empty_string
+  - empty_xctest_method
+  - convenience_type
+  - contains_over_first_not_nil
+  - conditional_returns_on_newline
+  - closure_spacing
+  - closure_end_indentation
+  - attributes
+  - array_init
+  - anyobject_protocol
 
 # paths to ignore during linting. Takes precedence over `included`.
 excluded:
   - .build
-
-# rules that should be deemed as errors.
-closing_brace: error
-colon:
-  severity: error
-comma: error
-control_statement: error
-leading_whitespace: error
-legacy_cggeometry_functions: error
-legacy_constant: error
-legacy_constructor: error
-nesting:
-  type_level:
-    warning: 3
-operator_whitespace: error
-return_arrow_whitespace: error
-statement_position:
-  severity: error
-trailing_newline: error
-trailing_semicolon: error
-
-# rules that should be deemed as warnings.
-empty_count: warning
-
-# custom rules
-custom_rules:
-  # prevent `//my comment`
-  space_after_comment:
-    name: "Space after comment delimiter"
-    message: "Always add a whitespace character after a comment delimiter, i.e. `// my comment`"
-    regex: '((?:^|[^:\v]?+)\/\/\/?+[\S])'
-    severity: warning
+  - Sources/Sugar/AnyCodable

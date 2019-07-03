@@ -1,12 +1,16 @@
 import Foundation
+import Git
 
 extension Release {
 	public final class API: GitHub.API {
+		public init(accessToken: String) {
+			super.init(authorization: .token(accessToken))
+		}
+
 		public func getReleases(for shorthand: Repository.Shorthand) throws -> [Release] {
 			return try get(
-				[Release].self,
-				for: shorthand,
-				endpoint: "releases"
+				endpoint: "/repos/\(shorthand.rawValue)/releases",
+				responseType: [Release].self
 			)
 		}
 	}

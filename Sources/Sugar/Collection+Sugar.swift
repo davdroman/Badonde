@@ -8,11 +8,11 @@ extension Collection {
 		return self
 	}
 
-	public subscript (safe index: Index) -> Element? {
-		return indices.contains(index) ? self[index] : nil
+	public func compacted<Wrapped>() -> [Wrapped] where Element == Wrapped? {
+		return compactMap { $0 }
 	}
 
-	public func compacted<Wrapped>() -> [Wrapped] where Element == Optional<Wrapped> {
-		return compactMap { $0 }
+	public subscript (safe index: Index) -> Element? {
+		return indices.contains(index) ? self[index] : nil
 	}
 }

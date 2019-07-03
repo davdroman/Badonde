@@ -11,7 +11,7 @@ final class DiffInteractorMock: DiffInteractor {
 		case baseReleaseTargetDevelop = "base_release_target_develop" // multi-diff
 	}
 
-	func diff(baseBranch: String, targetBranch: String) throws -> String {
+	func diff(baseBranch: String, targetBranch: String, atPath path: String) throws -> String {
 		return try Fixture(rawValue: "base_\(baseBranch)_target_\(targetBranch)")!.load(as: String.self)
 	}
 }
@@ -61,7 +61,7 @@ final class DiffTests: XCTestCase {
 		XCTAssertEqual(diffs.count, 1)
 
 		let diff = diffs.first
-		XCTAssertEqual(diff?.removedFilePath, "/dev/null")
+		XCTAssertNil(diff?.removedFilePath)
 		XCTAssertEqual(diff?.addedFilePath, "b/GitDiffSwift/Models/GitDiffLine.swift")
 
 		XCTAssertEqual(diff?.hunks.count, 1)
@@ -108,7 +108,7 @@ final class DiffTests: XCTestCase {
 
 		let diff = diffs.first
 		XCTAssertEqual(diff?.removedFilePath, "a/Sources/Layout/MessagesCollectionViewFlowLayout+Avatar.swift")
-		XCTAssertEqual(diff?.addedFilePath, "/dev/null")
+		XCTAssertNil(diff?.addedFilePath)
 
 		XCTAssertEqual(diff?.hunks.count, 1)
 
@@ -150,7 +150,7 @@ final class DiffTests: XCTestCase {
 		// MARK: diffB
 
 		let diffB = diffs.dropFirst().first
-		XCTAssertEqual(diffB?.removedFilePath, "/dev/null")
+		XCTAssertNil(diffB?.removedFilePath)
 		XCTAssertEqual(diffB?.addedFilePath, "b/Moya.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist")
 
 		XCTAssertEqual(diffB?.hunks.count, 1)
@@ -243,22 +243,24 @@ final class DiffTests: XCTestCase {
 
 extension DiffTests {
 	func testInit_baseBranch_targetBranch() throws {
-		let interactor = DiffInteractorMock()
+		Diff.interactor = DiffInteractorMock()
+
 		let diff = try Diff(
 			baseBranch: Branch(name: "master", source: .local),
 			targetBranch: Branch(name: "develop", source: .local),
-			interactor: interactor
+			atPath: ""
 		)
 
 		XCTAssertEqual(diff.hunks.count, 1)
 	}
 
 	func testInitArray_baseBranch_targetBranch() throws {
-		let interactor = DiffInteractorMock()
+		Diff.interactor = DiffInteractorMock()
+
 		let diffs = try [Diff](
 			baseBranch: Branch(name: "release", source: .local),
 			targetBranch: Branch(name: "develop", source: .local),
-			interactor: interactor
+			atPath: ""
 		)
 
 		XCTAssertEqual(diffs.count, 3)

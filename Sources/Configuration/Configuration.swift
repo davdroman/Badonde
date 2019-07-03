@@ -2,14 +2,13 @@ import Foundation
 
 public protocol KeyValueInteractive {
 	func getValue<T>(ofType type: T.Type, forKeyPath keyPath: KeyPath) throws -> T?
-	func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws
+	func setValue<T: Equatable>(_ value: T, forKeyPath keyPath: KeyPath) throws
 	func getRawValue(forKeyPath keyPath: KeyPath) throws -> String?
 	func setRawValue(_ value: String, forKeyPath keyPath: KeyPath) throws
 	func removeValue(forKeyPath keyPath: KeyPath) throws
 }
 
 public class Configuration: KeyValueInteractive {
-	let url: URL
 	let fileInteractor: JSONFileInteractor
 	var rawObject: [String: Any]
 	var keyPathedObject: [String: Any] {
@@ -25,16 +24,17 @@ public class Configuration: KeyValueInteractive {
 		return existingKeyPaths + supportedKeyPaths
 	}
 
+	public let path: String
 	public let supportedKeyPaths: [KeyPath]
 
-	public convenience init(contentsOf url: URL, supportedKeyPaths: [KeyPath]) throws {
-		try self.init(contentsOf: url, supportedKeyPaths: supportedKeyPaths, fileInteractor: FileInteractor())
+	public convenience init(contentsOfFile path: String, supportedKeyPaths: [KeyPath]) throws {
+		try self.init(contentsOfFile: path, supportedKeyPaths: supportedKeyPaths, fileInteractor: FileInteractor())
 	}
 
-	init(contentsOf url: URL, supportedKeyPaths: [KeyPath], fileInteractor: JSONFileInteractor) throws {
-		self.url = url
+	init(contentsOfFile path: String, supportedKeyPaths: [KeyPath], fileInteractor: JSONFileInteractor) throws {
+		self.path = path
 		self.fileInteractor = fileInteractor
-		self.rawObject = try fileInteractor.read(from: url)
+		self.rawObject = try fileInteractor.read(from: path)
 		self.supportedKeyPaths = supportedKeyPaths
 	}
 
@@ -66,7 +66,7 @@ public class Configuration: KeyValueInteractive {
 		}
 	}
 
-	public func setValue<T>(_ value: T, forKeyPath keyPath: KeyPath) throws {
+	public func setValue<T: Equatable>(_ value: T, forKeyPath keyPath: KeyPath) throws {
 		switch T.self {
 		case is Bool.Type, is Double.Type, is Int.Type, is String.Type:
 			break
@@ -78,9 +78,14 @@ public class Configuration: KeyValueInteractive {
 			throw Error.incompatibleKeyPath(keyPath)
 		}
 
+		// Optimization to not write to disk unnecessarily if the new value isn't.
+		if let existingValue = keyPathedObject[keyPath.rawValue] as? T, existingValue == value {
+			return
+		}
+
 		keyPathedObject[keyPath.rawValue] = value
 
-		try fileInteractor.write(rawObject, to: url)
+		try fileInteractor.write(rawObject, to: path)
 	}
 
 	public func getRawValue(forKeyPath keyPath: KeyPath) throws -> String? {
@@ -119,7 +124,7 @@ public class Configuration: KeyValueInteractive {
 
 		keyPathedObject[keyPath.rawValue] = nil
 
-		try fileInteractor.write(rawObject, to: url)
+		try fileInteractor.write(rawObject, to: path)
 	}
 }
 
