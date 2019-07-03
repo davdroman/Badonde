@@ -115,8 +115,7 @@ extension Branch {
 		return try Commit.count(baseBranch: remoteBranch, targetBranch: self, atPath: path) > 0
 	}
 
-	public func parent(for remote: Remote, atPath path: String) throws -> Branch {
-		let defaultBranch = try remote.defaultBranch(atPath: path)
+	public func parent(for remote: Remote, defaultBranch: Branch, atPath path: String) throws -> Branch {
 		let allRemoteBranches = try Branch.getAll(from: .remote(remote), atPath: path)
 
 		let recentDate = Date(timeIntervalSinceNow: -2_592_000) // 1 month ago

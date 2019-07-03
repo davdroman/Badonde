@@ -42,6 +42,7 @@ final class PRCommand: Command {
 
 		let remote = try repository.remote(for: configuration)
 		let repositoryShorthand = try remote.repositoryShorthand()
+		let defaultBranch = try Branch.default(for: repositoryShorthand, githubAccessToken: githubAccessToken, configuration: configuration)
 
 		try autopushIfNeeded(to: remote, configuration: configuration)
 
@@ -55,6 +56,7 @@ final class PRCommand: Command {
 				git: .init(
 					path: projectPath,
 					shorthand: repositoryShorthand,
+					defaultBranch: defaultBranch,
 					headBranch: repository.currentBranch,
 					remote: remote
 				),
@@ -175,7 +177,7 @@ final class PRCommand: Command {
 	}
 }
 
-extension Repository {
+extension Git.Repository {
 	func remote(for configuration: KeyValueInteractive) throws -> Remote {
 		if let remoteName = try configuration.getRawValue(forKeyPath: .gitRemote) {
 			guard let selectedRemote = remotes.first(where: { $0.name == remoteName }) else {
@@ -187,6 +189,18 @@ extension Repository {
 				throw PRCommand.Error.noGitRemotes
 			}
 			return selectedRemote
+		}
+	}
+}
+
+extension Branch {
+	static func `default`(for shorthand: RepositoryShorthand, githubAccessToken: String, configuration: KeyValueInteractive) throws -> Branch {
+		if let configuredDefaultBranch = try configuration.getRawValue(forKeyPath: .gitDefaultBranch) {
+			return try Branch(name: configuredDefaultBranch, source: .local)
+		} else {
+			let githubRepositoryDefaultBranch = try GitHub.Repository.API(accessToken: githubAccessToken).get(for: shorthand).defaultBranch
+			try configuration.setRawValue(githubRepositoryDefaultBranch, forKeyPath: .gitDefaultBranch)
+			return try Branch(name: githubRepositoryDefaultBranch, source: .local)
 		}
 	}
 }
