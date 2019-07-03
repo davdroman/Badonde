@@ -1,10 +1,30 @@
 import Foundation
-import Git
+
+public typealias RepositoryShorthand = Repository.Shorthand
 
 extension Repository {
-	public struct Shorthand: Codable {
+	public struct Shorthand {
 		public let username: String
 		public let repository: String
+	}
+}
+
+extension Repository.Shorthand: Codable {
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let rawValue = try container.decode(String.self)
+		guard let instance = type(of: self).init(rawValue: rawValue) else {
+			throw DecodingError.dataCorruptedError(
+				in: container,
+				debugDescription: #"Single 'String' value with format "user/repo" expected for 'Repository.Shorthand'."#
+			)
+		}
+		self = instance
+	}
+
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(rawValue)
 	}
 }
 
