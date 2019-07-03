@@ -21,6 +21,7 @@ extension Configuration {
 		.jiraApiToken,
 		.githubAccessToken,
 		.gitAutopush,
+		.gitDefaultBranch,
 		.gitRemote,
 		.firebaseProjectId,
 		.firebaseSecretToken,
@@ -53,6 +54,10 @@ extension KeyPath {
 	public static let gitAutopush = KeyPath(
 		rawValue: "git.autopush",
 		description: "Push changes automatically if branch is ahead of remote (true/false)"
+	)!
+	public static let gitDefaultBranch = KeyPath(
+		rawValue: "git.defaultBranch",
+		description: "Your repository's default branch where most changes are targeted into"
 	)!
 	public static let gitRemote = KeyPath(
 		rawValue: "git.remote",

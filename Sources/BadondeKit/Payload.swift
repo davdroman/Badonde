@@ -1,21 +1,25 @@
 import Foundation
 import Git
+import GitHub
 
 public struct Payload: Codable {
 	public struct Git: Codable {
 		public var path: String
-		public var shorthand: Repository.Shorthand
+		public var shorthand: RepositoryShorthand
+		public var defaultBranch: Branch
 		public var headBranch: Branch
 		public var remote: Remote
 
 		public init(
 			path: String,
-			shorthand: Repository.Shorthand,
+			shorthand: RepositoryShorthand,
+			defaultBranch: Branch,
 			headBranch: Branch,
 			remote: Remote
 		) {
 			self.path = path
 			self.shorthand = shorthand
+			self.defaultBranch = defaultBranch
 			self.headBranch = headBranch
 			self.remote = remote
 		}
