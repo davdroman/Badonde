@@ -175,7 +175,7 @@ final class PRCommand: Command {
 	}
 }
 
-extension Repository {
+extension Git.Repository {
 	func remote(for configuration: KeyValueInteractive) throws -> Remote {
 		if let remoteName = try configuration.getRawValue(forKeyPath: .gitRemote) {
 			guard let selectedRemote = remotes.first(where: { $0.name == remoteName }) else {
