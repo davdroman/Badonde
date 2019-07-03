@@ -15,8 +15,8 @@ addons:
       - swiftlint
 script:
   - danger-swift ci
-  - swift test
-  - make
+  - swift test 2>&1 | xcpretty
+  - make install
 branches:
   only:
     - master

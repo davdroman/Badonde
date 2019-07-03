@@ -1,0 +1,1 @@
+CommandLineTool().run()

@@ -3,17 +3,15 @@ import Sugar
 
 extension Ticket {
 	public final class API {
+		let organization: String
 		let email: String
 		let apiToken: String
-		var authorizationValue: String? {
-			let rawString = [email, apiToken].joined(separator: ":")
-			guard let utf8StringRepresentation = rawString.data(using: .utf8) else {
-				return nil
-			}
-			return utf8StringRepresentation.base64EncodedString()
+		var authorizationValue: String {
+			return [email, apiToken].joined(separator: ":").base64()
 		}
 
-		public init(email: String, apiToken: String) {
+		public init(organization: String, email: String, apiToken: String) {
+			self.organization = organization
 			self.email = email
 			self.apiToken = apiToken
 		}
@@ -25,14 +23,10 @@ extension Ticket {
 		private func getTicket(with key: Key, expanded: Bool) throws -> Ticket {
 			let url = try URL(
 				scheme: "https",
-				host: "asosmobile.atlassian.net",
+				host: "\(organization).atlassian.net",
 				path: "/rest/api/2/issue/\(key.rawValue)",
 				queryItems: expanded ? [URLQueryItem(name: "expand", value: "names")] : nil
 			)
-
-			guard let authorizationValue = authorizationValue else {
-				throw Error.authorizationEncodingError
-			}
 
 			let session = URLSession(configuration: .default)
 			var request = URLRequest(url: url)
@@ -64,7 +58,6 @@ extension Ticket {
 
 extension Ticket.API {
 	public enum Error {
-		case authorizationEncodingError
 		case http(Int)
 	}
 }
@@ -72,8 +65,6 @@ extension Ticket.API {
 extension Ticket.API.Error: LocalizedError {
 	public var errorDescription: String? {
 		switch self {
-		case .authorizationEncodingError:
-			return "JIRA authorization token encoding failed"
 		case .http(let statusCode):
 			return "JIRA API call failed with HTTP status code \(statusCode)"
 		}

@@ -9,12 +9,12 @@ final class DynamicConfigurationTests: XCTestCase {
 		case configA = "config_a"
 		case configB = "config_b"
 	}
+}
 
-	// MARK: getRawValue
-
+extension DynamicConfigurationTests {
 	func testGetRawValue_fromConfigA() throws {
-		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let configA = try Configuration(contentsOfFile: Fixture.configA.path, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOfFile: Fixture.configB.path, supportedKeyPaths: [])
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
 		let value = try dynamicConfig.getRawValue(forKeyPath: .name)
@@ -22,19 +22,19 @@ final class DynamicConfigurationTests: XCTestCase {
 	}
 
 	func testGetRawValue_fromConfigB() throws {
-		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let configA = try Configuration(contentsOfFile: Fixture.configA.path, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOfFile: Fixture.configB.path, supportedKeyPaths: [])
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
 		let value = try dynamicConfig.getRawValue(forKeyPath: .age)
 		XCTAssertEqual(value, "21")
 	}
+}
 
-	// MARK: getValue
-
+extension DynamicConfigurationTests {
 	func testGetValue_fromConfigA() throws {
-		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let configA = try Configuration(contentsOfFile: Fixture.configA.path, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOfFile: Fixture.configB.path, supportedKeyPaths: [])
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
 		let value = try dynamicConfig.getValue(ofType: String.self, forKeyPath: .name)
@@ -42,8 +42,8 @@ final class DynamicConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_fromConfigB() throws {
-		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let configA = try Configuration(contentsOfFile: Fixture.configA.path, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOfFile: Fixture.configB.path, supportedKeyPaths: [])
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
 		let value = try dynamicConfig.getValue(ofType: Int.self, forKeyPath: .age)
@@ -51,8 +51,8 @@ final class DynamicConfigurationTests: XCTestCase {
 	}
 
 	func testGetValue_ofInvalidBridgingTypeInConfigA_fromConfigB() throws {
-		let configA = try Configuration(contentsOf: Fixture.configA.url, supportedKeyPaths: [])
-		let configB = try Configuration(contentsOf: Fixture.configB.url, supportedKeyPaths: [])
+		let configA = try Configuration(contentsOfFile: Fixture.configA.path, supportedKeyPaths: [])
+		let configB = try Configuration(contentsOfFile: Fixture.configB.path, supportedKeyPaths: [])
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
 		XCTAssertThrowsError(try dynamicConfig.getValue(ofType: Bool.self, forKeyPath: .likesPepperoniPizza)) { error in
@@ -61,23 +61,23 @@ final class DynamicConfigurationTests: XCTestCase {
 				XCTAssertEqual(value, "maybe")
 				XCTAssert(type == Bool.self)
 			default:
-				XCTFail()
+				XCTFail("`getValue` threw the wrong error")
 			}
 		}
 	}
+}
 
-	// MARK: setValue
-
+extension DynamicConfigurationTests {
 	func testSetValue_toConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
 		let configAFixture = Fixture.configA
 		let configAInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in expectation.fulfill() }
-		let configA = try Configuration(contentsOf: configAFixture.url, supportedKeyPaths: [], fileInteractor: configAInteractor)
+		let configA = try Configuration(contentsOfFile: configAFixture.path, supportedKeyPaths: [], fileInteractor: configAInteractor)
 
 		let configBFixture = Fixture.configB
 		let configBInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in XCTFail("Config B should not be written to") }
-		let configB = try Configuration(contentsOf: configBFixture.url, supportedKeyPaths: [], fileInteractor: configBInteractor)
+		let configB = try Configuration(contentsOfFile: configBFixture.path, supportedKeyPaths: [], fileInteractor: configBInteractor)
 
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
@@ -87,19 +87,19 @@ final class DynamicConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: setRawValue
-
+extension DynamicConfigurationTests {
 	func testSetRawValue_toConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
 		let configAFixture = Fixture.configA
 		let configAInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in expectation.fulfill() }
-		let configA = try Configuration(contentsOf: configAFixture.url, supportedKeyPaths: [], fileInteractor: configAInteractor)
+		let configA = try Configuration(contentsOfFile: configAFixture.path, supportedKeyPaths: [], fileInteractor: configAInteractor)
 
 		let configBFixture = Fixture.configB
 		let configBInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in XCTFail("Config B should not be written to") }
-		let configB = try Configuration(contentsOf: configBFixture.url, supportedKeyPaths: [], fileInteractor: configBInteractor)
+		let configB = try Configuration(contentsOfFile: configBFixture.path, supportedKeyPaths: [], fileInteractor: configBInteractor)
 
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
@@ -109,19 +109,19 @@ final class DynamicConfigurationTests: XCTestCase {
 
 		waitForExpectations(timeout: 1, handler: nil)
 	}
+}
 
-	// MARK: removeValue
-
+extension DynamicConfigurationTests {
 	func testRemoveValue_fromConfigA() throws {
 		let expectation = self.expectation(description: "File is written after setting value")
 
 		let configAFixture = Fixture.configA
 		let configAInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in expectation.fulfill() }
-		let configA = try Configuration(contentsOf: configAFixture.url, supportedKeyPaths: [], fileInteractor: configAInteractor)
+		let configA = try Configuration(contentsOfFile: configAFixture.path, supportedKeyPaths: [], fileInteractor: configAInteractor)
 
 		let configBFixture = Fixture.configB
 		let configBInteractor = JSONFileInteractorSpy(readFixture: configAFixture) { _, _ in XCTFail("Config B should not be written to") }
-		let configB = try Configuration(contentsOf: configBFixture.url, supportedKeyPaths: [], fileInteractor: configBInteractor)
+		let configB = try Configuration(contentsOfFile: configBFixture.path, supportedKeyPaths: [], fileInteractor: configBInteractor)
 
 		let dynamicConfig = try DynamicConfiguration(prioritizedConfigurations: [configA, configB])
 
