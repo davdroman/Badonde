@@ -47,7 +47,7 @@ final class RepositoryShorthandTests: XCTestCase {
 	// MARK: init(stringLiteral:) tests
 
 	func testRepositoryShorthand_initWithStringLiteral() {
-		let literalShorthand: Repository.Shorthand = "user-123/repo-123"
+		let literalShorthand: RepositoryShorthand = "user-123/repo-123"
 		let shorthand = Repository.Shorthand(rawValue: "user-123/repo-123")
 		XCTAssertEqual(literalShorthand, shorthand)
 	}
