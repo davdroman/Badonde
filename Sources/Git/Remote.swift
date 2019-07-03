@@ -3,7 +3,6 @@ import Foundation
 protocol RemoteInteractor {
 	func getAllRemotes(atPath path: String) throws -> String
 	func getURL(forRemote remote: String, atPath path: String) throws -> String
-	func defaultBranch(forRemote remote: String, atPath path: String) throws -> String
 }
 
 public struct Remote: Equatable, Codable {
@@ -28,12 +27,5 @@ extension Remote {
 				}
 				return Remote(name: remoteName, url: remoteURL)
 			}
-	}
-
-	public func defaultBranch(atPath path: String) throws -> Branch {
-		return try Branch(
-			name: Remote.interactor.defaultBranch(forRemote: name, atPath: path),
-			source: .remote(self)
-		)
 	}
 }

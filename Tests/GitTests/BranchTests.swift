@@ -276,7 +276,7 @@ extension BranchTests {
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(for: remote, atPath: "")
+		let parentBranch = try branch.parent(for: remote, defaultBranch: Branch(name: "develop", source: .local), atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "swift-5")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
@@ -291,7 +291,7 @@ extension BranchTests {
 
 		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
 		let branch = try Branch(name: "target-branch", source: .local)
-		let parentBranch = try branch.parent(for: remote, atPath: "")
+		let parentBranch = try branch.parent(for: remote, defaultBranch: Branch(name: "develop", source: .local), atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "develop")
 		XCTAssertEqual(parentBranch.source, .remote(remote))
