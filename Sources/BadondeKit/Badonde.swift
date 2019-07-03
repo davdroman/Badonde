@@ -43,7 +43,7 @@ public final class Badonde {
 			let repositoryShorthand = payload.git.shorthand
 			let remote = payload.git.remote
 			let headBranch = payload.git.headBranch
-			let defaultBranch = try payload.git.remote.defaultBranch(atPath: payload.git.path)
+			let defaultBranch = payload.git.defaultBranch
 
 			let ((baseBranch, diff), me, labels, milestones, openPullRequests, (jiraTicket, githubIssue)) = DispatchGroup().asyncExecuteAndWait(
 				{ () -> (Branch, [Diff]) in
@@ -282,7 +282,7 @@ extension Badonde {
 			case .defaultBranch:
 				return defaultBranch
 			case .commitProximity:
-				return try currentBranch.parent(for: remote, atPath: repositoryPath)
+				return try currentBranch.parent(for: remote, defaultBranch: defaultBranch, atPath: repositoryPath)
 			case .custom(let strategyClosure):
 				return try Branch(name: strategyClosure(currentBranch.name), source: .local)
 			}

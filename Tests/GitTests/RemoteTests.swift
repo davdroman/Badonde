@@ -53,13 +53,3 @@ extension RemoteTests {
 		XCTAssertEqual(remoteB?.url.absoluteString, "git@github.com:user/repo.git")
 	}
 }
-
-extension RemoteTests {
-	func testRemoteDefaultBranch() throws {
-		let remote = Remote(name: "origin", url: URL(string: "git@github.com:user/repo.git")!)
-		let defaultBranch = try remote.defaultBranch(atPath: "")
-		let expectedDefaultBranch = try Branch(name: "develop", source: .remote(remote))
-
-		XCTAssertEqual(defaultBranch, expectedDefaultBranch)
-	}
-}
