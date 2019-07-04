@@ -44,6 +44,7 @@ public final class Badonde {
 			let remote = payload.git.remote
 			let headBranch = payload.git.headBranch
 			let defaultBranch = payload.git.defaultBranch
+			let tags = try Tag.getAll(atPath: payload.git.path)
 
 			let ((baseBranch, diff), me, labels, milestones, openPullRequests, (jiraTicket, githubIssue)) = DispatchGroup().asyncExecuteAndWait(
 				{ () -> (Branch, [Diff]) in
@@ -112,7 +113,8 @@ public final class Badonde {
 				remote: remote,
 				defaultBranch: defaultBranch,
 				currentBranch: headBranch,
-				diff: diff
+				diff: diff,
+				tags: tags
 			)
 
 			let githubDSL = GitHubDSL(
