@@ -17,13 +17,8 @@ public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 	do {
 		return try throwingClosure()
 	} catch {
-		failAndExit(error.localizedDescription)
+		Logger.failAndExit(error.localizedDescription)
 	}
-}
-
-func failAndExit(_ errorMessage: String) -> Never {
-	Logger.fail(errorMessage)
-	exit(EXIT_FAILURE)
 }
 
 /// A namespace collecting logging functions.
@@ -68,6 +63,16 @@ public enum Logger {
 	/// - Parameter description: the log description.
 	public static func fail(_ description: String) {
 		printLog(.fail(description))
+	}
+
+	/// Fails the previously executing step (if existing), prints
+	/// the specified description of what went wrong in the following
+	/// line, and exits the program with a failure status code.
+	///
+	/// - Parameter description: the log description.
+	public static func failAndExit(_ description: String) -> Never {
+		fail(description)
+		exit(EXIT_FAILURE)
 	}
 
 	static func printLog(_ log: Log) {

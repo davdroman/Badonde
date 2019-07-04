@@ -65,3 +65,9 @@ extension SwiftCLI: RepositoryInteractor {
 		return try Task.capture(bash: "git -C \(path) rev-parse --show-toplevel").stdout
 	}
 }
+
+extension SwiftCLI: TagInteractor {
+	func getAllTags(atPath path: String) throws -> String {
+		return try Task.capture(bash: "git -C \(path) tag --sort=-creatordate").stdout
+	}
+}

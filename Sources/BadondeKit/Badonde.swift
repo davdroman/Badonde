@@ -44,6 +44,7 @@ public final class Badonde {
 			let remote = payload.git.remote
 			let headBranch = payload.git.headBranch
 			let defaultBranch = payload.git.defaultBranch
+			let tags = try Tag.getAll(atPath: payload.git.path)
 
 			let ((baseBranch, diff), me, labels, milestones, openPullRequests, (jiraTicket, githubIssue)) = DispatchGroup().asyncExecuteAndWait(
 				{ () -> (Branch, [Diff]) in
@@ -81,7 +82,7 @@ public final class Badonde {
 							return (nil, nil)
 						}
 						guard let jira = payload.jira else {
-							failAndExit(
+							Logger.failAndExit(
 								"""
 								JIRA is used in Badondefile, but credentials are not configured.
 								Please run 'badonde init'.
@@ -112,7 +113,8 @@ public final class Badonde {
 				remote: remote,
 				defaultBranch: defaultBranch,
 				currentBranch: headBranch,
-				diff: diff
+				diff: diff,
+				tags: tags
 			)
 
 			let githubDSL = GitHubDSL(
@@ -267,8 +269,10 @@ extension Badonde {
 	/// Defines the way in which to derive the Git base branch of the PR through the
 	/// current Git context.
 	public enum BaseBranchDerivationStrategy {
-		/// Use the default branch for the repo.
+		/// Use the configured default branch for the repo (`git.defaultBranch`).
 		case defaultBranch
+		/// Use the specified branch by name.
+		case branch(named: String)
 		/// Use a derivation algorithm that compares how many commits away the current
 		/// branch is from all other branches, and selects the one with the smallest
 		/// non-zero amount.
@@ -281,6 +285,8 @@ extension Badonde {
 			switch self {
 			case .defaultBranch:
 				return defaultBranch
+			case .branch(let name):
+				return try Branch(name: name, source: .remote(remote))
 			case .commitProximity:
 				return try currentBranch.parent(for: remote, defaultBranch: defaultBranch, atPath: repositoryPath)
 			case .custom(let strategyClosure):
