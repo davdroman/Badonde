@@ -149,7 +149,7 @@ extension Branch {
 			.map { $0.0 }
 
 		guard
-			!branchesWithLowestEqualCommitCount.contains(defaultBranch),
+			!branchesWithLowestEqualCommitCount.contains(where: { $0.name == defaultBranch.name }),
 			let parentBranch = branchesWithLowestEqualCommitCount.first
 		else {
 			return defaultBranch
