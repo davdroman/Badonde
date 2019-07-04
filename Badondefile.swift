@@ -7,7 +7,7 @@ let badonde = Badonde(
 
 switch (badonde.pullRequest.baseBranch, badonde.pullRequest.headBranch) {
 case ("master", "develop"):
-	let latestTag = badonde.git.tags[0]
+	let latestTag = badonde.git.tags[0].name
 	title("\(latestTag) release")
 case (_, "develop"):
 	Logger.failAndExit("Develop should only be merged into master")
