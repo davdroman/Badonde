@@ -21,13 +21,6 @@ public func trySafely<T>(_ throwingClosure: () throws -> T) -> T {
 	}
 }
 
-extension Logger {
-	public static func failAndExit(_ errorMessage: String) -> Never {
-		Logger.fail(errorMessage)
-		exit(EXIT_FAILURE)
-	}
-}
-
 /// A namespace collecting logging functions.
 ///
 /// This class allows the user to print steps throughout Badondefile's
@@ -70,6 +63,16 @@ public enum Logger {
 	/// - Parameter description: the log description.
 	public static func fail(_ description: String) {
 		printLog(.fail(description))
+	}
+
+	/// Fails the previously executing step (if existing), prints
+	/// the specified description of what went wrong in the following
+	/// line, and exits the program with a failure status code.
+	///
+	/// - Parameter description: the log description.
+	public static func failAndExit(_ description: String) -> Never {
+		fail(description)
+		exit(EXIT_FAILURE)
 	}
 
 	static func printLog(_ log: Log) {
