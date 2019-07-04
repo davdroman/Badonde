@@ -82,7 +82,7 @@ public final class Badonde {
 							return (nil, nil)
 						}
 						guard let jira = payload.jira else {
-							failAndExit(
+							Logger.failAndExit(
 								"""
 								JIRA is used in Badondefile, but credentials are not configured.
 								Please run 'badonde init'.
