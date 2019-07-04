@@ -11,4 +11,6 @@ public struct GitDSL {
 	public var currentBranch: Branch
 	/// The diff between base and current branch.
 	public var diff: [Diff]
+	/// The repo's tags.
+	public var tags: [Tag]
 }
