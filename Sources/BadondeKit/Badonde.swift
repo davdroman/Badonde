@@ -269,8 +269,10 @@ extension Badonde {
 	/// Defines the way in which to derive the Git base branch of the PR through the
 	/// current Git context.
 	public enum BaseBranchDerivationStrategy {
-		/// Use the default branch for the repo.
+		/// Use the configured default branch for the repo (`git.defaultBranch`).
 		case defaultBranch
+		/// Use the specified branch by name.
+		case branch(named: String)
 		/// Use a derivation algorithm that compares how many commits away the current
 		/// branch is from all other branches, and selects the one with the smallest
 		/// non-zero amount.
@@ -283,6 +285,8 @@ extension Badonde {
 			switch self {
 			case .defaultBranch:
 				return defaultBranch
+			case .branch(let name):
+				return try Branch(name: name, source: .remote(remote))
 			case .commitProximity:
 				return try currentBranch.parent(for: remote, defaultBranch: defaultBranch, atPath: repositoryPath)
 			case .custom(let strategyClosure):
