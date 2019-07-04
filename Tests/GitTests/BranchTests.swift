@@ -294,6 +294,6 @@ extension BranchTests {
 		let parentBranch = try branch.parent(for: remote, defaultBranch: Branch(name: "develop", source: .local), atPath: "")
 
 		XCTAssertEqual(parentBranch.name, "develop")
-		XCTAssertEqual(parentBranch.source, .remote(remote))
+		XCTAssertEqual(parentBranch.source, .local)
 	}
 }
