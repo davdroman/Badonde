@@ -160,10 +160,10 @@ public final class Badonde {
 		self.github = githubDSL
 
 		switch ticketInfo {
-		case .github?, .none:
-			break
 		case .jira(let ticket)?:
 			self.jira = JiraDSL(ticket: ticket)
+		case .github?, .none:
+			break
 		}
 
 		badonde = self
