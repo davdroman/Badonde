@@ -30,12 +30,25 @@ final class InitCommand: Command {
 	func execute() throws {
 		let fileManager = FileManager.default
 		let repositoryPath = try Repository(atPath: fileManager.currentDirectoryPath).topLevelPath
-
 		let configuration = try? DynamicConfiguration(prioritizedScopes: [.local(path: repositoryPath), .global])
+
 		let githubAccessToken = try configuration?.getRawValue(forKeyPath: .githubAccessToken) ?? Prompter.prompt(.githubAccessToken)
-		let jiraEmail = try (configuration?.getRawValue(forKeyPath: .jiraEmail) ?? Prompter.prompt(.jiraEmail)).nilIfEmpty
-		let jiraApiToken = try jiraEmail != nil ? configuration?.getRawValue(forKeyPath: .jiraApiToken) ?? Prompter.prompt(.jiraApiToken) : nil
-		let credentials = Initializer.Credentials(githubAccessToken: githubAccessToken, jiraEmail: jiraEmail, jiraApiToken: jiraApiToken)
+		let ticketServiceCredentials: Initializer.Credentials.TicketServiceCredentials?
+
+		switch Prompter.promptTicketService() {
+		case .jira:
+			ticketServiceCredentials = try .jira(
+				email: configuration?.getRawValue(forKeyPath: .jiraEmail) ?? Prompter.prompt(.jiraEmail),
+				apiToken: configuration?.getRawValue(forKeyPath: .jiraApiToken) ?? Prompter.prompt(.jiraApiToken)
+			)
+		case .githubIssues, .none:
+			ticketServiceCredentials = nil
+		}
+
+		let credentials = Initializer.Credentials(
+			githubAccessToken: githubAccessToken,
+			ticketServiceCredentials: ticketServiceCredentials
+		)
 
 		// Reset start date because credentials might've been prompted
 		// and analytics data about tool performance might be skewed as a result.

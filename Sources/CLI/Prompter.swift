@@ -18,10 +18,44 @@ private extension URL {
 }
 
 enum Prompter {
+	enum TicketService: Int, CaseIterable {
+		case jira
+		case githubIssues
+		case none
+
+		fileprivate var name: String {
+			switch self {
+			case .jira:
+				return "Jira"
+			case .githubIssues:
+				return "GitHub Issues"
+			case .none:
+				return "None"
+			}
+		}
+
+		fileprivate static var promptDescription: String {
+			let heading = "Select your issue tracking software:"
+			let list = allCases.map { "  \($0.rawValue + 1). \($0.name)" }.joined(separator: "\n")
+			return [heading, list].joined(separator: "\n") + "\n"
+		}
+	}
+
 	enum Subject {
 		case githubAccessToken
 		case jiraEmail
 		case jiraApiToken
+	}
+
+	static func promptTicketService() -> TicketService {
+		let serviceNumber = Input.readInt(
+			prompt: TicketService.promptDescription,
+			validation: [.custom("Invalid number", { TicketService(rawValue: $0) != nil })]
+		)
+		guard let service = TicketService(rawValue: serviceNumber - 1) else {
+			fatalError("Prompt validation failed")
+		}
+		return service
 	}
 
 	static func prompt(_ subject: Subject) throws -> String {
@@ -40,7 +74,7 @@ enum Prompter {
 
 			return authorization.token
 		case .jiraEmail:
-			return Input.readLine(prompt: "Enter JIRA email address (skip if blank):")
+			return Input.readLine(prompt: "Enter JIRA email address:")
 		case .jiraApiToken:
 			#if !DEBUG
 			open(.jiraApiTokenUrl, delay: URL.jiraApiTokenUrlOpeningDelay)
