@@ -50,7 +50,7 @@ enum Prompter {
 	static func promptTicketService() -> TicketService {
 		let serviceNumber = Input.readInt(
 			prompt: TicketService.promptDescription,
-			validation: [.custom("Invalid number", { TicketService(rawValue: $0) != nil })]
+			validation: [.custom("input a valid number from the list", { TicketService(rawValue: $0 - 1) != nil })]
 		)
 		guard let service = TicketService(rawValue: serviceNumber - 1) else {
 			fatalError("Prompt validation failed")
